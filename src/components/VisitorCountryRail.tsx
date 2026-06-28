@@ -225,33 +225,33 @@ export default function VisitorCountryRail() {
   const t = copy[language];
 
   const topCountries = useMemo(() => {
-    return stats.countries.slice(0, 12);
+    return stats.countries.slice(0, 6);
   }, [stats.countries]);
 
   const maxCount = topCountries[0]?.count ?? 1;
   const currentCountryName = getCountryName(currentCountry, language);
 
   return (
-    <aside className="pointer-events-none fixed right-5 top-28 z-40 hidden w-64 2xl:block">
-      <div className="pointer-events-auto rounded-3xl border border-white/10 bg-[#0b0f1c]/90 p-5 text-white shadow-2xl backdrop-blur">
-        <div className="mb-4 flex items-center justify-between gap-3">
+    <aside className="pointer-events-none fixed right-3 top-24 z-40 hidden w-48 2xl:block">
+      <div className="pointer-events-auto rounded-2xl border border-white/10 bg-[#0b0f1c]/90 p-3 text-white shadow-2xl backdrop-blur">
+        <div className="mb-3 flex items-center justify-between gap-2">
           <div>
-            <p className="text-lg font-bold">{t.title}</p>
+            <p className="text-base font-bold">{t.title}</p>
             <p className="text-xs text-slate-500">{t.subtitle}</p>
           </div>
 
           <div className="text-2xl">🌍</div>
         </div>
 
-        <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
           <p className="text-xs text-slate-500">{t.total}</p>
-          <p className="mt-1 text-3xl font-bold">
+          <p className="mt-1 text-2xl font-bold">
             {stats.total.toLocaleString(languageToLocale(language))}
           </p>
           <p className="mt-1 text-xs text-slate-500">{t.notUnique}</p>
         </div>
 
-        <div className="mb-4 rounded-2xl border border-indigo-300/20 bg-indigo-400/10 p-4">
+        <div className="mb-3 rounded-xl border border-indigo-300/20 bg-indigo-400/10 p-3">
           <p className="text-xs text-indigo-200">{t.currentVisit}</p>
           <p className="mt-1 text-sm font-semibold">
             {getFlagEmoji(currentCountry)} {currentCountryName}
@@ -267,25 +267,25 @@ export default function VisitorCountryRail() {
         ) : topCountries.length === 0 ? (
           <div className="text-sm text-slate-500">{t.empty}</div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {topCountries.map((item) => {
               const width = Math.max(8, (item.count / maxCount) * 100);
               const countryName = getCountryName(item.country, language);
 
               return (
                 <div key={item.country}>
-                  <div className="mb-1 flex items-center justify-between gap-3">
-                    <span className="truncate text-sm">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <span className="truncate text-xs">
                       {getFlagEmoji(item.country)} {countryName}
                     </span>
-                    <span className="text-xs font-semibold text-indigo-200">
+                    <span className="text-[11px] font-semibold text-indigo-200">
                       {item.count.toLocaleString(languageToLocale(language))}
                     </span>
                   </div>
 
-                  <div className="h-1.5 rounded-full bg-white/10">
+                  <div className="h-1 rounded-full bg-white/10">
                     <div
-                      className="h-1.5 rounded-full bg-indigo-400"
+                      className="h-1 rounded-full bg-indigo-400"
                       style={{ width: `${width}%` }}
                     />
                   </div>
@@ -295,7 +295,7 @@ export default function VisitorCountryRail() {
           </div>
         )}
 
-        <p className="mt-4 text-xs leading-5 text-slate-500">{t.privacy}</p>
+        <p className="mt-3 text-[10px] leading-4 text-slate-500">{t.privacy}</p>
       </div>
     </aside>
   );
