@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
+import countries from "world-countries";
 
-type ReporterRecord = {
-  id?: number | string;
-  reporterCode?: number | string;
-  text?: string;
-  reporterDesc?: string;
-  country?: string;
-  iso3?: string;
-  iso_3?: string;
-  reporterISO?: string;
-  ISO3?: string;
+type CountryRecord = {
+  cca3?: string;
+  ccn3?: string;
 };
 
 type ComtradeRow = Record<string, unknown>;
@@ -19,8 +13,25 @@ type SeriesPoint = {
   value: number;
 };
 
-const COMTRADE_BASE_URL = "https://comtradeapi.un.org/data/v1/get/C/M/HS";
-const REPORTERS_URL = "https://comtradeapi.un.org/files/v1/app/reference/Reporters.json";
+const API_BASE = "https://comtradeapi.un.org/data/v1/get";
+
+const reporterOverrides: Record<string, string> = {
+  USA: "842",
+  KOR: "410",
+  JPN: "392",
+  CHN: "156",
+  DEU: "276",
+  FRA: "251",
+  GBR: "826",
+  ITA: "381",
+  CAN: "124",
+  AUS: "36",
+  MEX: "484",
+  BRA: "76",
+  IND: "699",
+  SGP: "702",
+  HKG: "344",
+};
 
 const foodCodes = [
   "01",
@@ -53,42 +64,67 @@ function normalizeIso3(value: string) {
   return value.trim().toUpperCase();
 }
 
-function buildRecentMonthlyPeriods(monthCount = 30) {
-  const periods: string[] = [];
-  const current = new Date();
+function getReporterCode(iso3: string) {
+  if (reporterOverrides[iso3]) {
+    return reporterOverrides[iso3];
+  }
 
-  current.setDate(1);
-  current.setMonth(current.getMonth() - 1);
+  const match = (countries as CountryRecord[]).find(
+    (country) => country.cca3?.toUpperCase() === iso3
+  );
+
+  if (!match?.ccn3) return null;
+
+  const numeric = String(Number(match.ccn3));
+
+  return numeric === "0" ? null : numeric;
+}
+
+function buildMonthlyPeriods(monthCount = 36) {
+  const periods: string[] = [];
+  const date = new Date();
+
+  date.setDate(1);
+  date.setMonth(date.getMonth() - 1);
 
   for (let index = 0; index < monthCount; index += 1) {
-    const year = current.getFullYear();
-    const month = String(current.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
 
     periods.push(`${year}${month}`);
-    current.setMonth(current.getMonth() - 1);
+    date.setMonth(date.getMonth() - 1);
   }
 
   return periods;
 }
 
-function getNumber(value: unknown) {
+function buildAnnualPeriods(yearCount = 7) {
+  const periods: string[] = [];
+  const currentYear = new Date().getFullYear();
+
+  for (let index = 0; index < yearCount; index += 1) {
+    periods.push(String(currentYear - index));
+  }
+
+  return periods;
+}
+
+function toNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return null;
 
   const numberValue = Number(value);
 
-  if (Number.isNaN(numberValue)) return null;
-
-  return numberValue;
+  return Number.isNaN(numberValue) ? null : numberValue;
 }
 
-function readTradeValue(row: ComtradeRow) {
+function readValue(row: ComtradeRow) {
   return (
-    getNumber(row.primaryValue) ??
-    getNumber(row.cifValue) ??
-    getNumber(row.fobValue) ??
-    getNumber(row.tradeValue) ??
-    getNumber(row.TradeValue) ??
-    getNumber(row.value) ??
+    toNumber(row.primaryValue) ??
+    toNumber(row.cifValue) ??
+    toNumber(row.fobValue) ??
+    toNumber(row.tradeValue) ??
+    toNumber(row.TradeValue) ??
+    toNumber(row.value) ??
     0
   );
 }
@@ -111,7 +147,7 @@ function aggregateByPeriod(rows: ComtradeRow[]) {
 
   for (const row of rows) {
     const period = readPeriod(row);
-    const value = readTradeValue(row);
+    const value = readValue(row);
 
     if (!period || value <= 0) continue;
 
@@ -132,13 +168,21 @@ function getLatestPoint(points: SeriesPoint[]) {
     .sort((a, b) => b.period.localeCompare(a.period))[0];
 }
 
-function getPreviousYearPeriod(period: string) {
-  if (!/^\d{6}$/.test(period)) return null;
+function getPreviousComparablePeriod(period: string | null) {
+  if (!period) return null;
 
-  const year = Number(period.slice(0, 4));
-  const month = period.slice(4, 6);
+  if (/^\d{6}$/.test(period)) {
+    const year = Number(period.slice(0, 4));
+    const month = period.slice(4, 6);
 
-  return `${year - 1}${month}`;
+    return `${year - 1}${month}`;
+  }
+
+  if (/^\d{4}$/.test(period)) {
+    return String(Number(period) - 1);
+  }
+
+  return null;
 }
 
 function getPointByPeriod(points: SeriesPoint[], period: string | null) {
@@ -147,125 +191,216 @@ function getPointByPeriod(points: SeriesPoint[], period: string | null) {
   return points.find((point) => point.period === period) ?? null;
 }
 
-function getYoYChange(latest: SeriesPoint | undefined, previous: SeriesPoint | null) {
+function getYoY(latest: SeriesPoint | undefined, previous: SeriesPoint | null) {
   if (!latest || !previous || previous.value === 0) return null;
 
   return ((latest.value - previous.value) / previous.value) * 100;
 }
 
-async function getReporterCode(iso3: string) {
-  const response = await fetch(REPORTERS_URL, {
-    next: {
-      revalidate: 86400,
-    },
-  });
-
-  if (!response.ok) return null;
-
-  const json = await response.json();
-
-  const records: ReporterRecord[] = Array.isArray(json)
-    ? json
-    : Array.isArray(json.results)
-      ? json.results
-      : Array.isArray(json.data)
-        ? json.data
-        : [];
-
-  const match = records.find((record) => {
-    const possibleIso3 = String(
-      record.iso3 ??
-        record.iso_3 ??
-        record.reporterISO ??
-        record.ISO3 ??
-        ""
-    ).toUpperCase();
-
-    return possibleIso3 === iso3;
-  });
-
-  const code = match?.id ?? match?.reporterCode;
-
-  if (code === undefined || code === null) return null;
-
-  return String(code);
-}
-
-async function fetchComtradeRows({
+async function fetchRows({
   reporterCode,
   cmdCode,
   periods,
+  frequency,
   apiKey,
 }: {
   reporterCode: string;
   cmdCode: string;
   periods: string[];
+  frequency: "M" | "A";
   apiKey: string;
 }) {
-  const params = new URLSearchParams({
-    reporterCode,
-    partnerCode: "0",
-    flowCode: "M",
-    cmdCode,
-    period: periods.join(","),
-    maxrecords: "5000",
-    includeDesc: "true",
-    "subscription-key": apiKey,
-  });
+  const rows: ComtradeRow[] = [];
 
-  const response = await fetch(`${COMTRADE_BASE_URL}?${params.toString()}`, {
-    headers: {
-      "Ocp-Apim-Subscription-Key": apiKey,
-    },
-    next: {
-      revalidate: 21600,
-    },
-  });
+  const partnerOptions = ["0", ""];
 
-  if (!response.ok) {
-    return [];
+  for (const partnerCode of partnerOptions) {
+    const params = new URLSearchParams({
+      reporterCode,
+      flowCode: "M",
+      cmdCode,
+      period: periods.join(","),
+      maxRecords: "50000",
+      includeDesc: "true",
+      format: "json",
+      breakdownMode: "classic",
+      subscription-key: apiKey,
+    });
+
+    if (partnerCode) {
+      params.set("partnerCode", partnerCode);
+    }
+
+    const url = `${API_BASE}/C/${frequency}/HS?${params.toString()}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Ocp-Apim-Subscription-Key": apiKey,
+        },
+        next: {
+          revalidate: 21600,
+        },
+      });
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const json = await response.json();
+      const data = Array.isArray(json.data) ? json.data : [];
+
+      rows.push(...data);
+
+      if (data.length > 0) {
+        break;
+      }
+    } catch {
+      continue;
+    }
   }
 
-  const json = await response.json();
-
-  return Array.isArray(json.data) ? json.data : [];
+  return rows;
 }
 
-async function fetchFoodRows({
+async function fetchGroupedRows({
   reporterCode,
+  cmdCodes,
+  periods,
+  frequency,
+  apiKey,
+}: {
+  reporterCode: string;
+  cmdCodes: string[];
+  periods: string[];
+  frequency: "M" | "A";
+  apiKey: string;
+}) {
+  const combined = await fetchRows({
+    reporterCode,
+    cmdCode: cmdCodes.join(","),
+    periods,
+    frequency,
+    apiKey,
+  });
+
+  if (combined.length > 0) {
+    return combined;
+  }
+
+  const rows: ComtradeRow[] = [];
+
+  for (const code of cmdCodes) {
+    const each = await fetchRows({
+      reporterCode,
+      cmdCode: code,
+      periods,
+      frequency,
+      apiKey,
+    });
+
+    rows.push(...each);
+  }
+
+  return rows;
+}
+
+async function getTradeLayer({
+  reporterCode,
+  frequency,
   periods,
   apiKey,
 }: {
   reporterCode: string;
+  frequency: "M" | "A";
   periods: string[];
   apiKey: string;
 }) {
-  const combinedRows = await fetchComtradeRows({
-    reporterCode,
-    cmdCode: foodCodes.join(","),
-    periods,
-    apiKey,
-  });
-
-  if (combinedRows.length > 0) {
-    return combinedRows;
-  }
-
-  const firstSixPeriods = periods.slice(0, 18);
-  const rows: ComtradeRow[] = [];
-
-  for (const code of foodCodes) {
-    const chapterRows = await fetchComtradeRows({
+  const [totalRows, fuelRows, foodRows] = await Promise.all([
+    fetchRows({
       reporterCode,
-      cmdCode: code,
-      periods: firstSixPeriods,
+      cmdCode: "TOTAL",
+      periods,
+      frequency,
       apiKey,
-    });
+    }),
+    fetchRows({
+      reporterCode,
+      cmdCode: "27",
+      periods,
+      frequency,
+      apiKey,
+    }),
+    fetchGroupedRows({
+      reporterCode,
+      cmdCodes: foodCodes,
+      periods,
+      frequency,
+      apiKey,
+    }),
+  ]);
 
-    rows.push(...chapterRows);
+  const totalSeries = aggregateByPeriod(totalRows);
+  const fuelSeries = aggregateByPeriod(fuelRows);
+  const foodSeries = aggregateByPeriod(foodRows);
+
+  const latestTotal = getLatestPoint(totalSeries);
+
+  if (!latestTotal) {
+    return null;
   }
 
-  return rows;
+  const latestPeriod = latestTotal.period;
+  const previousPeriod = getPreviousComparablePeriod(latestPeriod);
+
+  const latestFuel =
+    getPointByPeriod(fuelSeries, latestPeriod) ?? getLatestPoint(fuelSeries);
+  const latestFood =
+    getPointByPeriod(foodSeries, latestPeriod) ?? getLatestPoint(foodSeries);
+
+  const previousTotal = getPointByPeriod(totalSeries, previousPeriod);
+  const previousFuel = getPointByPeriod(
+    fuelSeries,
+    getPreviousComparablePeriod(latestFuel?.period ?? null)
+  );
+  const previousFood = getPointByPeriod(
+    foodSeries,
+    getPreviousComparablePeriod(latestFood?.period ?? null)
+  );
+
+  return {
+    frequency,
+    latestPeriod,
+    previousPeriod,
+    metrics: {
+      totalImports: {
+        value: latestTotal.value,
+        period: latestTotal.period,
+        previousYearValue: previousTotal?.value ?? null,
+        yoyChange: getYoY(latestTotal, previousTotal),
+      },
+      fuelImports: {
+        value: latestFuel?.value ?? null,
+        period: latestFuel?.period ?? null,
+        shareOfTotal:
+          latestFuel && latestFuel.period === latestTotal.period
+            ? (latestFuel.value / latestTotal.value) * 100
+            : null,
+        previousYearValue: previousFuel?.value ?? null,
+        yoyChange: getYoY(latestFuel, previousFuel),
+      },
+      foodImports: {
+        value: latestFood?.value ?? null,
+        period: latestFood?.period ?? null,
+        shareOfTotal:
+          latestFood && latestFood.period === latestTotal.period
+            ? (latestFood.value / latestTotal.value) * 100
+            : null,
+        previousYearValue: previousFood?.value ?? null,
+        yoyChange: getYoY(latestFood, previousFood),
+      },
+    },
+  };
 }
 
 export async function GET(
@@ -282,12 +417,14 @@ export async function GET(
       iso3: country,
       source: "UN Comtrade API",
       note: "COMTRADE_API_KEY is not configured.",
+      reporterCode: null,
+      frequency: null,
       latestPeriod: null,
       metrics: null,
     });
   }
 
-  const reporterCode = await getReporterCode(country);
+  const reporterCode = getReporterCode(country);
 
   if (!reporterCode) {
     return NextResponse.json({
@@ -295,88 +432,54 @@ export async function GET(
       iso3: country,
       source: "UN Comtrade API",
       note: "Reporter code was not found for this ISO3 country code.",
+      reporterCode: null,
+      frequency: null,
       latestPeriod: null,
       metrics: null,
     });
   }
 
-  const periods = buildRecentMonthlyPeriods(30);
+  const monthlyLayer = await getTradeLayer({
+    reporterCode,
+    frequency: "M",
+    periods: buildMonthlyPeriods(36),
+    apiKey,
+  });
 
-  const [totalRows, fuelRows, foodRows] = await Promise.all([
-    fetchComtradeRows({
+  const layer =
+    monthlyLayer ??
+    (await getTradeLayer({
       reporterCode,
-      cmdCode: "TOTAL",
-      periods,
+      frequency: "A",
+      periods: buildAnnualPeriods(8),
       apiKey,
-    }),
-    fetchComtradeRows({
+    }));
+
+  if (!layer) {
+    return NextResponse.json({
+      configured: true,
+      iso3: country,
+      source: "UN Comtrade API",
+      note: "No monthly or annual import data was returned for this reporter.",
       reporterCode,
-      cmdCode: "27",
-      periods,
-      apiKey,
-    }),
-    fetchFoodRows({
-      reporterCode,
-      periods,
-      apiKey,
-    }),
-  ]);
-
-  const totalSeries = aggregateByPeriod(totalRows);
-  const fuelSeries = aggregateByPeriod(fuelRows);
-  const foodSeries = aggregateByPeriod(foodRows);
-
-  const latestTotal = getLatestPoint(totalSeries);
-  const latestPeriod = latestTotal?.period ?? null;
-  const previousYearPeriod = getPreviousYearPeriod(latestPeriod ?? "");
-
-  const latestFuel = latestPeriod
-    ? getPointByPeriod(fuelSeries, latestPeriod)
-    : getLatestPoint(fuelSeries);
-
-  const latestFood = latestPeriod
-    ? getPointByPeriod(foodSeries, latestPeriod)
-    : getLatestPoint(foodSeries);
-
-  const previousTotal = getPointByPeriod(totalSeries, previousYearPeriod);
-  const previousFuel = getPointByPeriod(fuelSeries, previousYearPeriod);
-  const previousFood = getPointByPeriod(foodSeries, previousYearPeriod);
-
-  const totalValue = latestTotal?.value ?? null;
-  const fuelValue = latestFuel?.value ?? null;
-  const foodValue = latestFood?.value ?? null;
+      frequency: null,
+      latestPeriod: null,
+      metrics: null,
+    });
+  }
 
   return NextResponse.json({
     configured: true,
     iso3: country,
     reporterCode,
     source: "UN Comtrade API",
-    note: "Monthly merchandise import data. Country reporting schedules differ, so latest months may vary by country.",
-    latestPeriod,
-    previousYearPeriod,
-    metrics: {
-      totalImports: {
-        value: totalValue,
-        period: latestPeriod,
-        previousYearValue: previousTotal?.value ?? null,
-        yoyChange: getYoYChange(latestTotal, previousTotal),
-      },
-      fuelImports: {
-        value: fuelValue,
-        period: latestFuel?.period ?? null,
-        shareOfTotal:
-          totalValue && fuelValue !== null ? (fuelValue / totalValue) * 100 : null,
-        previousYearValue: previousFuel?.value ?? null,
-        yoyChange: getYoYChange(latestFuel ?? undefined, previousFuel),
-      },
-      foodImports: {
-        value: foodValue,
-        period: latestFood?.period ?? null,
-        shareOfTotal:
-          totalValue && foodValue !== null ? (foodValue / totalValue) * 100 : null,
-        previousYearValue: previousFood?.value ?? null,
-        yoyChange: getYoYChange(latestFood ?? undefined, previousFood),
-      },
-    },
+    note:
+      layer.frequency === "M"
+        ? "Latest official monthly merchandise import data."
+        : "Monthly data was unavailable, so latest official annual merchandise import data is shown.",
+    frequency: layer.frequency,
+    latestPeriod: layer.latestPeriod,
+    previousPeriod: layer.previousPeriod,
+    metrics: layer.metrics,
   });
 }
