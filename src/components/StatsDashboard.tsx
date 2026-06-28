@@ -31,6 +31,7 @@ const copy = {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "데이터",
+    navCompare: "국가 비교",
     navMethod: "분석 기준",
     navContact: "문의",
     heroBadge: "Global Country Dependency Statistics",
@@ -51,6 +52,7 @@ const copy = {
     country: "국가",
     region: "지역",
     income: "소득 그룹",
+    incomeOriginal: "World Bank 원문",
     energy: "에너지 순수입",
     fuel: "연료 수입 비중",
     food: "식량 수입 비중",
@@ -67,11 +69,27 @@ const copy = {
     contactText: "서비스 제안, 데이터 오류, 협업 문의는 아래 이메일로 연락해 주세요.",
     emailLabel: "문의 이메일",
     visitorFirst: "현재 접속 국가가 기본적으로 최상단에 표시됩니다.",
+    hideNoDataRows: "데이터가 전혀 없는 국가 숨기기",
+    minimumDataCount: "최소 데이터 수",
+    latestYearFilter: "최신 데이터 연도",
+    allYears: "전체 연도",
+    downloadCsv: "CSV 다운로드",
+    dataFilters: "데이터 필터",
+    filterDescription:
+      "데이터 제공 여부와 최신 연도를 기준으로 국가를 필터링하고, 현재 보이는 표를 CSV로 저장할 수 있습니다.",
+    compareTitle: "국가 비교",
+    compareSubtitle:
+      "최대 3개 국가를 선택해 주요 의존도 지표를 같은 표에서 비교합니다.",
+    selectCountry: "국가 선택",
+    compareTable: "비교 표",
+    noCompareCountry: "비교할 국가를 선택해 주세요.",
+    latestYear: "최신 데이터 연도",
   },
   en: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "Data",
+    navCompare: "Compare",
     navMethod: "Methodology",
     navContact: "Contact",
     heroBadge: "Global Country Dependency Statistics",
@@ -93,6 +111,7 @@ const copy = {
     country: "Country",
     region: "Region",
     income: "Income group",
+    incomeOriginal: "World Bank label",
     energy: "Energy net imports",
     fuel: "Fuel import share",
     food: "Food import share",
@@ -110,11 +129,27 @@ const copy = {
       "For service inquiries, data corrections, or collaboration proposals, please contact the email below.",
     emailLabel: "Contact email",
     visitorFirst: "Your current country is shown at the top by default.",
+    hideNoDataRows: "Hide countries with no data",
+    minimumDataCount: "Minimum data count",
+    latestYearFilter: "Latest data year",
+    allYears: "All years",
+    downloadCsv: "Download CSV",
+    dataFilters: "Data filters",
+    filterDescription:
+      "Filter countries by data availability and latest year, then export the visible table as CSV.",
+    compareTitle: "Country comparison",
+    compareSubtitle:
+      "Select up to three countries and compare their major dependency indicators in one table.",
+    selectCountry: "Select country",
+    compareTable: "Comparison table",
+    noCompareCountry: "Select countries to compare.",
+    latestYear: "Latest data year",
   },
   ja: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "データ",
+    navCompare: "比較",
     navMethod: "分析基準",
     navContact: "お問い合わせ",
     heroBadge: "Global Country Dependency Statistics",
@@ -135,6 +170,7 @@ const copy = {
     country: "国",
     region: "地域",
     income: "所得グループ",
+    incomeOriginal: "World Bank label",
     energy: "エネルギー純輸入",
     fuel: "燃料輸入比率",
     food: "食料輸入比率",
@@ -151,11 +187,26 @@ const copy = {
     contactText: "サービス提案、データ修正、協業のお問い合わせは下記メールまでご連絡ください。",
     emailLabel: "お問い合わせメール",
     visitorFirst: "現在の接続国が初期状態で最上位に表示されます。",
+    hideNoDataRows: "データがない国を非表示",
+    minimumDataCount: "最小データ数",
+    latestYearFilter: "最新データ年",
+    allYears: "すべての年",
+    downloadCsv: "CSVをダウンロード",
+    dataFilters: "データフィルター",
+    filterDescription:
+      "データの有無と最新年を基準に国を絞り込み、表示中の表をCSVで保存できます。",
+    compareTitle: "国別比較",
+    compareSubtitle: "最大3か国を選択して主要指標を比較します。",
+    selectCountry: "国を選択",
+    compareTable: "比較表",
+    noCompareCountry: "比較する国を選択してください。",
+    latestYear: "最新データ年",
   },
   zh: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "数据",
+    navCompare: "比较",
     navMethod: "方法论",
     navContact: "联系",
     heroBadge: "Global Country Dependency Statistics",
@@ -175,6 +226,7 @@ const copy = {
     country: "国家",
     region: "地区",
     income: "收入组别",
+    incomeOriginal: "World Bank label",
     energy: "能源净进口",
     fuel: "燃料进口占比",
     food: "食品进口占比",
@@ -191,11 +243,26 @@ const copy = {
     contactText: "服务建议、数据纠错或合作咨询，请通过以下邮箱联系。",
     emailLabel: "联系邮箱",
     visitorFirst: "当前访问国家默认显示在最上方。",
+    hideNoDataRows: "隐藏无数据国家",
+    minimumDataCount: "最少数据数",
+    latestYearFilter: "最新数据年份",
+    allYears: "所有年份",
+    downloadCsv: "下载CSV",
+    dataFilters: "数据筛选",
+    filterDescription:
+      "按数据可用性和最新年份筛选国家，并导出当前可见表格。",
+    compareTitle: "国家比较",
+    compareSubtitle: "最多选择三个国家并比较主要依赖指标。",
+    selectCountry: "选择国家",
+    compareTable: "比较表",
+    noCompareCountry: "请选择要比较的国家。",
+    latestYear: "最新数据年份",
   },
   es: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "Datos",
+    navCompare: "Comparar",
     navMethod: "Metodología",
     navContact: "Contacto",
     heroBadge: "Global Country Dependency Statistics",
@@ -217,6 +284,7 @@ const copy = {
     country: "País",
     region: "Región",
     income: "Grupo de ingresos",
+    incomeOriginal: "World Bank label",
     energy: "Importación neta de energía",
     fuel: "Participación de combustibles",
     food: "Participación de alimentos",
@@ -234,11 +302,26 @@ const copy = {
       "Para consultas, correcciones de datos o propuestas de colaboración, contacta al correo siguiente.",
     emailLabel: "Correo de contacto",
     visitorFirst: "Tu país actual aparece arriba por defecto.",
+    hideNoDataRows: "Ocultar países sin datos",
+    minimumDataCount: "Datos mínimos",
+    latestYearFilter: "Último año de datos",
+    allYears: "Todos los años",
+    downloadCsv: "Descargar CSV",
+    dataFilters: "Filtros de datos",
+    filterDescription:
+      "Filtra países por disponibilidad y año reciente, y exporta la tabla visible.",
+    compareTitle: "Comparación de países",
+    compareSubtitle: "Selecciona hasta tres países y compara indicadores clave.",
+    selectCountry: "Seleccionar país",
+    compareTable: "Tabla comparativa",
+    noCompareCountry: "Selecciona países para comparar.",
+    latestYear: "Último año de datos",
   },
   fr: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "Données",
+    navCompare: "Comparer",
     navMethod: "Méthodologie",
     navContact: "Contact",
     heroBadge: "Global Country Dependency Statistics",
@@ -260,6 +343,7 @@ const copy = {
     country: "Pays",
     region: "Région",
     income: "Groupe de revenu",
+    incomeOriginal: "World Bank label",
     energy: "Importations nettes d’énergie",
     fuel: "Part des combustibles",
     food: "Part alimentaire",
@@ -277,11 +361,26 @@ const copy = {
       "Pour toute demande de service, correction de données ou proposition de collaboration, contactez l’e-mail ci-dessous.",
     emailLabel: "E-mail de contact",
     visitorFirst: "Votre pays actuel est affiché en haut par défaut.",
+    hideNoDataRows: "Masquer les pays sans données",
+    minimumDataCount: "Nombre minimum de données",
+    latestYearFilter: "Dernière année disponible",
+    allYears: "Toutes les années",
+    downloadCsv: "Télécharger CSV",
+    dataFilters: "Filtres de données",
+    filterDescription:
+      "Filtrez les pays par disponibilité des données et année récente, puis exportez la table visible.",
+    compareTitle: "Comparaison de pays",
+    compareSubtitle: "Sélectionnez jusqu’à trois pays pour comparer les indicateurs clés.",
+    selectCountry: "Sélectionner un pays",
+    compareTable: "Tableau comparatif",
+    noCompareCountry: "Sélectionnez des pays à comparer.",
+    latestYear: "Dernière année disponible",
   },
   de: {
     siteName: "Dependency Radar",
     subtitle: "Country Dependency & Supply Exposure Data",
     navData: "Daten",
+    navCompare: "Vergleich",
     navMethod: "Methodik",
     navContact: "Kontakt",
     heroBadge: "Global Country Dependency Statistics",
@@ -303,6 +402,7 @@ const copy = {
     country: "Land",
     region: "Region",
     income: "Einkommensgruppe",
+    incomeOriginal: "World Bank label",
     energy: "Nettoenergieimporte",
     fuel: "Brennstoffimportanteil",
     food: "Lebensmittelimportanteil",
@@ -320,6 +420,20 @@ const copy = {
       "Für Serviceanfragen, Datenkorrekturen oder Kooperationsvorschläge kontaktieren Sie bitte die folgende E-Mail.",
     emailLabel: "Kontakt-E-Mail",
     visitorFirst: "Ihr aktuelles Land wird standardmäßig oben angezeigt.",
+    hideNoDataRows: "Länder ohne Daten ausblenden",
+    minimumDataCount: "Mindestanzahl an Daten",
+    latestYearFilter: "Neuestes Datenjahr",
+    allYears: "Alle Jahre",
+    downloadCsv: "CSV herunterladen",
+    dataFilters: "Datenfilter",
+    filterDescription:
+      "Filtern Sie Länder nach Datenverfügbarkeit und aktuellem Jahr, und exportieren Sie die sichtbare Tabelle.",
+    compareTitle: "Ländervergleich",
+    compareSubtitle: "Wählen Sie bis zu drei Länder und vergleichen Sie wichtige Indikatoren.",
+    selectCountry: "Land auswählen",
+    compareTable: "Vergleichstabelle",
+    noCompareCountry: "Wählen Sie Länder zum Vergleich aus.",
+    latestYear: "Neuestes Datenjahr",
   },
 };
 
@@ -333,67 +447,54 @@ const languageLabels: Record<Language, string> = {
   de: "Deutsch",
 };
 
+function countryToLanguage(countryCode: string): Language {
+  const code = countryCode.toUpperCase();
 
-const filterCopy: Record<
-  Language,
-  {
-    hideNoDataRows: string;
-    minimumDataCount: string;
-    latestYearFilter: string;
-    allYears: string;
-    downloadCsv: string;
-  }
-> = {
-  ko: {
-    hideNoDataRows: "데이터가 전혀 없는 국가 숨기기",
-    minimumDataCount: "최소 데이터 수",
-    latestYearFilter: "최신 데이터 연도",
-    allYears: "전체 연도",
-    downloadCsv: "CSV 다운로드",
-  },
-  en: {
-    hideNoDataRows: "Hide countries with no data",
-    minimumDataCount: "Minimum data count",
-    latestYearFilter: "Latest data year",
-    allYears: "All years",
-    downloadCsv: "Download CSV",
-  },
-  ja: {
-    hideNoDataRows: "データがない国を非表示",
-    minimumDataCount: "最小データ数",
-    latestYearFilter: "最新データ年",
-    allYears: "すべての年",
-    downloadCsv: "CSVをダウンロード",
-  },
-  zh: {
-    hideNoDataRows: "隐藏无数据国家",
-    minimumDataCount: "最少数据数",
-    latestYearFilter: "最新数据年份",
-    allYears: "所有年份",
-    downloadCsv: "下载CSV",
-  },
-  es: {
-    hideNoDataRows: "Ocultar países sin datos",
-    minimumDataCount: "Datos mínimos",
-    latestYearFilter: "Último año de datos",
-    allYears: "Todos los años",
-    downloadCsv: "Descargar CSV",
-  },
-  fr: {
-    hideNoDataRows: "Masquer les pays sans données",
-    minimumDataCount: "Nombre minimum de données",
-    latestYearFilter: "Dernière année disponible",
-    allYears: "Toutes les années",
-    downloadCsv: "Télécharger CSV",
-  },
-  de: {
-    hideNoDataRows: "Länder ohne Daten ausblenden",
-    minimumDataCount: "Mindestanzahl an Daten",
-    latestYearFilter: "Neuestes Datenjahr",
-    allYears: "Alle Jahre",
-    downloadCsv: "CSV herunterladen",
-  },
-};
+  if (code === "KR") return "ko";
+  if (code === "JP") return "ja";
+  if (["CN", "TW", "HK", "MO", "SG"].includes(code)) return "zh";
+  if (
+    [
+      "ES",
+      "MX",
+      "AR",
+      "CL",
+      "CO",
+      "PE",
+      "VE",
+      "EC",
+      "UY",
+      "PY",
+      "BO",
+      "CR",
+      "PA",
+      "DO",
+      "GT",
+      "HN",
+      "NI",
+      "SV",
+    ].includes(code)
+  )
+    return "es";
+  if (["FR", "BE", "CH", "CA", "LU", "MC"].includes(code)) return "fr";
+  if (["DE", "AT"].includes(code)) return "de";
+
+  return "en";
+}
+
+function languageToLocale(language: Language) {
+  const map: Record<Language, string> = {
+    ko: "ko-KR",
+    en: "en-US",
+    ja: "ja-JP",
+    zh: "zh-CN",
+    es: "es-ES",
+    fr: "fr-FR",
+    de: "de-DE",
+  };
+
+  return map[language];
+}
 
 function getRowStatList(row: CountryRow) {
   return [
@@ -420,33 +521,6 @@ function getLatestAvailableYear(row: CountryRow) {
 function escapeCsvValue(value: unknown) {
   const text = value === null || value === undefined ? "" : String(value);
   return `"${text.replace(/"/g, '""')}"`;
-}
-
-function countryToLanguage(countryCode: string): Language {
-  const code = countryCode.toUpperCase();
-
-  if (code === "KR") return "ko";
-  if (code === "JP") return "ja";
-  if (["CN", "TW", "HK", "MO", "SG"].includes(code)) return "zh";
-  if (["ES", "MX", "AR", "CL", "CO", "PE", "VE", "EC", "UY", "PY", "BO", "CR", "PA", "DO", "GT", "HN", "NI", "SV"].includes(code)) return "es";
-  if (["FR", "BE", "CH", "CA", "LU", "MC"].includes(code)) return "fr";
-  if (["DE", "AT"].includes(code)) return "de";
-
-  return "en";
-}
-
-function languageToLocale(language: Language) {
-  const map: Record<Language, string> = {
-    ko: "ko-KR",
-    en: "en-US",
-    ja: "ja-JP",
-    zh: "zh-CN",
-    es: "es-ES",
-    fr: "fr-FR",
-    de: "de-DE",
-  };
-
-  return map[language];
 }
 
 function formatPercent(stat: StatValue, language: Language) {
@@ -496,10 +570,69 @@ function getLocalizedCountryName(row: CountryRow, language: Language) {
   }
 }
 
+function getIncomeGroupLabel(incomeLevel: string, language: Language) {
+  const normalized = incomeLevel.toLowerCase();
+
+  const labelsKo = {
+    high: {
+      title: "고소득 국가",
+      description: "World Bank 기준 고소득 경제권",
+    },
+    upperMiddle: {
+      title: "중상위 소득 국가",
+      description: "고소득 직전 단계의 중상위 소득 경제권",
+    },
+    lowerMiddle: {
+      title: "중하위 소득 국가",
+      description: "저소득과 중상위 소득 사이의 경제권",
+    },
+    low: {
+      title: "저소득 국가",
+      description: "World Bank 기준 저소득 경제권",
+    },
+    notClassified: {
+      title: "소득 분류 없음",
+      description: "World Bank 소득 그룹이 지정되지 않음",
+    },
+  };
+
+  const labelsEn = {
+    high: {
+      title: "High-income economy",
+      description: "World Bank high-income group",
+    },
+    upperMiddle: {
+      title: "Upper-middle-income economy",
+      description: "Economies between high and lower-middle income",
+    },
+    lowerMiddle: {
+      title: "Lower-middle-income economy",
+      description: "Economies between low and upper-middle income",
+    },
+    low: {
+      title: "Low-income economy",
+      description: "World Bank low-income group",
+    },
+    notClassified: {
+      title: "Not classified",
+      description: "No World Bank income classification",
+    },
+  };
+
+  const labels = language === "ko" ? labelsKo : labelsEn;
+
+  if (normalized.includes("high income")) return labels.high;
+  if (normalized.includes("upper middle")) return labels.upperMiddle;
+  if (normalized.includes("lower middle")) return labels.lowerMiddle;
+  if (normalized.includes("low income")) return labels.low;
+
+  return labels.notClassified;
+}
+
 function getSortValue(row: CountryRow, key: SortKey, language: Language) {
   if (key === "country") return getLocalizedCountryName(row, language);
   if (key === "region") return row.region;
-  if (key === "incomeLevel") return row.incomeLevel;
+  if (key === "incomeLevel") return getIncomeGroupLabel(row.incomeLevel, language).title;
   if (key === "dataCompleteness") return row.dataCompleteness;
 
   return row[key].value;
@@ -537,7 +670,6 @@ function SortHeader({
 }
 
 function LoadingScreen({ language }: { language: Language }) {
-
   const t = copy[language];
 
   return (
@@ -548,6 +680,26 @@ function LoadingScreen({ language }: { language: Language }) {
       </div>
     </main>
   );
+}
+
+function formatMetricValue(
+  row: CountryRow,
+  metric:
+    | "energyImportPercent"
+    | "fuelImportShare"
+    | "foodImportShare"
+    | "importsGdp"
+    | "importUsd"
+    | "tariffRate"
+    | "logisticsIndex",
+  language: Language
+) {
+  const stat = row[metric];
+
+  if (metric === "importUsd") return formatUsd(stat, language);
+  if (metric === "logisticsIndex") return formatNumber(stat, language);
+
+  return formatPercent(stat, language);
 }
 
 export default function StatsDashboard({
@@ -566,6 +718,7 @@ export default function StatsDashboard({
   const [hideNoDataRows, setHideNoDataRows] = useState(true);
   const [minimumDataCount, setMinimumDataCount] = useState(1);
   const [minimumLatestYear, setMinimumLatestYear] = useState("all");
+  const [compareIso3, setCompareIso3] = useState(["KOR", "JPN", "USA"]);
 
   useEffect(() => {
     async function initialize() {
@@ -590,6 +743,15 @@ export default function StatsDashboard({
         if (data.country) {
           setVisitorCountry(data.country);
 
+          const visitorRow = rows.find((row) => row.iso2 === data.country);
+          if (visitorRow) {
+            const defaults = [visitorRow.iso3, "JPN", "USA"].filter(
+              (code, index, array) => array.indexOf(code) === index
+            );
+
+            setCompareIso3(defaults.slice(0, 3));
+          }
+
           if (!savedLanguage) {
             setLanguage(countryToLanguage(data.country));
           }
@@ -604,7 +766,7 @@ export default function StatsDashboard({
     }
 
     initialize();
-  }, []);
+  }, [rows]);
 
   function changeLanguage(nextLanguage: Language) {
     setLanguage(nextLanguage);
@@ -627,90 +789,29 @@ export default function StatsDashboard({
     });
   }
 
-
-  function downloadCsv() {
-    const headers = [
-      "Country",
-      "Original country name",
-      "ISO2",
-      "ISO3",
-      "Region",
-      "Income group",
-      "Energy net imports (%)",
-      "Energy year",
-      "Fuel import share (%)",
-      "Fuel year",
-      "Food import share (%)",
-      "Food year",
-      "Imports/GDP (%)",
-      "Imports/GDP year",
-      "Total imports USD",
-      "Total imports year",
-      "Tariff rate (%)",
-      "Tariff year",
-      "Logistics index",
-      "Logistics year",
-      "Data count",
-      "Latest available year",
-      "Source",
-    ];
-
-    const csvRows = filteredAndSortedRows.map((row) => [
-      getLocalizedCountryName(row, language),
-      row.name,
-      row.iso2,
-      row.iso3,
-      row.region,
-      row.incomeLevel,
-      row.energyImportPercent.value ?? "",
-      row.energyImportPercent.year ?? "",
-      row.fuelImportShare.value ?? "",
-      row.fuelImportShare.year ?? "",
-      row.foodImportShare.value ?? "",
-      row.foodImportShare.year ?? "",
-      row.importsGdp.value ?? "",
-      row.importsGdp.year ?? "",
-      row.importUsd.value ?? "",
-      row.importUsd.year ?? "",
-      row.tariffRate.value ?? "",
-      row.tariffRate.year ?? "",
-      row.logisticsIndex.value ?? "",
-      row.logisticsIndex.year ?? "",
-      row.dataCompleteness,
-      getLatestAvailableYear(row) ?? "",
-      "World Bank API",
-    ]);
-
-    const csv = "\uFEFF" + [headers, ...csvRows]
-      .map((row) => row.map(escapeCsvValue).join(","))
-      .join("\n");
-
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
+  function handleCompareChange(index: number, nextIso3: string) {
+    setCompareIso3((current) => {
+      const next = [...current];
+      next[index] = nextIso3;
+      return next;
     });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = `dependency-radar-${new Date()
-      .toISOString()
-      .slice(0, 10)}.csv`;
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    URL.revokeObjectURL(url);
   }
 
   const t = copy[language];
-  const f = filterCopy[language];
 
   const regions = useMemo(() => {
     const uniqueRegions = Array.from(new Set(rows.map((row) => row.region)));
     return uniqueRegions.sort();
   }, [rows]);
+
+  const countryOptions = useMemo(() => {
+    return [...rows].sort((a, b) =>
+      getLocalizedCountryName(a, language).localeCompare(
+        getLocalizedCountryName(b, language),
+        languageToLocale(language)
+      )
+    );
+  }, [rows, language]);
 
   const filteredAndSortedRows = useMemo(() => {
     const filtered = rows.filter((row) => {
@@ -774,7 +875,54 @@ export default function StatsDashboard({
 
       return sortConfig.direction === "asc" ? result : -result;
     });
-  }, [rows, search, region, language, sortConfig, visitorCountry, hideNoDataRows, minimumDataCount, minimumLatestYear]);
+  }, [
+    rows,
+    search,
+    region,
+    language,
+    sortConfig,
+    visitorCountry,
+    hideNoDataRows,
+    minimumDataCount,
+    minimumLatestYear,
+  ]);
+
+  const compareRows = useMemo(() => {
+    return compareIso3
+      .map((iso3) => rows.find((row) => row.iso3 === iso3))
+      .filter((row): row is CountryRow => Boolean(row));
+  }, [compareIso3, rows]);
+
+  const compareMetrics = [
+    {
+      label: t.energy,
+      key: "energyImportPercent" as const,
+    },
+    {
+      label: t.fuel,
+      key: "fuelImportShare" as const,
+    },
+    {
+      label: t.food,
+      key: "foodImportShare" as const,
+    },
+    {
+      label: t.importsGdp,
+      key: "importsGdp" as const,
+    },
+    {
+      label: t.importsUsd,
+      key: "importUsd" as const,
+    },
+    {
+      label: t.tariff,
+      key: "tariffRate" as const,
+    },
+    {
+      label: t.logistics,
+      key: "logisticsIndex" as const,
+    },
+  ];
 
   const visitorCountryName = useMemo(() => {
     try {
@@ -787,6 +935,90 @@ export default function StatsDashboard({
       return visitorCountry;
     }
   }, [visitorCountry, language]);
+
+  function downloadCsv() {
+    const headers = [
+      "Country",
+      "Original country name",
+      "ISO2",
+      "ISO3",
+      "Region",
+      "Income group",
+      "Income group original",
+      "Energy net imports (%)",
+      "Energy year",
+      "Fuel import share (%)",
+      "Fuel year",
+      "Food import share (%)",
+      "Food year",
+      "Imports/GDP (%)",
+      "Imports/GDP year",
+      "Total imports USD",
+      "Total imports year",
+      "Tariff rate (%)",
+      "Tariff year",
+      "Logistics index",
+      "Logistics year",
+      "Data count",
+      "Latest available year",
+      "Source",
+    ];
+
+    const csvRows = filteredAndSortedRows.map((row) => {
+      const income = getIncomeGroupLabel(row.incomeLevel, language);
+
+      return [
+        getLocalizedCountryName(row, language),
+        row.name,
+        row.iso2,
+        row.iso3,
+        row.region,
+        income.title,
+        row.incomeLevel,
+        row.energyImportPercent.value ?? "",
+        row.energyImportPercent.year ?? "",
+        row.fuelImportShare.value ?? "",
+        row.fuelImportShare.year ?? "",
+        row.foodImportShare.value ?? "",
+        row.foodImportShare.year ?? "",
+        row.importsGdp.value ?? "",
+        row.importsGdp.year ?? "",
+        row.importUsd.value ?? "",
+        row.importUsd.year ?? "",
+        row.tariffRate.value ?? "",
+        row.tariffRate.year ?? "",
+        row.logisticsIndex.value ?? "",
+        row.logisticsIndex.year ?? "",
+        row.dataCompleteness,
+        getLatestAvailableYear(row) ?? "",
+        "World Bank API",
+      ];
+    });
+
+    const csv =
+      "\uFEFF" +
+      [headers, ...csvRows]
+        .map((row) => row.map(escapeCsvValue).join(","))
+        .join("\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `dependency-radar-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
 
   if (!mounted) {
     return <LoadingScreen language={language} />;
@@ -805,6 +1037,9 @@ export default function StatsDashboard({
             <a href="#data" className="hover:text-white">
               {t.navData}
             </a>
+            <a href="#compare" className="hover:text-white">
+              {t.navCompare}
+            </a>
             <a href="#method" className="hover:text-white">
               {t.navMethod}
             </a>
@@ -816,7 +1051,7 @@ export default function StatsDashboard({
           <select
             value={language}
             onChange={(event) => changeLanguage(event.target.value as Language)}
-            className="rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full border border-white/15 bg-[#111524] px-4 py-2 text-sm text-white outline-none"
           >
             {Object.entries(languageLabels).map(([value, label]) => (
               <option key={value} value={value}>
@@ -864,11 +1099,129 @@ export default function StatsDashboard({
         </div>
       </section>
 
-      <WorldMap
-        rows={rows}
-        language={language}
-        visitorCountry={visitorCountry}
-      />
+      <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
+
+      <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+          <div className="mb-6">
+            <p className="text-sm font-medium text-indigo-300">
+              Country Comparison
+            </p>
+            <h2 className="mt-2 text-3xl font-bold">{t.compareTitle}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+              {t.compareSubtitle}
+            </p>
+          </div>
+
+          <div className="mb-6 grid gap-3 md:grid-cols-3">
+            {[0, 1, 2].map((index) => (
+              <label
+                key={index}
+                className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300"
+              >
+                <span className="mb-2 block text-xs text-slate-500">
+                  {t.selectCountry} {index + 1}
+                </span>
+                <select
+                  value={compareIso3[index] ?? ""}
+                  onChange={(event) =>
+                    handleCompareChange(index, event.target.value)
+                  }
+                  className="w-full bg-[#0b0f1c] text-white outline-none"
+                >
+                  <option value="">{t.selectCountry}</option>
+                  {countryOptions.map((row) => (
+                    <option key={row.iso3} value={row.iso3}>
+                      {getLocalizedCountryName(row, language)} · {row.iso3}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+
+          {compareRows.length === 0 ? (
+            <p className="text-sm text-slate-400">{t.noCompareCountry}</p>
+          ) : (
+            <>
+              <div className="mb-6 grid gap-4 md:grid-cols-3">
+                {compareRows.map((row) => {
+                  const income = getIncomeGroupLabel(row.incomeLevel, language);
+
+                  return (
+                    <div
+                      key={row.iso3}
+                      className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-5"
+                    >
+                      <p className="text-lg font-bold">
+                        {getLocalizedCountryName(row, language)}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {row.name} · {row.iso3}
+                      </p>
+                      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                        <p className="text-sm font-semibold text-white">
+                          {income.title}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {income.description}
+                        </p>
+                        <p className="mt-2 text-xs text-slate-600">
+                          {t.incomeOriginal}: {row.incomeLevel}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                  <thead className="bg-white/[0.06] text-slate-400">
+                    <tr>
+                      <th className="px-5 py-4">{t.compareTable}</th>
+                      {compareRows.map((row) => (
+                        <th key={row.iso3} className="px-5 py-4">
+                          {getLocalizedCountryName(row, language)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {compareMetrics.map((metric) => (
+                      <tr key={metric.key} className="border-t border-white/10">
+                        <td className="px-5 py-4 font-semibold">
+                          {metric.label}
+                        </td>
+                        {compareRows.map((row) => {
+                          const stat = row[metric.key];
+
+                          return (
+                            <td key={`${row.iso3}-${metric.key}`} className="px-5 py-4">
+                              <p>{formatMetricValue(row, metric.key, language)}</p>
+                              <Year stat={stat} />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                    <tr className="border-t border-white/10">
+                      <td className="px-5 py-4 font-semibold">
+                        {t.latestYear}
+                      </td>
+                      {compareRows.map((row) => (
+                        <td key={`${row.iso3}-latest`} className="px-5 py-4">
+                          {getLatestAvailableYear(row) ?? "—"}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
 
       <section id="data" className="mx-auto max-w-7xl px-6 pb-20">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -891,7 +1244,7 @@ export default function StatsDashboard({
             <select
               value={region}
               onChange={(event) => setRegion(event.target.value)}
-              className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-white outline-none"
+              className="rounded-2xl border border-white/10 bg-[#111524] px-4 py-3 text-sm text-white outline-none"
             >
               <option value="all">{t.allRegions}</option>
               {regions.map((regionName) => (
@@ -907,10 +1260,10 @@ export default function StatsDashboard({
           <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-white">
-                Data filters
+                {t.dataFilters}
               </p>
               <p className="text-xs text-slate-500">
-                Filter countries by data availability and export the visible table.
+                {t.filterDescription}
               </p>
             </div>
 
@@ -918,7 +1271,7 @@ export default function StatsDashboard({
               onClick={downloadCsv}
               className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
             >
-              {f.downloadCsv}
+              {t.downloadCsv}
             </button>
           </div>
 
@@ -930,12 +1283,12 @@ export default function StatsDashboard({
                 onChange={(event) => setHideNoDataRows(event.target.checked)}
                 className="h-4 w-4"
               />
-              <span>{f.hideNoDataRows}</span>
+              <span>{t.hideNoDataRows}</span>
             </label>
 
             <label className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300">
               <span className="mb-2 block text-xs text-slate-500">
-                {f.minimumDataCount}
+                {t.minimumDataCount}
               </span>
               <select
                 value={minimumDataCount}
@@ -954,14 +1307,14 @@ export default function StatsDashboard({
 
             <label className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300">
               <span className="mb-2 block text-xs text-slate-500">
-                {f.latestYearFilter}
+                {t.latestYearFilter}
               </span>
               <select
                 value={minimumLatestYear}
                 onChange={(event) => setMinimumLatestYear(event.target.value)}
                 className="w-full bg-[#0b0f1c] text-white outline-none"
               >
-                <option value="all">{f.allYears}</option>
+                <option value="all">{t.allYears}</option>
                 <option value="2024">2024+</option>
                 <option value="2023">2023+</option>
                 <option value="2022">2022+</option>
@@ -974,8 +1327,10 @@ export default function StatsDashboard({
 
         <p className="mb-4 text-sm text-slate-400">
           {t.showing}:{" "}
-          {filteredAndSortedRows.length.toLocaleString(languageToLocale(language))} /{" "}
-          {rows.length.toLocaleString(languageToLocale(language))}
+          {filteredAndSortedRows.length.toLocaleString(
+            languageToLocale(language)
+          )}{" "}
+          / {rows.length.toLocaleString(languageToLocale(language))}
         </p>
 
         {errorMessage ? (
@@ -985,7 +1340,7 @@ export default function StatsDashboard({
         ) : null}
 
         <div className="overflow-x-auto rounded-3xl border border-white/10">
-          <table className="w-full min-w-[1450px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1500px] border-collapse text-left text-sm">
             <thead className="bg-white/[0.06] text-slate-400">
               <tr>
                 <th className="px-5 py-4">
@@ -1076,13 +1431,14 @@ export default function StatsDashboard({
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-5 py-4">{f.latestYearFilter}</th>
+                <th className="px-5 py-4">{t.latestYearFilter}</th>
               </tr>
             </thead>
 
             <tbody>
               {filteredAndSortedRows.map((row) => {
                 const isVisitorCountry = row.iso2 === visitorCountry;
+                const income = getIncomeGroupLabel(row.incomeLevel, language);
 
                 return (
                   <tr
@@ -1101,8 +1457,17 @@ export default function StatsDashboard({
                     </td>
 
                     <td className="px-5 py-4 text-slate-300">{row.region}</td>
-                    <td className="px-5 py-4 text-slate-300">
-                      {row.incomeLevel}
+
+                    <td className="px-5 py-4">
+                      <p className="font-semibold text-slate-100">
+                        {income.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {income.description}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-600">
+                        {t.incomeOriginal}: {row.incomeLevel}
+                      </p>
                     </td>
 
                     <td className="px-5 py-4">
@@ -1141,6 +1506,7 @@ export default function StatsDashboard({
                     </td>
 
                     <td className="px-5 py-4">{row.dataCompleteness} / 7</td>
+
                     <td className="px-5 py-4">
                       {getLatestAvailableYear(row) ?? "—"}
                     </td>
@@ -1166,21 +1532,10 @@ export default function StatsDashboard({
         id="contact"
         className="mx-auto max-w-7xl border-t border-white/10 px-6 py-10"
       >
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h2 className="text-xl font-bold">{t.contactTitle}</h2>
             <p className="mt-2 text-sm text-slate-400">{t.contactText}</p>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4">
-            <p className="text-xs text-slate-500">{t.emailLabel}</p>
-            <a
-              href="mailto:kevinsmp123@gmail.com"
-              className="text-lg font-semibold text-indigo-200 hover:text-white"
-            >
-              kevinsmp123@gmail.com
-            </a>
-          </div>
 
             <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
               <a href="/sources" className="hover:text-white">
@@ -1196,7 +1551,17 @@ export default function StatsDashboard({
                 Disclaimer
               </a>
             </div>
+          </div>
 
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4">
+            <p className="text-xs text-slate-500">{t.emailLabel}</p>
+            <a
+              href="mailto:kevinsmp123@gmail.com"
+              className="text-lg font-semibold text-indigo-200 hover:text-white"
+            >
+              kevinsmp123@gmail.com
+            </a>
+          </div>
         </div>
       </footer>
     </main>
