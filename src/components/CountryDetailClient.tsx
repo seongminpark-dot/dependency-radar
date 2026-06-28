@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
+import RegionalInsightSection from "@/components/RegionalInsightSection";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -537,6 +538,8 @@ export default function CountryDetailClient({
           </div>
         </div>
       </section>
+
+      <RegionalInsightSection row={row} rows={rows} language={language} />
 
       <section className="mx-auto max-w-7xl px-6 pb-12">
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
