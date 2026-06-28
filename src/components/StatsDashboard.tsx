@@ -333,6 +333,95 @@ const languageLabels: Record<Language, string> = {
   de: "Deutsch",
 };
 
+
+const filterCopy: Record<
+  Language,
+  {
+    hideNoDataRows: string;
+    minimumDataCount: string;
+    latestYearFilter: string;
+    allYears: string;
+    downloadCsv: string;
+  }
+> = {
+  ko: {
+    hideNoDataRows: "데이터가 전혀 없는 국가 숨기기",
+    minimumDataCount: "최소 데이터 수",
+    latestYearFilter: "최신 데이터 연도",
+    allYears: "전체 연도",
+    downloadCsv: "CSV 다운로드",
+  },
+  en: {
+    hideNoDataRows: "Hide countries with no data",
+    minimumDataCount: "Minimum data count",
+    latestYearFilter: "Latest data year",
+    allYears: "All years",
+    downloadCsv: "Download CSV",
+  },
+  ja: {
+    hideNoDataRows: "データがない国を非表示",
+    minimumDataCount: "最小データ数",
+    latestYearFilter: "最新データ年",
+    allYears: "すべての年",
+    downloadCsv: "CSVをダウンロード",
+  },
+  zh: {
+    hideNoDataRows: "隐藏无数据国家",
+    minimumDataCount: "最少数据数",
+    latestYearFilter: "最新数据年份",
+    allYears: "所有年份",
+    downloadCsv: "下载CSV",
+  },
+  es: {
+    hideNoDataRows: "Ocultar países sin datos",
+    minimumDataCount: "Datos mínimos",
+    latestYearFilter: "Último año de datos",
+    allYears: "Todos los años",
+    downloadCsv: "Descargar CSV",
+  },
+  fr: {
+    hideNoDataRows: "Masquer les pays sans données",
+    minimumDataCount: "Nombre minimum de données",
+    latestYearFilter: "Dernière année disponible",
+    allYears: "Toutes les années",
+    downloadCsv: "Télécharger CSV",
+  },
+  de: {
+    hideNoDataRows: "Länder ohne Daten ausblenden",
+    minimumDataCount: "Mindestanzahl an Daten",
+    latestYearFilter: "Neuestes Datenjahr",
+    allYears: "Alle Jahre",
+    downloadCsv: "CSV herunterladen",
+  },
+};
+
+function getRowStatList(row: CountryRow) {
+  return [
+    row.energyImportPercent,
+    row.fuelImportShare,
+    row.foodImportShare,
+    row.importsGdp,
+    row.importUsd,
+    row.tariffRate,
+    row.logisticsIndex,
+  ];
+}
+
+function getLatestAvailableYear(row: CountryRow) {
+  const years = getRowStatList(row)
+    .map((stat) => (stat.year ? Number(stat.year) : null))
+    .filter((year): year is number => year !== null && !Number.isNaN(year));
+
+  if (years.length === 0) return null;
+
+  return Math.max(...years);
+}
+
+function escapeCsvValue(value: unknown) {
+  const text = value === null || value === undefined ? "" : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 function countryToLanguage(countryCode: string): Language {
   const code = countryCode.toUpperCase();
 
@@ -448,6 +537,7 @@ function SortHeader({
 }
 
 function LoadingScreen({ language }: { language: Language }) {
+
   const t = copy[language];
 
   return (
@@ -473,6 +563,9 @@ export default function StatsDashboard({
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [hideNoDataRows, setHideNoDataRows] = useState(false);
+  const [minimumDataCount, setMinimumDataCount] = useState(0);
+  const [minimumLatestYear, setMinimumLatestYear] = useState("all");
 
   useEffect(() => {
     async function initialize() {
@@ -534,7 +627,85 @@ export default function StatsDashboard({
     });
   }
 
+
+  function downloadCsv() {
+    const headers = [
+      "Country",
+      "Original country name",
+      "ISO2",
+      "ISO3",
+      "Region",
+      "Income group",
+      "Energy net imports (%)",
+      "Energy year",
+      "Fuel import share (%)",
+      "Fuel year",
+      "Food import share (%)",
+      "Food year",
+      "Imports/GDP (%)",
+      "Imports/GDP year",
+      "Total imports USD",
+      "Total imports year",
+      "Tariff rate (%)",
+      "Tariff year",
+      "Logistics index",
+      "Logistics year",
+      "Data count",
+      "Latest available year",
+      "Source",
+    ];
+
+    const csvRows = filteredAndSortedRows.map((row) => [
+      getLocalizedCountryName(row, language),
+      row.name,
+      row.iso2,
+      row.iso3,
+      row.region,
+      row.incomeLevel,
+      row.energyImportPercent.value ?? "",
+      row.energyImportPercent.year ?? "",
+      row.fuelImportShare.value ?? "",
+      row.fuelImportShare.year ?? "",
+      row.foodImportShare.value ?? "",
+      row.foodImportShare.year ?? "",
+      row.importsGdp.value ?? "",
+      row.importsGdp.year ?? "",
+      row.importUsd.value ?? "",
+      row.importUsd.year ?? "",
+      row.tariffRate.value ?? "",
+      row.tariffRate.year ?? "",
+      row.logisticsIndex.value ?? "",
+      row.logisticsIndex.year ?? "",
+      row.dataCompleteness,
+      getLatestAvailableYear(row) ?? "",
+      "World Bank API",
+    ]);
+
+    const csv = "\uFEFF" + [headers, ...csvRows]
+      .map((row) => row.map(escapeCsvValue).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `dependency-radar-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   const t = copy[language];
+  const f = filterCopy[language];
 
   const regions = useMemo(() => {
     const uniqueRegions = Array.from(new Set(rows.map((row) => row.region)));
@@ -552,8 +723,21 @@ export default function StatsDashboard({
         row.iso3.toLowerCase().includes(search.toLowerCase());
 
       const matchesRegion = region === "all" || row.region === region;
+      const matchesDataPresence = !hideNoDataRows || row.dataCompleteness > 0;
+      const matchesMinimumDataCount = row.dataCompleteness >= minimumDataCount;
+      const latestAvailableYear = getLatestAvailableYear(row);
+      const matchesLatestYear =
+        minimumLatestYear === "all" ||
+        (latestAvailableYear !== null &&
+          latestAvailableYear >= Number(minimumLatestYear));
 
-      return matchesSearch && matchesRegion;
+      return (
+        matchesSearch &&
+        matchesRegion &&
+        matchesDataPresence &&
+        matchesMinimumDataCount &&
+        matchesLatestYear
+      );
     });
 
     return filtered.sort((a, b) => {
@@ -590,7 +774,7 @@ export default function StatsDashboard({
 
       return sortConfig.direction === "asc" ? result : -result;
     });
-  }, [rows, search, region, language, sortConfig, visitorCountry]);
+  }, [rows, search, region, language, sortConfig, visitorCountry, hideNoDataRows, minimumDataCount, minimumLatestYear]);
 
   const visitorCountryName = useMemo(() => {
     try {
