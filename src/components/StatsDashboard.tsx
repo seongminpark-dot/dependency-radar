@@ -771,7 +771,7 @@ function InfoTooltip({ text }: { text: string }) {
       <span className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-indigo-300/40 bg-indigo-400/10 text-[11px] font-bold text-indigo-200">
         ?
       </span>
-      <span className="pointer-events-none absolute left-1/2 top-7 z-30 hidden w-72 -translate-x-1/2 rounded-2xl border border-white/10 bg-[#111524] p-4 text-xs leading-5 text-slate-200 shadow-2xl group-hover:block">
+      <span className="pointer-events-none absolute left-6 top-1/2 z-50 hidden w-80 -translate-y-1/2 rounded-2xl border border-white/10 bg-[#111524] p-4 text-xs leading-5 text-slate-200 shadow-2xl group-hover:block">
         {text}
       </span>
     </span>
