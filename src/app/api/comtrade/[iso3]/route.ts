@@ -224,7 +224,7 @@ async function fetchRows({
       includeDesc: "true",
       format: "json",
       breakdownMode: "classic",
-      subscription-key: apiKey,
+      "subscription-key": apiKey,
     });
 
     if (partnerCode) {
