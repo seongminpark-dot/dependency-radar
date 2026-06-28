@@ -366,6 +366,11 @@ export default function WorldMap({
                         }
                         stroke="#273044"
                         strokeWidth={0.35}
+                        onClick={() => {
+                          if (row) {
+                            window.location.href = `/country/${row.iso3}`;
+                          }
+                        }}
                         style={{
                           default: { outline: "none" },
                           hover: {

@@ -1301,9 +1301,12 @@ export default function StatsDashboard({
                       key={row.iso3}
                       className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-5"
                     >
-                      <p className="text-lg font-bold">
+                      <a
+                        href={`/country/${row.iso3}`}
+                        className="text-lg font-bold hover:text-indigo-200 hover:underline"
+                      >
                         {getLocalizedCountryName(row, language)}
-                      </p>
+                      </a>
                       <p className="mt-1 text-xs text-slate-500">
                         {row.name} · {row.iso3}
                       </p>
@@ -1613,9 +1616,12 @@ export default function StatsDashboard({
                     }`}
                   >
                     <td className="px-5 py-4">
-                      <p className="font-semibold">
+                      <a
+                        href={`/country/${row.iso3}`}
+                        className="font-semibold text-white hover:text-indigo-200 hover:underline"
+                      >
                         {getLocalizedCountryName(row, language)}
-                      </p>
+                      </a>
                       <p className="text-xs text-slate-500">
                         {row.name} · {row.iso3}
                       </p>
