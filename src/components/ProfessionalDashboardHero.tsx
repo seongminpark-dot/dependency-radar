@@ -19,143 +19,111 @@ const copy: Record<
     currentCountry: string;
     source: string;
     sourceValue: string;
-    sourceYearNote: string;
-    nextDataLayer: string;
-    nextDataLayerDesc: string;
   }
 > = {
   ko: {
     badge: "Official statistics dashboard",
     title: "국가별 공급망 의존도를 공식 통계로 비교합니다.",
     subtitle:
-      "World Bank 공개 지표를 기반으로 에너지, 연료, 식량, 수입, 관세, 물류 데이터를 국가별로 비교하고, 각 지표의 최신 제공 연도를 함께 표시합니다.",
-    official: "공식 최신값 기준",
+      "World Bank 공식 최신 지표와 IMF 2025/2026 전망 데이터를 분리해서 보여주는 글로벌 공급망·무역 통계 플랫폼입니다.",
+    official: "공식 통계와 전망치 분리",
     officialDesc:
-      "추정 카운터가 아니라 각 출처가 제공하는 최신 공식 연도 값을 표시합니다.",
-    freshness: "데이터 최신성 표시",
+      "World Bank 값은 공식 최신 제공 연도 기준이며, 2025/2026 값은 IMF 전망 레이어에서 별도로 표시합니다.",
+    freshness: "지표별 연도 표시",
     freshnessDesc:
-      "각 셀 아래의 연도는 해당 지표가 제공되는 최신 연도입니다.",
+      "각 값 아래의 연도는 해당 지표가 실제로 제공되는 최신 연도입니다.",
     coverage: "국가/경제권",
     indicators: "핵심 지표",
     currentCountry: "현재 접속 국가",
     source: "주요 출처",
-    sourceValue: "World Bank API",
-    sourceYearNote: "지표별 제공 연도는 국가와 지표에 따라 다릅니다.",
-    nextDataLayer: "다음 데이터 확장",
-    nextDataLayerDesc:
-      "UN Comtrade 월간 무역, IMF 거시지표, OECD 단기 지표를 추가하면 최신성이 더 높아집니다.",
+    sourceValue: "World Bank / IMF",
   },
   en: {
     badge: "Official statistics dashboard",
     title: "Compare country supply dependency with official statistics.",
     subtitle:
-      "Dependency Radar compares energy, fuel, food, imports, tariffs, and logistics indicators by country using public World Bank data, while showing the latest available year for each indicator.",
-    official: "Official latest values",
+      "A global supply-chain and trade statistics platform separating official World Bank values from IMF 2025/2026 outlook data.",
+    official: "Official values and forecasts separated",
     officialDesc:
-      "The site shows the latest source-provided official values, not estimated live counters.",
-    freshness: "Source-year transparency",
+      "World Bank values use the latest officially available source year, while 2025/2026 values are shown separately through the IMF outlook layer.",
+    freshness: "Indicator-level source years",
     freshnessDesc:
-      "The year below each value shows the latest available year for that indicator.",
+      "The year below each value shows the actual latest available source year for that indicator.",
     coverage: "Countries/economies",
     indicators: "Core indicators",
     currentCountry: "Current country",
-    source: "Primary source",
-    sourceValue: "World Bank API",
-    sourceYearNote:
-      "Source years vary by country and indicator depending on official availability.",
-    nextDataLayer: "Next data layer",
-    nextDataLayerDesc:
-      "Adding UN Comtrade monthly trade, IMF macro data, and OECD short-term indicators can improve freshness.",
+    source: "Primary sources",
+    sourceValue: "World Bank / IMF",
   },
   ja: {
     badge: "Official statistics dashboard",
     title: "各国の供給依存度を公式統計で比較します。",
-    subtitle:
-      "World Bank公開データを基に、エネルギー、燃料、食料、輸入、関税、物流指標を比較します。",
-    official: "公式最新値",
-    officialDesc: "推定ライブカウンターではなく、出典が提供する最新公式値を表示します。",
-    freshness: "データ年の透明性",
-    freshnessDesc: "各値の下に、その指標の最新提供年を表示します。",
+    subtitle: "World Bank公式値とIMF 2025/2026 전망 데이터를 분리해 표시합니다.",
+    official: "公式値と予測値を分離",
+    officialDesc: "World Bank値とIMF 전망치를 별도로 표시합니다.",
+    freshness: "指標別データ年",
+    freshnessDesc: "各値の下に最新提供年を 표시합니다.",
     coverage: "国/経済圏",
     indicators: "主要指標",
     currentCountry: "現在の接続国",
     source: "主要出典",
-    sourceValue: "World Bank API",
-    sourceYearNote: "提供年は国と指標によって異なります。",
-    nextDataLayer: "次のデータ拡張",
-    nextDataLayerDesc: "月次貿易データや短期指標を追加すると最新性が高まります。",
+    sourceValue: "World Bank / IMF",
   },
   zh: {
     badge: "Official statistics dashboard",
     title: "使用官方统计比较各国供应依赖度。",
-    subtitle:
-      "基于 World Bank 公开数据比较能源、燃料、食品、进口、关税和物流指标。",
-    official: "官方最新值",
-    officialDesc: "显示来源提供的最新官方数值，而不是估算实时计数器。",
-    freshness: "数据年份透明",
-    freshnessDesc: "每个数值下方显示该指标的最新可用年份。",
+    subtitle: "分离显示 World Bank 官方值和 IMF 2025/2026 전망 数据。",
+    official: "官方值与预测分离",
+    officialDesc: "World Bank 官方值和 IMF 전망 数据分开显示。",
+    freshness: "指标年份透明",
+    freshnessDesc: "每个值下方显示最新可用年份。",
     coverage: "国家/经济体",
     indicators: "核心指标",
     currentCountry: "当前访问国家",
     source: "主要来源",
-    sourceValue: "World Bank API",
-    sourceYearNote: "数据年份因国家和指标而异。",
-    nextDataLayer: "下一步数据扩展",
-    nextDataLayerDesc: "可增加月度贸易数据、IMF 宏观数据和 OECD 短期指标。",
+    sourceValue: "World Bank / IMF",
   },
   es: {
     badge: "Official statistics dashboard",
     title: "Compara la dependencia de suministro con estadísticas oficiales.",
-    subtitle:
-      "Compara energía, combustibles, alimentos, importaciones, aranceles y logística usando datos públicos del World Bank.",
-    official: "Valores oficiales recientes",
-    officialDesc: "Muestra valores oficiales disponibles, no contadores estimados en vivo.",
-    freshness: "Transparencia del año",
+    subtitle: "Separa valores oficiales del World Bank y perspectivas IMF 2025/2026.",
+    official: "Valores oficiales y previsiones separados",
+    officialDesc: "Los valores World Bank y las previsiones IMF se muestran por separado.",
+    freshness: "Años por indicador",
     freshnessDesc: "El año bajo cada valor muestra el último año disponible.",
     coverage: "Países/economías",
     indicators: "Indicadores",
     currentCountry: "País actual",
-    source: "Fuente principal",
-    sourceValue: "World Bank API",
-    sourceYearNote: "El año disponible varía por país e indicador.",
-    nextDataLayer: "Próxima capa de datos",
-    nextDataLayerDesc: "UN Comtrade, IMF y OECD pueden mejorar la actualidad.",
+    source: "Fuentes principales",
+    sourceValue: "World Bank / IMF",
   },
   fr: {
     badge: "Official statistics dashboard",
     title: "Comparez la dépendance d’approvisionnement avec des statistiques officielles.",
-    subtitle:
-      "Compare les indicateurs d’énergie, combustibles, alimentation, importations, droits de douane et logistique.",
-    official: "Valeurs officielles récentes",
-    officialDesc: "Affiche les dernières valeurs officielles disponibles, pas des estimations en direct.",
-    freshness: "Transparence des années",
+    subtitle: "Sépare les valeurs World Bank et les perspectives IMF 2025/2026.",
+    official: "Valeurs officielles et prévisions séparées",
+    officialDesc: "Les valeurs World Bank et les prévisions IMF sont séparées.",
+    freshness: "Années par indicateur",
     freshnessDesc: "L’année sous chaque valeur indique la dernière année disponible.",
     coverage: "Pays/économies",
     indicators: "Indicateurs",
     currentCountry: "Pays actuel",
-    source: "Source principale",
-    sourceValue: "World Bank API",
-    sourceYearNote: "Les années varient selon les pays et les indicateurs.",
-    nextDataLayer: "Prochaine couche de données",
-    nextDataLayerDesc: "UN Comtrade, IMF et OECD peuvent améliorer l’actualité.",
+    source: "Sources principales",
+    sourceValue: "World Bank / IMF",
   },
   de: {
     badge: "Official statistics dashboard",
     title: "Vergleichen Sie Lieferabhängigkeit mit offiziellen Statistiken.",
-    subtitle:
-      "Vergleicht Energie, Brennstoffe, Lebensmittel, Importe, Zölle und Logistik anhand öffentlicher World-Bank-Daten.",
-    official: "Offizielle aktuelle Werte",
-    officialDesc: "Zeigt offiziell verfügbare Werte, keine geschätzten Live-Zähler.",
-    freshness: "Transparente Datenjahre",
-    freshnessDesc: "Das Jahr unter jedem Wert zeigt das aktuellste verfügbare Jahr.",
+    subtitle: "Trennt World-Bank-Werte und IMF-Ausblicksdaten 2025/2026.",
+    official: "Offizielle Werte und Prognosen getrennt",
+    officialDesc: "World-Bank-Werte und IMF-Prognosen werden getrennt angezeigt.",
+    freshness: "Datenjahre pro Indikator",
+    freshnessDesc: "Das Jahr unter jedem Wert zeigt das neueste verfügbare Jahr.",
     coverage: "Länder/Volkswirtschaften",
     indicators: "Indikatoren",
     currentCountry: "Aktuelles Land",
-    source: "Hauptquelle",
-    sourceValue: "World Bank API",
-    sourceYearNote: "Datenjahre variieren je nach Land und Indikator.",
-    nextDataLayer: "Nächste Datenebene",
-    nextDataLayerDesc: "UN Comtrade, IMF und OECD können die Aktualität verbessern.",
+    source: "Hauptquellen",
+    sourceValue: "World Bank / IMF",
   },
 };
 
@@ -177,44 +145,18 @@ export default function ProfessionalDashboardHero({
   return (
     <section className="border-b border-white/10 bg-[#070914]">
       <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-end">
-          <div>
-            <p className="mb-4 inline-flex rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-medium uppercase tracking-[0.24em] text-slate-300">
-              {t.badge}
-            </p>
+        <div>
+          <p className="mb-4 inline-flex rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-medium uppercase tracking-[0.24em] text-slate-300">
+            {t.badge}
+          </p>
 
-            <h1 className="max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl">
-              {t.title}
-            </h1>
+          <h1 className="max-w-5xl text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl">
+            {t.title}
+          </h1>
 
-            <p className="mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
-              {t.subtitle}
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3 text-sm">
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-emerald-100">
-                {t.official}
-              </span>
-              <span className="rounded-full border border-blue-400/20 bg-blue-400/10 px-4 py-2 text-blue-100">
-                {t.freshness}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-slate-300">
-                {t.sourceValue}
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-            <p className="text-sm font-semibold text-slate-200">
-              {t.nextDataLayer}
-            </p>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              {t.nextDataLayerDesc}
-            </p>
-            <div className="mt-5 rounded-2xl border border-white/10 bg-[#0b0f1c] p-4">
-              <p className="text-xs text-slate-500">{t.sourceYearNote}</p>
-            </div>
-          </div>
+          <p className="mt-6 max-w-4xl text-base leading-8 text-slate-300 md:text-lg">
+            {t.subtitle}
+          </p>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-4">
@@ -256,16 +198,16 @@ export default function ProfessionalDashboardHero({
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm font-semibold text-white">{t.official}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+          <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-5">
+            <p className="text-sm font-semibold text-emerald-100">{t.official}</p>
+            <p className="mt-2 text-sm leading-6 text-emerald-50/80">
               {t.officialDesc}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm font-semibold text-white">{t.freshness}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+          <div className="rounded-2xl border border-blue-400/20 bg-blue-400/10 p-5">
+            <p className="text-sm font-semibold text-blue-100">{t.freshness}</p>
+            <p className="mt-2 text-sm leading-6 text-blue-50/80">
               {t.freshnessDesc}
             </p>
           </div>

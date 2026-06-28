@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
+import IMFOutlookPanel from "@/components/IMFOutlookPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -1219,6 +1220,24 @@ export default function StatsDashboard({
         countryCount={rows.length}
         indicatorCount={7}
       />
+
+      {(() => {
+        const outlookRow =
+          rows.find((item) => item.iso2 === visitorCountry) ??
+          rows.find((item) => item.iso3 === "USA") ??
+          rows[0];
+
+        return outlookRow ? (
+          <IMFOutlookPanel
+            iso3={outlookRow.iso3}
+            countryName={`${getFlagEmoji(outlookRow.iso2)} ${getLocalizedCountryName(
+              outlookRow,
+              language
+            )}`}
+            language={language}
+          />
+        ) : null;
+      })()}
 
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
