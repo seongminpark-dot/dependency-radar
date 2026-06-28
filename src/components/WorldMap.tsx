@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -29,6 +29,15 @@ type MetricKey =
   | "tariffRate"
   | "logisticsIndex";
 
+type HoverInfo = {
+  x: number;
+  y: number;
+  title: string;
+  subtitle: string;
+  value: string;
+  year: string;
+};
+
 const geographyUrl =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -41,6 +50,7 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "데이터 없음",
     topCountries: "상위 국가",
+    hoverHint: "국가 위에 마우스를 올리면 국가명과 값이 표시됩니다. 클릭하면 상세 페이지로 이동합니다.",
   },
   en: {
     title: "World map visualization",
@@ -51,6 +61,8 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "No data",
     topCountries: "Top countries",
+    hoverHint:
+      "Hover over a country to see its name and value. Click to open its detail page.",
   },
   ja: {
     title: "世界地図の可視化",
@@ -60,6 +72,8 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "データなし",
     topCountries: "上位国",
+    hoverHint:
+      "国にマウスを合わせると国名と値が表示されます。クリックすると詳細ページへ移動します。",
   },
   zh: {
     title: "世界地图可视化",
@@ -69,6 +83,7 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "无数据",
     topCountries: "排名靠前国家",
+    hoverHint: "将鼠标悬停在国家上可查看名称和数值。点击进入详情页。",
   },
   es: {
     title: "Visualización del mapa mundial",
@@ -78,6 +93,8 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "Sin datos",
     topCountries: "Países principales",
+    hoverHint:
+      "Pasa el cursor sobre un país para ver su nombre y valor. Haz clic para abrir su página.",
   },
   fr: {
     title: "Visualisation de la carte mondiale",
@@ -88,6 +105,8 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "Aucune donnée",
     topCountries: "Principaux pays",
+    hoverHint:
+      "Survolez un pays pour voir son nom et sa valeur. Cliquez pour ouvrir sa page.",
   },
   de: {
     title: "Weltkarten-Visualisierung",
@@ -98,6 +117,8 @@ const copy = {
       "Map boundary source: Natural Earth / world-atlas. Data source: World Bank API.",
     noData: "Keine Daten",
     topCountries: "Top-Länder",
+    hoverHint:
+      "Bewegen Sie den Mauszeiger über ein Land, um Name und Wert zu sehen. Klicken Sie für Details.",
   },
 };
 
@@ -280,6 +301,7 @@ export default function WorldMap({
   visitorCountry: string;
 }) {
   const [metric, setMetric] = useState<MetricKey>("importsGdp");
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const t = copy[language];
 
   const rowByName = useMemo(() => {
@@ -314,8 +336,62 @@ export default function WorldMap({
     return rowByName.get(normalizeName(targetName));
   }
 
+  function updateHover(
+    event: MouseEvent<SVGPathElement>,
+    geoName: string,
+    row?: CountryRow
+  ) {
+    if (!row) {
+      setHoverInfo({
+        x: event.clientX,
+        y: event.clientY,
+        title: geoName,
+        subtitle: t.noData,
+        value: "—",
+        year: t.noData,
+      });
+      return;
+    }
+
+    const stat = getStat(row, metric);
+
+    setHoverInfo({
+      x: event.clientX,
+      y: event.clientY,
+      title: `${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(
+        row,
+        language
+      )}`,
+      subtitle: `${row.name} · ${row.iso3}`,
+      value: formatValue(stat, metric, language),
+      year: stat.year ?? t.noData,
+    });
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-6 pb-16">
+      {hoverInfo ? (
+        <div
+          className="pointer-events-none fixed z-50 w-64 rounded-2xl border border-white/10 bg-[#111524]/95 p-4 text-white shadow-2xl backdrop-blur"
+          style={{
+            left: Math.min(hoverInfo.x + 16, window.innerWidth - 280),
+            top: Math.max(hoverInfo.y - 70, 20),
+          }}
+        >
+          <p className="text-sm font-bold">{hoverInfo.title}</p>
+          <p className="mt-1 text-xs text-slate-500">{hoverInfo.subtitle}</p>
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <p className="text-xs text-slate-500">
+              {metricLabels[language][metric]}
+            </p>
+            <p className="mt-1 text-lg font-bold text-indigo-100">
+              {hoverInfo.value}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{hoverInfo.year}</p>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-medium text-indigo-300">
@@ -325,10 +401,15 @@ export default function WorldMap({
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
             {t.subtitle}
           </p>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-500">
+            {t.hoverHint}
+          </p>
         </div>
 
         <div>
-          <label className="mb-2 block text-xs text-slate-500">{t.metric}</label>
+          <label className="mb-2 block text-xs text-slate-500">
+            {t.metric}
+          </label>
           <select
             value={metric}
             onChange={(event) => setMetric(event.target.value as MetricKey)}
@@ -367,6 +448,10 @@ export default function WorldMap({
                         }
                         stroke="#273044"
                         strokeWidth={0.35}
+                        onMouseMove={(event: MouseEvent<SVGPathElement>) =>
+                          updateHover(event, geoName, row)
+                        }
+                        onMouseLeave={() => setHoverInfo(null)}
                         onClick={() => {
                           if (row) {
                             window.location.href = `/country/${row.iso3}`;
@@ -377,20 +462,11 @@ export default function WorldMap({
                           hover: {
                             fill: "#a5b4fc",
                             outline: "none",
-                            cursor: "pointer",
+                            cursor: row ? "pointer" : "default",
                           },
                           pressed: { outline: "none" },
                         }}
-                      >
-                        <title>
-                          {row
-                            ? `${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(
-                                row,
-                                language
-                              )}: ${formatValue(stat!, metric, language)}`
-                            : `${geoName}: ${t.noData}`}
-                        </title>
-                      </Geography>
+                      />
                     );
                   })
                 }
@@ -409,13 +485,15 @@ export default function WorldMap({
               const stat = getStat(row, metric);
 
               return (
-                <div
+                <a
                   key={row.iso3}
-                  className="flex items-center justify-between gap-4 border-b border-white/10 pb-3 last:border-b-0"
+                  href={`/country/${row.iso3}`}
+                  className="flex items-center justify-between gap-4 border-b border-white/10 pb-3 last:border-b-0 hover:text-indigo-200"
                 >
                   <div>
                     <p className="text-sm font-semibold">
-                      #{index + 1} {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
+                      #{index + 1} {getFlagEmoji(row.iso2)}{" "}
+                      {getLocalizedCountryName(row, language)}
                     </p>
                     <p className="text-xs text-slate-500">
                       {row.name} · {row.iso3}
@@ -430,7 +508,7 @@ export default function WorldMap({
                       {stat.year ?? "No year"}
                     </p>
                   </div>
-                </div>
+                </a>
               );
             })}
           </div>
