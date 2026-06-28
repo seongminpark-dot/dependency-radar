@@ -447,6 +447,128 @@ const languageLabels: Record<Language, string> = {
   de: "Deutsch",
 };
 
+
+const indicatorDescriptions: Record<
+  Language,
+  {
+    income: string;
+    energy: string;
+    fuel: string;
+    food: string;
+    importsGdp: string;
+    importsUsd: string;
+    tariff: string;
+    logistics: string;
+    coverage: string;
+    latestYear: string;
+  }
+> = {
+  ko: {
+    income:
+      "World Bank의 국가 소득 분류입니다. 고소득, 중상위 소득, 중하위 소득, 저소득으로 구분됩니다.",
+    energy:
+      "에너지 수입량에서 수출량을 뺀 순수입 비율입니다. 양수는 순수입국, 음수는 순수출국일 수 있습니다.",
+    fuel:
+      "전체 상품 수입 중 연료가 차지하는 비중입니다. 값이 높을수록 수입 품목에서 연료 의존도가 큽니다.",
+    food:
+      "전체 상품 수입 중 식량이 차지하는 비중입니다. 식량 공급망의 외부 의존도를 보는 참고 지표입니다.",
+    importsGdp:
+      "재화와 서비스 수입액이 GDP에서 차지하는 비율입니다. 경제 규모 대비 수입 의존도를 보여줍니다.",
+    importsUsd:
+      "해당 국가의 총 재화·서비스 수입액입니다. 절대적인 수입 규모를 비교할 때 사용합니다.",
+    tariff:
+      "수입 상품에 적용되는 평균 관세율입니다. 값이 높을수록 무역 장벽이 높을 수 있습니다.",
+    logistics:
+      "World Bank 물류성과지수입니다. 보통 1~5 범위이며, 값이 높을수록 물류 인프라와 효율성이 좋은 편입니다.",
+    coverage:
+      "이 사이트에서 사용하는 7개 지표 중 해당 국가에 제공되는 데이터 개수입니다.",
+    latestYear:
+      "해당 국가의 7개 지표 중 가장 최근에 제공된 데이터 연도입니다.",
+  },
+  en: {
+    income:
+      "World Bank income classification: high, upper-middle, lower-middle, or low income.",
+    energy:
+      "Net energy imports as a share of energy use. Positive values may indicate net import dependence, while negative values may indicate net exports.",
+    fuel:
+      "Fuel imports as a share of merchandise imports. Higher values suggest greater fuel concentration in imports.",
+    food:
+      "Food imports as a share of merchandise imports. This helps indicate exposure to external food supply.",
+    importsGdp:
+      "Imports of goods and services as a share of GDP. It shows import dependence relative to the size of the economy.",
+    importsUsd:
+      "Total imports of goods and services in current US dollars. This shows the absolute import scale.",
+    tariff:
+      "Weighted mean tariff rate on imported goods. Higher values may indicate stronger trade barriers.",
+    logistics:
+      "World Bank Logistics Performance Index. Usually ranges from 1 to 5; higher values indicate stronger logistics performance.",
+    coverage:
+      "Number of available indicators out of the 7 indicators used on this site.",
+    latestYear:
+      "The most recent available year among the 7 indicators for this country.",
+  },
+  ja: {
+    income: "World Bankの所得分類です。",
+    energy: "エネルギー純輸入比率です。正の値は純輸入、負の値は純輸出を示す場合があります。",
+    fuel: "商品輸入に占める燃料の比率です。",
+    food: "商品輸入に占める食料の比率です。",
+    importsGdp: "GDPに対する財・サービス輸入の比率です。",
+    importsUsd: "財・サービス輸入の総額です。",
+    tariff: "輸入品に対する平均関税率です。",
+    logistics: "World Bank物流パフォーマンス指数です。高いほど物流性能が良い傾向があります。",
+    coverage: "このサイトで使用する7指標のうち利用可能なデータ数です。",
+    latestYear: "7指標のうち最も新しいデータ年です。",
+  },
+  zh: {
+    income: "World Bank 的收入分类。",
+    energy: "能源净进口比例。正值可能表示净进口，负值可能表示净出口。",
+    fuel: "燃料进口占商品进口的比例。",
+    food: "食品进口占商品进口的比例。",
+    importsGdp: "货物和服务进口占GDP的比例。",
+    importsUsd: "货物和服务进口总额。",
+    tariff: "进口商品的加权平均关税率。",
+    logistics: "World Bank 物流绩效指数。数值越高通常表示物流表现越好。",
+    coverage: "本网站使用的7个指标中可用的数据数量。",
+    latestYear: "该国7个指标中最新的数据年份。",
+  },
+  es: {
+    income: "Clasificación de ingresos del World Bank.",
+    energy: "Importaciones netas de energía. Valores positivos pueden indicar dependencia de importación.",
+    fuel: "Participación de combustibles en las importaciones de mercancías.",
+    food: "Participación de alimentos en las importaciones de mercancías.",
+    importsGdp: "Importaciones de bienes y servicios como porcentaje del GDP.",
+    importsUsd: "Importaciones totales de bienes y servicios en dólares estadounidenses.",
+    tariff: "Arancel medio ponderado sobre bienes importados.",
+    logistics: "Índice de desempeño logístico del World Bank. Un valor más alto suele indicar mejor logística.",
+    coverage: "Número de indicadores disponibles entre los 7 usados en este sitio.",
+    latestYear: "Año más reciente disponible entre los 7 indicadores.",
+  },
+  fr: {
+    income: "Classification des revenus de la World Bank.",
+    energy: "Importations nettes d’énergie. Une valeur positive peut indiquer une dépendance aux importations.",
+    fuel: "Part des combustibles dans les importations de marchandises.",
+    food: "Part de l’alimentation dans les importations de marchandises.",
+    importsGdp: "Importations de biens et services en pourcentage du GDP.",
+    importsUsd: "Importations totales de biens et services en dollars américains.",
+    tariff: "Taux tarifaire moyen pondéré sur les biens importés.",
+    logistics: "Indice de performance logistique de la World Bank. Une valeur plus élevée indique généralement une meilleure logistique.",
+    coverage: "Nombre d’indicateurs disponibles sur les 7 utilisés par ce site.",
+    latestYear: "Année la plus récente disponible parmi les 7 indicateurs.",
+  },
+  de: {
+    income: "Einkommensklassifikation der World Bank.",
+    energy: "Nettoenergieimporte. Positive Werte können Importabhängigkeit anzeigen.",
+    fuel: "Anteil der Brennstoffe an den Warenimporten.",
+    food: "Anteil der Lebensmittel an den Warenimporten.",
+    importsGdp: "Importe von Waren und Dienstleistungen als Anteil am GDP.",
+    importsUsd: "Gesamtimporte von Waren und Dienstleistungen in US-Dollar.",
+    tariff: "Gewichteter durchschnittlicher Zollsatz auf importierte Waren.",
+    logistics: "Logistics Performance Index der World Bank. Höhere Werte deuten meist auf bessere Logistik hin.",
+    coverage: "Anzahl verfügbarer Indikatoren von den 7 auf dieser Website verwendeten Indikatoren.",
+    latestYear: "Das aktuellste verfügbare Jahr unter den 7 Indikatoren.",
+  },
+};
+
 function countryToLanguage(countryCode: string): Language {
   const code = countryCode.toUpperCase();
 
@@ -642,30 +764,49 @@ function isNumericSort(key: SortKey) {
   return !["country", "region", "incomeLevel"].includes(key);
 }
 
+
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <span className="flex h-5 w-5 cursor-help items-center justify-center rounded-full border border-indigo-300/40 bg-indigo-400/10 text-[11px] font-bold text-indigo-200">
+        ?
+      </span>
+      <span className="pointer-events-none absolute left-1/2 top-7 z-30 hidden w-72 -translate-x-1/2 rounded-2xl border border-white/10 bg-[#111524] p-4 text-xs leading-5 text-slate-200 shadow-2xl group-hover:block">
+        {text}
+      </span>
+    </span>
+  );
+}
+
 function SortHeader({
   label,
   sortKey,
   sortConfig,
   onSort,
+  description,
 }: {
   label: string;
   sortKey: SortKey;
   sortConfig: SortConfig;
   onSort: (key: SortKey) => void;
+  description?: string;
 }) {
   const active = sortConfig?.key === sortKey;
   const arrow = active ? (sortConfig.direction === "asc" ? "↑" : "↓") : "↕";
 
   return (
-    <button
-      onClick={() => onSort(sortKey)}
-      className="flex items-center gap-1 text-left hover:text-white"
-    >
-      <span>{label}</span>
-      <span className={active ? "text-indigo-300" : "text-slate-600"}>
-        {arrow}
-      </span>
-    </button>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => onSort(sortKey)}
+        className="flex items-center gap-1 text-left hover:text-white"
+      >
+        <span>{label}</span>
+        <span className={active ? "text-indigo-300" : "text-slate-600"}>
+          {arrow}
+        </span>
+      </button>
+      {description ? <InfoTooltip text={description} /> : null}
+    </div>
   );
 }
 
@@ -896,30 +1037,37 @@ export default function StatsDashboard({
   const compareMetrics = [
     {
       label: t.energy,
+      description: indicatorDescriptions[language].energy,
       key: "energyImportPercent" as const,
     },
     {
       label: t.fuel,
+      description: indicatorDescriptions[language].fuel,
       key: "fuelImportShare" as const,
     },
     {
       label: t.food,
+      description: indicatorDescriptions[language].food,
       key: "foodImportShare" as const,
     },
     {
       label: t.importsGdp,
+      description: indicatorDescriptions[language].importsGdp,
       key: "importsGdp" as const,
     },
     {
       label: t.importsUsd,
+      description: indicatorDescriptions[language].importsUsd,
       key: "importUsd" as const,
     },
     {
       label: t.tariff,
+      description: indicatorDescriptions[language].tariff,
       key: "tariffRate" as const,
     },
     {
       label: t.logistics,
+      description: indicatorDescriptions[language].logistics,
       key: "logisticsIndex" as const,
     },
   ];
@@ -1191,7 +1339,10 @@ export default function StatsDashboard({
                     {compareMetrics.map((metric) => (
                       <tr key={metric.key} className="border-t border-white/10">
                         <td className="px-5 py-4 font-semibold">
-                          {metric.label}
+                          <div className="flex items-center gap-2">
+                            <span>{metric.label}</span>
+                            <InfoTooltip text={metric.description} />
+                          </div>
                         </td>
                         {compareRows.map((row) => {
                           const stat = row[metric.key];
@@ -1362,6 +1513,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.income}
+                    description={indicatorDescriptions[language].income}
                     sortKey="incomeLevel"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1370,6 +1522,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.energy}
+                    description={indicatorDescriptions[language].energy}
                     sortKey="energyImportPercent"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1378,6 +1531,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.fuel}
+                    description={indicatorDescriptions[language].fuel}
                     sortKey="fuelImportShare"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1386,6 +1540,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.food}
+                    description={indicatorDescriptions[language].food}
                     sortKey="foodImportShare"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1394,6 +1549,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.importsGdp}
+                    description={indicatorDescriptions[language].importsGdp}
                     sortKey="importsGdp"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1402,6 +1558,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.importsUsd}
+                    description={indicatorDescriptions[language].importsUsd}
                     sortKey="importUsd"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1410,6 +1567,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.tariff}
+                    description={indicatorDescriptions[language].tariff}
                     sortKey="tariffRate"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1418,6 +1576,7 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.logistics}
+                    description={indicatorDescriptions[language].logistics}
                     sortKey="logisticsIndex"
                     sortConfig={sortConfig}
                     onSort={handleSort}
@@ -1426,12 +1585,18 @@ export default function StatsDashboard({
                 <th className="px-5 py-4">
                   <SortHeader
                     label={t.coverage}
+                    description={indicatorDescriptions[language].coverage}
                     sortKey="dataCompleteness"
                     sortConfig={sortConfig}
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-5 py-4">{t.latestYearFilter}</th>
+                <th className="px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <span>{t.latestYearFilter}</span>
+                    <InfoTooltip text={indicatorDescriptions[language].latestYear} />
+                  </div>
+                </th>
               </tr>
             </thead>
 
