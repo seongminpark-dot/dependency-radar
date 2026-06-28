@@ -1,76 +1,113 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
+
+type VisitorCountryCount = {
+  country: string;
+  count: number;
+};
+
+type VisitorStats = {
+  configured: boolean;
+  country?: string;
+  total: number;
+  countries: VisitorCountryCount[];
+  lastUpdated: string | null;
+};
 
 const copy: Record<
   Language,
   {
     title: string;
     subtitle: string;
-    countryCode: string;
+    total: string;
+    visits: string;
+    notUnique: string;
     privacy: string;
-    accuracy: string;
-    loading: string;
+    empty: string;
+    dbMissing: string;
+    currentVisit: string;
   }
 > = {
   ko: {
-    title: "현재 접속 국가",
-    subtitle: "IP 기반 국가 추정",
-    countryCode: "국가 코드",
-    privacy: "IP 주소는 저장하지 않습니다.",
-    accuracy: "VPN이나 학교/회사 네트워크에서는 다를 수 있습니다.",
-    loading: "접속 국가 확인 중",
+    title: "Visitors",
+    subtitle: "국가별 누적 방문 횟수",
+    total: "총 방문",
+    visits: "회",
+    notUnique: "중복 방문 포함",
+    privacy: "IP 주소는 저장하지 않고 국가 코드만 집계합니다.",
+    empty: "아직 방문 기록이 없습니다.",
+    dbMissing: "Redis 저장소 연결 필요",
+    currentVisit: "이번 접속",
   },
   en: {
-    title: "Current visitor country",
-    subtitle: "IP-based country estimate",
-    countryCode: "Country code",
-    privacy: "The IP address is not stored.",
-    accuracy: "VPNs or school/work networks may affect accuracy.",
-    loading: "Checking country",
+    title: "Visitors",
+    subtitle: "Cumulative visits by country",
+    total: "Total visits",
+    visits: "visits",
+    notUnique: "Duplicate visits included",
+    privacy: "Only country codes are counted. IP addresses are not stored.",
+    empty: "No visits recorded yet.",
+    dbMissing: "Redis storage required",
+    currentVisit: "Current visit",
   },
   ja: {
-    title: "現在の接続国",
-    subtitle: "IPベースの国推定",
-    countryCode: "国コード",
-    privacy: "IPアドレスは保存しません。",
-    accuracy: "VPNや学校/会社ネットワークでは異なる場合があります。",
-    loading: "接続国を確認中",
+    title: "Visitors",
+    subtitle: "国別累積訪問数",
+    total: "総訪問",
+    visits: "回",
+    notUnique: "重複訪問を含む",
+    privacy: "IPアドレスは保存せず、国コードのみ集計します。",
+    empty: "まだ訪問記録がありません。",
+    dbMissing: "Redis保存先が必要です",
+    currentVisit: "今回の接続",
   },
   zh: {
-    title: "当前访问国家",
-    subtitle: "基于 IP 的国家估计",
-    countryCode: "国家代码",
-    privacy: "不会存储 IP 地址。",
-    accuracy: "VPN 或学校/公司网络可能影响准确性。",
-    loading: "正在确认国家",
+    title: "Visitors",
+    subtitle: "按国家累计访问次数",
+    total: "总访问",
+    visits: "次",
+    notUnique: "包含重复访问",
+    privacy: "不存储 IP 地址，仅统计国家代码。",
+    empty: "暂无访问记录。",
+    dbMissing: "需要连接 Redis 存储",
+    currentVisit: "本次访问",
   },
   es: {
-    title: "País del visitante",
-    subtitle: "Estimación basada en IP",
-    countryCode: "Código de país",
-    privacy: "La dirección IP no se almacena.",
-    accuracy: "VPN o redes escolares/laborales pueden afectar la precisión.",
-    loading: "Comprobando país",
+    title: "Visitors",
+    subtitle: "Visitas acumuladas por país",
+    total: "Visitas totales",
+    visits: "visitas",
+    notUnique: "Incluye visitas duplicadas",
+    privacy: "Solo se cuentan códigos de país. No se almacena la IP.",
+    empty: "Aún no hay visitas registradas.",
+    dbMissing: "Se requiere Redis",
+    currentVisit: "Visita actual",
   },
   fr: {
-    title: "Pays du visiteur",
-    subtitle: "Estimation basée sur l’IP",
-    countryCode: "Code pays",
-    privacy: "L’adresse IP n’est pas stockée.",
-    accuracy: "Un VPN ou un réseau scolaire/professionnel peut modifier le résultat.",
-    loading: "Vérification du pays",
+    title: "Visitors",
+    subtitle: "Visites cumulées par pays",
+    total: "Visites totales",
+    visits: "visites",
+    notUnique: "Visites répétées incluses",
+    privacy: "Seuls les codes pays sont comptés. L’IP n’est pas stockée.",
+    empty: "Aucune visite enregistrée.",
+    dbMissing: "Stockage Redis requis",
+    currentVisit: "Visite actuelle",
   },
   de: {
-    title: "Aktuelles Besucherland",
-    subtitle: "IP-basierte Länderschätzung",
-    countryCode: "Ländercode",
-    privacy: "Die IP-Adresse wird nicht gespeichert.",
-    accuracy: "VPNs oder Schul-/Firmennetzwerke können die Genauigkeit beeinflussen.",
-    loading: "Land wird geprüft",
+    title: "Visitors",
+    subtitle: "Kumulierte Besuche nach Land",
+    total: "Gesamtbesuche",
+    visits: "Besuche",
+    notUnique: "Doppelte Besuche enthalten",
+    privacy: "Nur Ländercodes werden gezählt. IP-Adressen werden nicht gespeichert.",
+    empty: "Noch keine Besuche erfasst.",
+    dbMissing: "Redis-Speicher erforderlich",
+    currentVisit: "Aktueller Besuch",
   },
 };
 
@@ -108,33 +145,71 @@ function getSavedLanguage(): Language {
   return "ko";
 }
 
+function getCountryName(country: string, language: Language) {
+  try {
+    const displayNames = new Intl.DisplayNames([languageToLocale(language)], {
+      type: "region",
+    });
+
+    return displayNames.of(country) ?? country;
+  } catch {
+    return country;
+  }
+}
+
 export default function VisitorCountryRail() {
-  const [country, setCountry] = useState("KR");
+  const countedRef = useRef(false);
   const [language, setLanguage] = useState<Language>("ko");
+  const [stats, setStats] = useState<VisitorStats>({
+    configured: true,
+    total: 0,
+    countries: [],
+    lastUpdated: null,
+  });
+  const [currentCountry, setCurrentCountry] = useState("KR");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
 
-    async function loadCountry() {
+    async function registerVisit() {
+      if (countedRef.current) return;
+      countedRef.current = true;
+
       try {
-        const response = await fetch("/api/geo", {
+        const response = await fetch("/api/visitor/register", {
+          method: "POST",
           cache: "no-store",
         });
 
-        const data = await response.json();
+        const data = (await response.json()) as VisitorStats;
+
+        setStats(data);
 
         if (data.country) {
-          setCountry(String(data.country).toUpperCase());
+          setCurrentCountry(data.country);
         }
       } catch {
-        setCountry("KR");
+        try {
+          const response = await fetch("/api/visitor/stats", {
+            cache: "no-store",
+          });
+          const data = (await response.json()) as VisitorStats;
+          setStats(data);
+        } catch {
+          setStats({
+            configured: false,
+            total: 0,
+            countries: [],
+            lastUpdated: null,
+          });
+        }
       } finally {
         setLoading(false);
       }
     }
 
-    loadCountry();
+    registerVisit();
 
     function handleStorageChange() {
       setLanguage(getSavedLanguage());
@@ -147,50 +222,80 @@ export default function VisitorCountryRail() {
     };
   }, []);
 
-  const countryName = useMemo(() => {
-    try {
-      const displayNames = new Intl.DisplayNames([languageToLocale(language)], {
-        type: "region",
-      });
-
-      return displayNames.of(country) ?? country;
-    } catch {
-      return country;
-    }
-  }, [country, language]);
-
   const t = copy[language];
 
-  return (
-    <aside className="pointer-events-none fixed right-5 top-28 z-40 hidden w-56 2xl:block">
-      <div className="pointer-events-auto rounded-3xl border border-white/10 bg-[#0b0f1c]/90 p-5 text-white shadow-2xl backdrop-blur">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-400/10 text-2xl">
-            {loading ? "🌐" : getFlagEmoji(country)}
-          </div>
+  const topCountries = useMemo(() => {
+    return stats.countries.slice(0, 12);
+  }, [stats.countries]);
 
+  const maxCount = topCountries[0]?.count ?? 1;
+  const currentCountryName = getCountryName(currentCountry, language);
+
+  return (
+    <aside className="pointer-events-none fixed right-5 top-28 z-40 hidden w-64 2xl:block">
+      <div className="pointer-events-auto rounded-3xl border border-white/10 bg-[#0b0f1c]/90 p-5 text-white shadow-2xl backdrop-blur">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold">
-              {loading ? t.loading : t.title}
-            </p>
+            <p className="text-lg font-bold">{t.title}</p>
             <p className="text-xs text-slate-500">{t.subtitle}</p>
           </div>
+
+          <div className="text-2xl">🌍</div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-2xl font-bold">
-            {getFlagEmoji(country)} {countryName}
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <p className="text-xs text-slate-500">{t.total}</p>
+          <p className="mt-1 text-3xl font-bold">
+            {stats.total.toLocaleString(languageToLocale(language))}
           </p>
+          <p className="mt-1 text-xs text-slate-500">{t.notUnique}</p>
+        </div>
 
-          <p className="mt-2 text-xs text-slate-500">
-            {t.countryCode}: {country}
+        <div className="mb-4 rounded-2xl border border-indigo-300/20 bg-indigo-400/10 p-4">
+          <p className="text-xs text-indigo-200">{t.currentVisit}</p>
+          <p className="mt-1 text-sm font-semibold">
+            {getFlagEmoji(currentCountry)} {currentCountryName}
           </p>
         </div>
 
-        <div className="mt-4 space-y-2 text-xs leading-5 text-slate-500">
-          <p>{t.privacy}</p>
-          <p>{t.accuracy}</p>
-        </div>
+        {!stats.configured ? (
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-xs leading-5 text-amber-100">
+            {t.dbMissing}
+          </div>
+        ) : loading ? (
+          <div className="text-sm text-slate-500">Loading...</div>
+        ) : topCountries.length === 0 ? (
+          <div className="text-sm text-slate-500">{t.empty}</div>
+        ) : (
+          <div className="space-y-3">
+            {topCountries.map((item) => {
+              const width = Math.max(8, (item.count / maxCount) * 100);
+              const countryName = getCountryName(item.country, language);
+
+              return (
+                <div key={item.country}>
+                  <div className="mb-1 flex items-center justify-between gap-3">
+                    <span className="truncate text-sm">
+                      {getFlagEmoji(item.country)} {countryName}
+                    </span>
+                    <span className="text-xs font-semibold text-indigo-200">
+                      {item.count.toLocaleString(languageToLocale(language))}
+                    </span>
+                  </div>
+
+                  <div className="h-1.5 rounded-full bg-white/10">
+                    <div
+                      className="h-1.5 rounded-full bg-indigo-400"
+                      style={{ width: `${width}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <p className="mt-4 text-xs leading-5 text-slate-500">{t.privacy}</p>
       </div>
     </aside>
   );
