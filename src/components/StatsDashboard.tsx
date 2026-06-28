@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
+import GlobalInsightsSection from "@/components/GlobalInsightsSection";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1246,6 +1247,8 @@ export default function StatsDashboard({
           </div>
         </div>
       </section>
+
+      <GlobalInsightsSection rows={rows} language={language} />
 
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
