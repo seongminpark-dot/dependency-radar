@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import RegionalInsightSection from "@/components/RegionalInsightSection";
 import HistoricalTrendSection from "@/components/HistoricalTrendSection";
+import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -496,7 +497,7 @@ export default function CountryDetailClient({
           <div>
             <p className="text-sm font-medium text-indigo-300">{t.title}</p>
             <h1 className="mt-3 text-5xl font-bold tracking-tight">
-              {getLocalizedCountryName(row, language)}
+              {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
             </h1>
             <p className="mt-3 text-slate-400">
               {row.name} · {row.iso2} · {row.iso3}
@@ -542,7 +543,7 @@ export default function CountryDetailClient({
 
       <HistoricalTrendSection
         iso3={row.iso3}
-        countryName={getLocalizedCountryName(row, language)}
+        countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
         language={language}
       />
 
@@ -605,7 +606,7 @@ export default function CountryDetailClient({
                 className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 hover:border-indigo-300/40 hover:bg-indigo-400/10"
               >
                 <p className="font-semibold">
-                  {getLocalizedCountryName(related, language)}
+                  {getFlagEmoji(related.iso2)} {getLocalizedCountryName(related, language)}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {related.name} · {related.iso3}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
-import GlobalInsightsSection from "@/components/GlobalInsightsSection";
+import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1227,7 +1227,9 @@ export default function StatsDashboard({
         <div className="mt-10 grid gap-4 md:grid-cols-4">
           <div className="rounded-3xl border border-indigo-400/30 bg-indigo-400/10 p-6">
             <p className="text-sm text-indigo-200">{t.currentCountry}</p>
-            <p className="mt-2 text-2xl font-bold">{visitorCountryName}</p>
+            <p className="mt-2 text-2xl font-bold">
+              {getFlagEmoji(visitorCountry)} {visitorCountryName}
+            </p>
             <p className="mt-2 text-xs text-slate-400">{t.visitorFirst}</p>
           </div>
 
@@ -1247,8 +1249,6 @@ export default function StatsDashboard({
           </div>
         </div>
       </section>
-
-      <GlobalInsightsSection rows={rows} language={language} />
 
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
@@ -1283,7 +1283,7 @@ export default function StatsDashboard({
                   <option value="">{t.selectCountry}</option>
                   {countryOptions.map((row) => (
                     <option key={row.iso3} value={row.iso3}>
-                      {getLocalizedCountryName(row, language)} · {row.iso3}
+                      {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)} · {row.iso3}
                     </option>
                   ))}
                 </select>
@@ -1308,7 +1308,7 @@ export default function StatsDashboard({
                         href={`/country/${row.iso3}`}
                         className="text-lg font-bold hover:text-indigo-200 hover:underline"
                       >
-                        {getLocalizedCountryName(row, language)}
+                        {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
                       </a>
                       <p className="mt-1 text-xs text-slate-500">
                         {row.name} · {row.iso3}
@@ -1336,7 +1336,7 @@ export default function StatsDashboard({
                       <th className="px-5 py-4">{t.compareTable}</th>
                       {compareRows.map((row) => (
                         <th key={row.iso3} className="px-5 py-4">
-                          {getLocalizedCountryName(row, language)}
+                          {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
                         </th>
                       ))}
                     </tr>
@@ -1623,7 +1623,7 @@ export default function StatsDashboard({
                         href={`/country/${row.iso3}`}
                         className="font-semibold text-white hover:text-indigo-200 hover:underline"
                       >
-                        {getLocalizedCountryName(row, language)}
+                        {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
                       </a>
                       <p className="text-xs text-slate-500">
                         {row.name} · {row.iso3}

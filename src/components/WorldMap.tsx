@@ -8,6 +8,7 @@ import {
   ZoomableGroup,
 } from "react-simple-maps";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
+import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -383,7 +384,7 @@ export default function WorldMap({
                       >
                         <title>
                           {row
-                            ? `${getLocalizedCountryName(
+                            ? `${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(
                                 row,
                                 language
                               )}: ${formatValue(stat!, metric, language)}`
@@ -414,7 +415,7 @@ export default function WorldMap({
                 >
                   <div>
                     <p className="text-sm font-semibold">
-                      #{index + 1} {getLocalizedCountryName(row, language)}
+                      #{index + 1} {getFlagEmoji(row.iso2)} {getLocalizedCountryName(row, language)}
                     </p>
                     <p className="text-xs text-slate-500">
                       {row.name} · {row.iso3}
