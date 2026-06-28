@@ -563,8 +563,8 @@ export default function StatsDashboard({
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
-  const [hideNoDataRows, setHideNoDataRows] = useState(false);
-  const [minimumDataCount, setMinimumDataCount] = useState(0);
+  const [hideNoDataRows, setHideNoDataRows] = useState(true);
+  const [minimumDataCount, setMinimumDataCount] = useState(1);
   const [minimumLatestYear, setMinimumLatestYear] = useState("all");
 
   useEffect(() => {
@@ -903,6 +903,75 @@ export default function StatsDashboard({
           </div>
         </div>
 
+        <div className="mb-6 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-white">
+                Data filters
+              </p>
+              <p className="text-xs text-slate-500">
+                Filter countries by data availability and export the visible table.
+              </p>
+            </div>
+
+            <button
+              onClick={downloadCsv}
+              className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+            >
+              {f.downloadCsv}
+            </button>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300">
+              <input
+                type="checkbox"
+                checked={hideNoDataRows}
+                onChange={(event) => setHideNoDataRows(event.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>{f.hideNoDataRows}</span>
+            </label>
+
+            <label className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300">
+              <span className="mb-2 block text-xs text-slate-500">
+                {f.minimumDataCount}
+              </span>
+              <select
+                value={minimumDataCount}
+                onChange={(event) =>
+                  setMinimumDataCount(Number(event.target.value))
+                }
+                className="w-full bg-[#0b0f1c] text-white outline-none"
+              >
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((count) => (
+                  <option key={count} value={count}>
+                    {count} / 7
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm text-slate-300">
+              <span className="mb-2 block text-xs text-slate-500">
+                {f.latestYearFilter}
+              </span>
+              <select
+                value={minimumLatestYear}
+                onChange={(event) => setMinimumLatestYear(event.target.value)}
+                className="w-full bg-[#0b0f1c] text-white outline-none"
+              >
+                <option value="all">{f.allYears}</option>
+                <option value="2024">2024+</option>
+                <option value="2023">2023+</option>
+                <option value="2022">2022+</option>
+                <option value="2021">2021+</option>
+                <option value="2020">2020+</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
         <p className="mb-4 text-sm text-slate-400">
           {t.showing}:{" "}
           {filteredAndSortedRows.length.toLocaleString(languageToLocale(language))} /{" "}
@@ -916,7 +985,7 @@ export default function StatsDashboard({
         ) : null}
 
         <div className="overflow-x-auto rounded-3xl border border-white/10">
-          <table className="w-full min-w-[1300px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[1450px] border-collapse text-left text-sm">
             <thead className="bg-white/[0.06] text-slate-400">
               <tr>
                 <th className="px-5 py-4">
@@ -1007,6 +1076,7 @@ export default function StatsDashboard({
                     onSort={handleSort}
                   />
                 </th>
+                <th className="px-5 py-4">{f.latestYearFilter}</th>
               </tr>
             </thead>
 
@@ -1071,6 +1141,9 @@ export default function StatsDashboard({
                     </td>
 
                     <td className="px-5 py-4">{row.dataCompleteness} / 7</td>
+                    <td className="px-5 py-4">
+                      {getLatestAvailableYear(row) ?? "—"}
+                    </td>
                   </tr>
                 );
               })}
