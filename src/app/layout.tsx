@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
+import VisitorCountryRail from "@/components/VisitorCountryRail";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -57,7 +58,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="bg-[#070914]">{children}</body>
+      <body className="bg-[#070914]">
+        <VisitorCountryRail />
+        {children}
+      </body>
     </html>
   );
 }

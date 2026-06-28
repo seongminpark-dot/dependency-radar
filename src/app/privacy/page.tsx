@@ -19,6 +19,15 @@ export default function PrivacyPage() {
             </p>
           </section>
 
+
+          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+            <h2 className="text-xl font-bold text-white">Country display panel</h2>
+            <p className="mt-3 leading-7">
+              The country display panel uses an approximate country code from the
+              hosting platform to show the visitor's current country. Dependency
+              Radar does not store the visitor's full IP address for this feature.
+            </p>
+          </section>
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
             <h2 className="text-xl font-bold text-white">Language preference</h2>
             <p className="mt-3 leading-7">
