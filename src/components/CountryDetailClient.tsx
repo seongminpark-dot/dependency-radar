@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import RegionalInsightSection from "@/components/RegionalInsightSection";
+import HistoricalTrendSection from "@/components/HistoricalTrendSection";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -538,6 +539,12 @@ export default function CountryDetailClient({
           </div>
         </div>
       </section>
+
+      <HistoricalTrendSection
+        iso3={row.iso3}
+        countryName={getLocalizedCountryName(row, language)}
+        language={language}
+      />
 
       <RegionalInsightSection row={row} rows={rows} language={language} />
 
