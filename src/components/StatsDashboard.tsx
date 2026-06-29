@@ -5,7 +5,6 @@ import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
-import OfficialMacroOutlookPanel from "@/components/OfficialMacroOutlookPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -1239,25 +1238,6 @@ export default function StatsDashboard({
           />
         ) : null;
       })()}
-
-      {(() => {
-        const macroRow =
-          rows.find((item) => item.iso2 === visitorCountry) ??
-          rows.find((item) => item.iso3 === "USA") ??
-          rows[0];
-
-        return macroRow ? (
-          <OfficialMacroOutlookPanel
-            iso3={macroRow.iso3}
-            countryName={`${getFlagEmoji(macroRow.iso2)} ${getLocalizedCountryName(
-              macroRow,
-              language
-            )}`}
-            language={language}
-          />
-        ) : null;
-      })()}
-
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
       <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">

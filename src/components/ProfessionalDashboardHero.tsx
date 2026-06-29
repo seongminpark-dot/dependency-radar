@@ -25,10 +25,10 @@ const copy: Record<
     badge: "Official statistics dashboard",
     title: "국가별 공급망 의존도를 공식 통계로 비교합니다.",
     subtitle:
-      "World Bank 공식 최신 지표와 IMF 2025/2026 전망 데이터를 분리해서 보여주는 글로벌 공급망·무역 통계 플랫폼입니다.",
-    official: "공식 통계와 전망치 분리",
+      "World Bank 연간 구조 지표와 UN Comtrade 최신 공식 무역 데이터를 함께 보여주는 글로벌 공급망·무역 통계 플랫폼입니다.",
+    official: "공식 연간 지표와 최신 무역 데이터 분리",
     officialDesc:
-      "World Bank 값은 공식 최신 제공 연도 기준이며, 2025/2026 값은 IMF 전망 레이어에서 별도로 표시합니다.",
+      "World Bank 값은 연간 구조 지표로 유지하고, UN Comtrade 값은 최신 공식 무역 데이터 레이어로 별도 표시합니다.",
     freshness: "지표별 연도 표시",
     freshnessDesc:
       "각 값 아래의 연도는 해당 지표가 실제로 제공되는 최신 연도입니다.",
@@ -36,16 +36,16 @@ const copy: Record<
     indicators: "핵심 지표",
     currentCountry: "현재 접속 국가",
     source: "주요 출처",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   en: {
     badge: "Official statistics dashboard",
     title: "Compare country supply dependency with official statistics.",
     subtitle:
-      "A global supply-chain and trade statistics platform separating official World Bank values from IMF 2025/2026 outlook data.",
-    official: "Official values and forecasts separated",
+      "A global supply-chain and trade statistics platform combining annual World Bank structural indicators with latest official UN Comtrade trade data.",
+    official: "Official annual indicators and latest trade data separated",
     officialDesc:
-      "World Bank values use the latest officially available source year, while 2025/2026 values are shown separately through the IMF outlook layer.",
+      "World Bank values remain annual structural indicators, while UN Comtrade values are shown as the latest official trade data layer.",
     freshness: "Indicator-level source years",
     freshnessDesc:
       "The year below each value shows the actual latest available source year for that indicator.",
@@ -53,7 +53,7 @@ const copy: Record<
     indicators: "Core indicators",
     currentCountry: "Current country",
     source: "Primary sources",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   ja: {
     badge: "Official statistics dashboard",
@@ -67,7 +67,7 @@ const copy: Record<
     indicators: "主要指標",
     currentCountry: "現在の接続国",
     source: "主要出典",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   zh: {
     badge: "Official statistics dashboard",
@@ -81,7 +81,7 @@ const copy: Record<
     indicators: "核心指标",
     currentCountry: "当前访问国家",
     source: "主要来源",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   es: {
     badge: "Official statistics dashboard",
@@ -95,7 +95,7 @@ const copy: Record<
     indicators: "Indicadores",
     currentCountry: "País actual",
     source: "Fuentes principales",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   fr: {
     badge: "Official statistics dashboard",
@@ -109,7 +109,7 @@ const copy: Record<
     indicators: "Indicateurs",
     currentCountry: "Pays actuel",
     source: "Sources principales",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
   de: {
     badge: "Official statistics dashboard",
@@ -123,7 +123,7 @@ const copy: Record<
     indicators: "Indikatoren",
     currentCountry: "Aktuelles Land",
     source: "Hauptquellen",
-    sourceValue: "World Bank / UN Comtrade / IMF",
+    sourceValue: "World Bank / UN Comtrade",
   },
 };
 

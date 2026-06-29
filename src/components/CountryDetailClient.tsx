@@ -5,7 +5,6 @@ import type { CountryRow, StatValue } from "@/lib/worldBank";
 import RegionalInsightSection from "@/components/RegionalInsightSection";
 import HistoricalTrendSection from "@/components/HistoricalTrendSection";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
-import OfficialMacroOutlookPanel from "@/components/OfficialMacroOutlookPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -550,13 +549,6 @@ export default function CountryDetailClient({
         countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
         language={language}
       />
-
-      <OfficialMacroOutlookPanel
-        iso3={row.iso3}
-        countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
-        language={language}
-      />
-
       <HistoricalTrendSection
         iso3={row.iso3}
         countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
