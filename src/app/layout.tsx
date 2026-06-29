@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
 import VisitorCountryRail from "@/components/VisitorCountryRail";
 import "./globals.css";
+import StructuredData from "@/components/StructuredData";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -60,6 +61,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className="bg-[#070914]">
         <VisitorCountryRail />
+        <StructuredData />
         {children}
       </body>
     </html>
