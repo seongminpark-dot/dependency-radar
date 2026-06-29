@@ -22,6 +22,8 @@ type ComtradeResponse = {
   latestPeriod: string | null;
   metrics: null | {
     totalImports: MetricValue;
+    totalExports: MetricValue;
+    tradeBalance: MetricValue;
     fuelImports: MetricValue;
     foodImports: MetricValue;
   };
@@ -30,10 +32,12 @@ type ComtradeResponse = {
 const copy = {
   ko: {
     label: "Latest official trade layer",
-    title: "UN Comtrade 최신 수입 데이터",
+    title: "UN Comtrade 최신 무역 데이터",
     subtitle:
-      "World Bank 연간 지표와 별도로, UN Comtrade 공식 보고 데이터를 사용해 수입 관련 항목을 최신 제공 기간 기준으로 보강합니다.",
+      "World Bank 연간 지표와 별도로, UN Comtrade 공식 보고 데이터로 수입·수출·무역수지를 최신 제공 기간 기준으로 보강합니다.",
     totalImports: "총 상품 수입액",
+    totalExports: "총 상품 수출액",
+    tradeBalance: "상품 무역수지",
     fuelImports: "연료 수입액",
     foodImports: "식량/농산물 수입액",
     value: "최신값",
@@ -45,18 +49,20 @@ const copy = {
     monthly: "월간 데이터",
     annual: "연간 데이터",
     noData:
-      "UN Comtrade에서 해당 국가의 월간/연간 수입 데이터가 반환되지 않았습니다. API key, reporter code, 또는 국가별 보고 가능성을 확인해야 합니다.",
+      "UN Comtrade에서 해당 국가의 월간/연간 무역 데이터가 반환되지 않았습니다. API key, reporter code, 또는 국가별 보고 가능성을 확인해야 합니다.",
     notConfigured: "COMTRADE_API_KEY가 Vercel 환경변수에 설정되어 있지 않습니다.",
-    loading: "UN Comtrade 공식 수입 데이터를 불러오는 중입니다.",
+    loading: "UN Comtrade 공식 무역 데이터를 불러오는 중입니다.",
     note:
       "국가별 보고 일정이 다르므로 모든 국가가 같은 최신 월까지 제공되지는 않습니다. 이 값은 추정치가 아니라 UN Comtrade에 보고된 공식 상품무역 데이터입니다.",
   },
   en: {
     label: "Latest official trade layer",
-    title: "UN Comtrade latest import data",
+    title: "UN Comtrade latest trade data",
     subtitle:
-      "Separate from annual World Bank indicators, this layer uses official UN Comtrade reported data to enrich import-related metrics with the latest available period.",
+      "Separate from annual World Bank indicators, this layer uses official UN Comtrade reported data to enrich imports, exports, and merchandise trade balance.",
     totalImports: "Total merchandise imports",
+    totalExports: "Total merchandise exports",
+    tradeBalance: "Merchandise trade balance",
     fuelImports: "Fuel imports",
     foodImports: "Food/agricultural imports",
     value: "Latest value",
@@ -68,17 +74,19 @@ const copy = {
     monthly: "Monthly data",
     annual: "Annual data",
     noData:
-      "UN Comtrade returned no monthly or annual import data for this country. Check API key, reporter code, or country reporting availability.",
+      "UN Comtrade returned no monthly or annual trade data for this country. Check API key, reporter code, or country reporting availability.",
     notConfigured: "COMTRADE_API_KEY is not configured in Vercel environment variables.",
-    loading: "Loading official UN Comtrade import data.",
+    loading: "Loading official UN Comtrade trade data.",
     note:
       "Country reporting schedules differ, so not every country reports up to the same latest month. These are reported official merchandise trade values, not estimates.",
   },
   ja: {
     label: "Latest official trade layer",
-    title: "UN Comtrade 最新輸入データ",
-    subtitle: "UN Comtradeの公式報告データで輸入関連指標を補強します。",
+    title: "UN Comtrade 最新貿易データ",
+    subtitle: "UN Comtradeの公式報告データで輸出入と貿易収支を補強します。",
     totalImports: "総商品輸入額",
+    totalExports: "総商品輸出額",
+    tradeBalance: "商品貿易収支",
     fuelImports: "燃料輸入額",
     foodImports: "食料/農産物輸入額",
     value: "最新値",
@@ -96,9 +104,11 @@ const copy = {
   },
   zh: {
     label: "Latest official trade layer",
-    title: "UN Comtrade 最新进口数据",
-    subtitle: "使用 UN Comtrade 官方报告数据补充进口相关指标。",
+    title: "UN Comtrade 最新贸易数据",
+    subtitle: "使用 UN Comtrade 官方报告数据补充进出口和商品贸易差额。",
     totalImports: "商品进口总额",
+    totalExports: "商品出口总额",
+    tradeBalance: "商品贸易差额",
     fuelImports: "燃料进口额",
     foodImports: "食品/农产品进口额",
     value: "最新值",
@@ -116,9 +126,11 @@ const copy = {
   },
   es: {
     label: "Latest official trade layer",
-    title: "Datos recientes de importaciones UN Comtrade",
+    title: "Datos comerciales recientes UN Comtrade",
     subtitle: "Capa oficial de comercio separada de los indicadores anuales World Bank.",
     totalImports: "Importaciones totales",
+    totalExports: "Exportaciones totales",
+    tradeBalance: "Balanza comercial",
     fuelImports: "Importaciones de combustibles",
     foodImports: "Importaciones de alimentos/agro",
     value: "Valor reciente",
@@ -136,9 +148,11 @@ const copy = {
   },
   fr: {
     label: "Latest official trade layer",
-    title: "Données récentes d’importations UN Comtrade",
+    title: "Données commerciales récentes UN Comtrade",
     subtitle: "Couche officielle de commerce séparée des indicateurs annuels World Bank.",
     totalImports: "Importations totales",
+    totalExports: "Exportations totales",
+    tradeBalance: "Balance commerciale",
     fuelImports: "Importations de combustibles",
     foodImports: "Importations alimentaires/agricoles",
     value: "Valeur récente",
@@ -156,9 +170,11 @@ const copy = {
   },
   de: {
     label: "Latest official trade layer",
-    title: "Aktuelle UN-Comtrade-Importdaten",
+    title: "Aktuelle UN-Comtrade-Handelsdaten",
     subtitle: "Offizielle Handelsebene getrennt von jährlichen World-Bank-Indikatoren.",
     totalImports: "Gesamtimporte",
+    totalExports: "Gesamtexporte",
+    tradeBalance: "Handelsbilanz",
     fuelImports: "Brennstoffimporte",
     foodImports: "Lebensmittel-/Agrarimporte",
     value: "Aktueller Wert",
@@ -381,6 +397,16 @@ export default function LatestMonthlyTradePanel({
             <MetricCard
               title={t.totalImports}
               metric={metrics.totalImports}
+              language={language}
+            />
+            <MetricCard
+              title={t.totalExports}
+              metric={metrics.totalExports}
+              language={language}
+            />
+            <MetricCard
+              title={t.tradeBalance}
+              metric={metrics.tradeBalance}
               language={language}
             />
             <MetricCard

@@ -98,7 +98,7 @@ function buildMonthlyPeriods(monthCount = 36) {
   return periods;
 }
 
-function buildAnnualPeriods(yearCount = 7) {
+function buildAnnualPeriods(yearCount = 8) {
   const periods: string[] = [];
   const currentYear = new Date().getFullYear();
 
@@ -149,7 +149,7 @@ function aggregateByPeriod(rows: ComtradeRow[]) {
     const period = readPeriod(row);
     const value = readValue(row);
 
-    if (!period || value <= 0) continue;
+    if (!period || value === 0) continue;
 
     map.set(period, (map.get(period) ?? 0) + value);
   }
@@ -164,7 +164,7 @@ function aggregateByPeriod(rows: ComtradeRow[]) {
 
 function getLatestPoint(points: SeriesPoint[]) {
   return [...points]
-    .filter((point) => point.value > 0)
+    .filter((point) => point.value !== 0)
     .sort((a, b) => b.period.localeCompare(a.period))[0];
 }
 
@@ -194,7 +194,7 @@ function getPointByPeriod(points: SeriesPoint[], period: string | null) {
 function getYoY(latest: SeriesPoint | undefined, previous: SeriesPoint | null) {
   if (!latest || !previous || previous.value === 0) return null;
 
-  return ((latest.value - previous.value) / previous.value) * 100;
+  return ((latest.value - previous.value) / Math.abs(previous.value)) * 100;
 }
 
 async function fetchRows({
@@ -202,22 +202,23 @@ async function fetchRows({
   cmdCode,
   periods,
   frequency,
+  flowCode,
   apiKey,
 }: {
   reporterCode: string;
   cmdCode: string;
   periods: string[];
   frequency: "M" | "A";
+  flowCode: "M" | "X";
   apiKey: string;
 }) {
   const rows: ComtradeRow[] = [];
-
   const partnerOptions = ["0", ""];
 
   for (const partnerCode of partnerOptions) {
     const params = new URLSearchParams({
       reporterCode,
-      flowCode: "M",
+      flowCode,
       cmdCode,
       period: periods.join(","),
       maxRecords: "50000",
@@ -268,12 +269,14 @@ async function fetchGroupedRows({
   cmdCodes,
   periods,
   frequency,
+  flowCode,
   apiKey,
 }: {
   reporterCode: string;
   cmdCodes: string[];
   periods: string[];
   frequency: "M" | "A";
+  flowCode: "M" | "X";
   apiKey: string;
 }) {
   const combined = await fetchRows({
@@ -281,6 +284,7 @@ async function fetchGroupedRows({
     cmdCode: cmdCodes.join(","),
     periods,
     frequency,
+    flowCode,
     apiKey,
   });
 
@@ -296,6 +300,7 @@ async function fetchGroupedRows({
       cmdCode: code,
       periods,
       frequency,
+      flowCode,
       apiKey,
     });
 
@@ -316,12 +321,21 @@ async function getTradeLayer({
   periods: string[];
   apiKey: string;
 }) {
-  const [totalRows, fuelRows, foodRows] = await Promise.all([
+  const [importRows, exportRows, fuelRows, foodRows] = await Promise.all([
     fetchRows({
       reporterCode,
       cmdCode: "TOTAL",
       periods,
       frequency,
+      flowCode: "M",
+      apiKey,
+    }),
+    fetchRows({
+      reporterCode,
+      cmdCode: "TOTAL",
+      periods,
+      frequency,
+      flowCode: "X",
       apiKey,
     }),
     fetchRows({
@@ -329,6 +343,7 @@ async function getTradeLayer({
       cmdCode: "27",
       periods,
       frequency,
+      flowCode: "M",
       apiKey,
     }),
     fetchGroupedRows({
@@ -336,37 +351,72 @@ async function getTradeLayer({
       cmdCodes: foodCodes,
       periods,
       frequency,
+      flowCode: "M",
       apiKey,
     }),
   ]);
 
-  const totalSeries = aggregateByPeriod(totalRows);
+  const importSeries = aggregateByPeriod(importRows);
+  const exportSeries = aggregateByPeriod(exportRows);
   const fuelSeries = aggregateByPeriod(fuelRows);
   const foodSeries = aggregateByPeriod(foodRows);
 
-  const latestTotal = getLatestPoint(totalSeries);
+  const latestImport = getLatestPoint(importSeries);
+  const latestExport = getLatestPoint(exportSeries);
 
-  if (!latestTotal) {
+  if (!latestImport && !latestExport) {
     return null;
   }
 
-  const latestPeriod = latestTotal.period;
+  const latestPeriod = latestImport?.period ?? latestExport?.period ?? null;
   const previousPeriod = getPreviousComparablePeriod(latestPeriod);
+
+  const importAtPeriod =
+    getPointByPeriod(importSeries, latestPeriod) ?? latestImport;
+  const exportAtPeriod =
+    getPointByPeriod(exportSeries, latestPeriod) ?? latestExport;
+
+  const previousImport = getPointByPeriod(importSeries, previousPeriod);
+  const previousExport = getPointByPeriod(exportSeries, previousPeriod);
 
   const latestFuel =
     getPointByPeriod(fuelSeries, latestPeriod) ?? getLatestPoint(fuelSeries);
   const latestFood =
     getPointByPeriod(foodSeries, latestPeriod) ?? getLatestPoint(foodSeries);
 
-  const previousTotal = getPointByPeriod(totalSeries, previousPeriod);
   const previousFuel = getPointByPeriod(
     fuelSeries,
     getPreviousComparablePeriod(latestFuel?.period ?? null)
   );
+
   const previousFood = getPointByPeriod(
     foodSeries,
     getPreviousComparablePeriod(latestFood?.period ?? null)
   );
+
+  const tradeBalanceValue =
+    exportAtPeriod && importAtPeriod ? exportAtPeriod.value - importAtPeriod.value : null;
+
+  const previousTradeBalanceValue =
+    previousExport && previousImport
+      ? previousExport.value - previousImport.value
+      : null;
+
+  const tradeBalancePoint =
+    tradeBalanceValue !== null && latestPeriod
+      ? {
+          period: latestPeriod,
+          value: tradeBalanceValue,
+        }
+      : undefined;
+
+  const previousTradeBalancePoint =
+    previousTradeBalanceValue !== null && previousPeriod
+      ? {
+          period: previousPeriod,
+          value: previousTradeBalanceValue,
+        }
+      : null;
 
   return {
     frequency,
@@ -374,17 +424,29 @@ async function getTradeLayer({
     previousPeriod,
     metrics: {
       totalImports: {
-        value: latestTotal.value,
-        period: latestTotal.period,
-        previousYearValue: previousTotal?.value ?? null,
-        yoyChange: getYoY(latestTotal, previousTotal),
+        value: importAtPeriod?.value ?? null,
+        period: importAtPeriod?.period ?? null,
+        previousYearValue: previousImport?.value ?? null,
+        yoyChange: getYoY(importAtPeriod, previousImport),
+      },
+      totalExports: {
+        value: exportAtPeriod?.value ?? null,
+        period: exportAtPeriod?.period ?? null,
+        previousYearValue: previousExport?.value ?? null,
+        yoyChange: getYoY(exportAtPeriod, previousExport),
+      },
+      tradeBalance: {
+        value: tradeBalanceValue,
+        period: latestPeriod,
+        previousYearValue: previousTradeBalanceValue,
+        yoyChange: getYoY(tradeBalancePoint, previousTradeBalancePoint),
       },
       fuelImports: {
         value: latestFuel?.value ?? null,
         period: latestFuel?.period ?? null,
         shareOfTotal:
-          latestFuel && latestFuel.period === latestTotal.period
-            ? (latestFuel.value / latestTotal.value) * 100
+          latestFuel && importAtPeriod && latestFuel.period === importAtPeriod.period
+            ? (latestFuel.value / importAtPeriod.value) * 100
             : null,
         previousYearValue: previousFuel?.value ?? null,
         yoyChange: getYoY(latestFuel, previousFuel),
@@ -393,8 +455,8 @@ async function getTradeLayer({
         value: latestFood?.value ?? null,
         period: latestFood?.period ?? null,
         shareOfTotal:
-          latestFood && latestFood.period === latestTotal.period
-            ? (latestFood.value / latestTotal.value) * 100
+          latestFood && importAtPeriod && latestFood.period === importAtPeriod.period
+            ? (latestFood.value / importAtPeriod.value) * 100
             : null,
         previousYearValue: previousFood?.value ?? null,
         yoyChange: getYoY(latestFood, previousFood),
@@ -460,7 +522,7 @@ export async function GET(
       configured: true,
       iso3: country,
       source: "UN Comtrade API",
-      note: "No monthly or annual import data was returned for this reporter.",
+      note: "No monthly or annual import/export data was returned for this reporter.",
       reporterCode,
       frequency: null,
       latestPeriod: null,
@@ -475,8 +537,8 @@ export async function GET(
     source: "UN Comtrade API",
     note:
       layer.frequency === "M"
-        ? "Latest official monthly merchandise import data."
-        : "Monthly data was unavailable, so latest official annual merchandise import data is shown.",
+        ? "Latest official monthly merchandise trade data."
+        : "Monthly data was unavailable, so latest official annual merchandise trade data is shown.",
     frequency: layer.frequency,
     latestPeriod: layer.latestPeriod,
     previousPeriod: layer.previousPeriod,
