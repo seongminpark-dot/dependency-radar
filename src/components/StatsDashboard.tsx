@@ -5,6 +5,7 @@ import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
+import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -1238,6 +1239,24 @@ export default function StatsDashboard({
           />
         ) : null;
       })()}
+      {(() => {
+        const tariffRow =
+          rows.find((item) => item.iso2 === visitorCountry) ??
+          rows.find((item) => item.iso3 === "USA") ??
+          rows[0];
+
+        return tariffRow ? (
+          <OfficialTariffPanel
+            iso3={tariffRow.iso3}
+            countryName={`${getFlagEmoji(tariffRow.iso2)} ${getLocalizedCountryName(
+              tariffRow,
+              language
+            )}`}
+            language={language}
+          />
+        ) : null;
+      })()}
+
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
       <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
