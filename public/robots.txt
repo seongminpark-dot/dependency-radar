@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://dependency-radar-three.vercel.app/sitemap.xml
+Sitemap: https://dependency-radar-three.vercel.app/sitemap.txt
