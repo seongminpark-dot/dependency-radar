@@ -215,7 +215,18 @@ export default function OfficialFreshnessPanel({
           fetch(`/api/comtrade/${row.iso3}?fresh=${Date.now()}`, {
             cache: "no-store",
             signal: controller.signal,
-          }).then((r) => r.json()),
+          })
+            .then((r) => r.json())
+            .then(async (json) => {
+              if (json?.latestPeriod || json?.metrics) return json;
+
+              await new Promise((resolve) => setTimeout(resolve, 700));
+
+              return fetch(`/api/comtrade/${row.iso3}?fresh=${Date.now()}&retry=1`, {
+                cache: "no-store",
+                signal: controller.signal,
+              }).then((r) => r.json());
+            }),
           fetch(`/api/eia/${row.iso3}?fresh=${Date.now()}`, {
             cache: "no-store",
             signal: controller.signal,

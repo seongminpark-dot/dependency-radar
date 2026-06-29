@@ -326,12 +326,26 @@ export default function LatestMonthlyTradePanel({
       setLoading(true);
 
       try {
-        const response = await fetch(`/api/comtrade/${iso3}`, {
+        const firstResponse = await fetch(`/api/comtrade/${iso3}?fresh=${Date.now()}`, {
           cache: "no-store",
           signal: controller.signal,
         });
 
-        const json = await response.json();
+        let json = await firstResponse.json();
+
+        if (!json?.metrics) {
+          await new Promise((resolve) => setTimeout(resolve, 700));
+
+          const secondResponse = await fetch(
+            `/api/comtrade/${iso3}?fresh=${Date.now()}&retry=1`,
+            {
+              cache: "no-store",
+              signal: controller.signal,
+            }
+          );
+
+          json = await secondResponse.json();
+        }
 
         if (!controller.signal.aborted) {
           setData(json);
