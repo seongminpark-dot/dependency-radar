@@ -3,13 +3,21 @@ export default function StructuredData() {
     process.env.NEXT_PUBLIC_SITE_URL ??
     "https://dependency-radar-three.vercel.app";
 
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Dependency Radar",
+    url: siteUrl,
+    email: "kevinsmp123@gmail.com",
+  };
+
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Dependency Radar",
     url: siteUrl,
     description:
-      "A global statistics platform integrating official country dependency, trade, tariff, and energy data from World Bank, UN Comtrade, WITS, and EIA.",
+      "Dependency Radar is a global statistics platform integrating official country-level supply dependency, trade, tariff, logistics, and energy indicators.",
     inLanguage: ["ko", "en", "ja", "zh", "es", "fr", "de"],
     publisher: {
       "@type": "Organization",
@@ -23,15 +31,28 @@ export default function StructuredData() {
     "@type": "Dataset",
     name: "Dependency Radar Official Country Statistics Dataset",
     description:
-      "Integrated country-level statistics covering supply dependency, merchandise trade, tariffs, logistics, and energy indicators from official public data sources.",
+      "An integrated country-level statistics dataset covering supply dependency, merchandise trade, tariffs, logistics, and energy indicators. The dataset combines official public indicators from World Bank, UN Comtrade, WITS, and the U.S. Energy Information Administration for comparison and educational research purposes.",
     url: siteUrl,
+    sameAs: siteUrl,
+    license: `${siteUrl}/terms`,
+    isAccessibleForFree: true,
+    inLanguage: ["ko", "en", "ja", "zh", "es", "fr", "de"],
     creator: {
       "@type": "Organization",
       name: "Dependency Radar",
+      url: siteUrl,
+      email: "kevinsmp123@gmail.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Dependency Radar",
+      url: siteUrl,
+      email: "kevinsmp123@gmail.com",
     },
     includedInDataCatalog: {
       "@type": "DataCatalog",
       name: "Dependency Radar",
+      url: siteUrl,
     },
     keywords: [
       "country statistics",
@@ -39,37 +60,52 @@ export default function StructuredData() {
       "trade data",
       "tariff data",
       "energy data",
+      "logistics indicators",
       "World Bank",
       "UN Comtrade",
       "WITS",
       "EIA",
     ],
+    citation: [
+      "https://databank.worldbank.org/source/world-development-indicators",
+      "https://comtradeplus.un.org/",
+      "https://wits.worldbank.org/",
+      "https://www.eia.gov/opendata/",
+    ],
     isBasedOn: [
+      "https://databank.worldbank.org/source/world-development-indicators",
+      "https://comtradeplus.un.org/",
+      "https://wits.worldbank.org/",
+      "https://www.eia.gov/opendata/",
+    ],
+    temporalCoverage: "1960/2026",
+    spatialCoverage: {
+      "@type": "Place",
+      name: "Worldwide",
+    },
+    distribution: [
       {
-        "@type": "Dataset",
-        name: "World Bank World Development Indicators",
-        url: "https://databank.worldbank.org/source/world-development-indicators",
+        "@type": "DataDownload",
+        name: "Dependency Radar country statistics web dashboard",
+        encodingFormat: "text/html",
+        contentUrl: siteUrl,
       },
       {
-        "@type": "Dataset",
-        name: "UN Comtrade Database",
-        url: "https://comtradeplus.un.org/",
-      },
-      {
-        "@type": "Dataset",
-        name: "WITS Trade Stats Tariff Data",
-        url: "https://wits.worldbank.org/",
-      },
-      {
-        "@type": "Dataset",
-        name: "U.S. Energy Information Administration Open Data",
-        url: "https://www.eia.gov/opendata/",
+        "@type": "DataDownload",
+        name: "Dependency Radar sitemap",
+        encodingFormat: "application/xml",
+        contentUrl: `${siteUrl}/sitemap.xml`,
       },
     ],
   };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
+      />
       <script
         type="application/ld+json"
         suppressHydrationWarning
