@@ -36,7 +36,7 @@ const copy: Record<
     indicators: "핵심 지표",
     currentCountry: "현재 접속 국가",
     source: "주요 출처",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   en: {
     badge: "Official statistics dashboard",
@@ -53,7 +53,7 @@ const copy: Record<
     indicators: "Core indicators",
     currentCountry: "Current country",
     source: "Primary sources",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   ja: {
     badge: "Official statistics dashboard",
@@ -67,7 +67,7 @@ const copy: Record<
     indicators: "主要指標",
     currentCountry: "現在の接続国",
     source: "主要出典",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   zh: {
     badge: "Official statistics dashboard",
@@ -81,7 +81,7 @@ const copy: Record<
     indicators: "核心指标",
     currentCountry: "当前访问国家",
     source: "主要来源",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   es: {
     badge: "Official statistics dashboard",
@@ -95,7 +95,7 @@ const copy: Record<
     indicators: "Indicadores",
     currentCountry: "País actual",
     source: "Fuentes principales",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   fr: {
     badge: "Official statistics dashboard",
@@ -109,7 +109,7 @@ const copy: Record<
     indicators: "Indicateurs",
     currentCountry: "Pays actuel",
     source: "Sources principales",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
   de: {
     badge: "Official statistics dashboard",
@@ -123,7 +123,7 @@ const copy: Record<
     indicators: "Indikatoren",
     currentCountry: "Aktuelles Land",
     source: "Hauptquellen",
-    sourceValue: "World Bank / IMF",
+    sourceValue: "World Bank / UN Comtrade / IMF",
   },
 };
 

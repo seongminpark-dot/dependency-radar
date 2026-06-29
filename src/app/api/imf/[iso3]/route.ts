@@ -25,23 +25,13 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function exactExtract(json: unknown, indicatorCode: string, iso3: string) {
-  if (!isObject(json)) return {};
-
-  const values = isObject(json.values) ? json.values : null;
-  const byIndicator = values && isObject(values[indicatorCode])
-    ? values[indicatorCode]
-    : null;
-  const byCountry = byIndicator && isObject(byIndicator[iso3])
-    ? byIndicator[iso3]
-    : null;
-
-  if (!byCountry) return {};
-
+function extractYearValuesFromNode(node: unknown) {
   const result: Record<string, number | string | null> = {};
 
+  if (!isObject(node)) return result;
+
   for (const year of periods) {
-    const value = byCountry[year];
+    const value = node[year];
 
     if (typeof value === "number" || typeof value === "string") {
       result[year] = value;
@@ -51,69 +41,105 @@ function exactExtract(json: unknown, indicatorCode: string, iso3: string) {
   return result;
 }
 
-function looseExtract(json: unknown) {
-  const result: Record<string, number | string | null> = {};
+function walkForYearValues(node: unknown, depth = 0): Record<string, number | string | null> {
+  if (depth > 10) return {};
 
-  function walk(node: unknown, depth = 0) {
-    if (depth > 8 || !isObject(node)) return;
+  const direct = extractYearValuesFromNode(node);
 
-    for (const year of periods) {
-      const value = node[year];
+  if (Object.keys(direct).length > 0) {
+    return direct;
+  }
 
-      if (typeof value === "number" || typeof value === "string") {
-        result[year] = value;
-      }
-    }
+  if (!isObject(node)) return {};
 
-    if (Object.keys(result).length > 0) return;
+  for (const value of Object.values(node)) {
+    const nested = walkForYearValues(value, depth + 1);
 
-    for (const value of Object.values(node)) {
-      walk(value, depth + 1);
-      if (Object.keys(result).length > 0) return;
+    if (Object.keys(nested).length > 0) {
+      return nested;
     }
   }
 
-  walk(json);
+  return {};
+}
 
-  return result;
+function extractValues(json: unknown, indicatorCode: string, indicatorId: string, iso3: string) {
+  if (!isObject(json)) return {};
+
+  const values = isObject(json.values) ? json.values : null;
+
+  const candidates: unknown[] = [
+    values?.[indicatorId],
+    values?.[indicatorCode],
+    isObject(values?.[indicatorId]) ? values?.[indicatorId]?.[iso3] : null,
+    isObject(values?.[indicatorCode]) ? values?.[indicatorCode]?.[iso3] : null,
+    values,
+    json,
+  ];
+
+  for (const candidate of candidates) {
+    const found = walkForYearValues(candidate);
+
+    if (Object.keys(found).length > 0) {
+      return found;
+    }
+  }
+
+  return {};
 }
 
 async function fetchIMFIndicator(iso3: string, indicator: IMFIndicator) {
   const periodQuery = periods.join(",");
-  const urls = [
-    `https://www.imf.org/external/datamapper/api/v1/${indicator.code}/${iso3}?periods=${periodQuery}`,
-    `https://www.imf.org/external/datamapper/api/v1/${indicator.code}/${iso3}`,
-    `https://www.imf.org/external/datamapper/api/v2/${indicator.code}/${iso3}?periods=${periodQuery}`,
-    `https://www.imf.org/external/datamapper/api/v2/${indicator.code}/${iso3}`,
-  ];
+  const idsToTry = [`${indicator.code}@WEO`, indicator.code];
+
+  const headers = {
+    Accept: "application/json,text/plain,*/*",
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/129.0 Safari/537.36",
+    Referer: "https://www.imf.org/external/datamapper/datasets/WEO",
+  };
 
   let lastStatus = "";
 
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, {
-        next: {
-          revalidate: 86400,
-        },
-      });
+  for (const indicatorId of idsToTry) {
+    const encodedIndicator = encodeURIComponent(indicatorId);
 
-      lastStatus = `${response.status} ${response.statusText}`;
+    const urls = [
+      `https://www.imf.org/external/datamapper/api/v2/${encodedIndicator}/${iso3}?periods=${periodQuery}`,
+      `https://www.imf.org/external/datamapper/api/v2/${encodedIndicator}/${iso3}`,
+      `https://www.imf.org/external/datamapper/api/v1/${encodedIndicator}/${iso3}?periods=${periodQuery}`,
+      `https://www.imf.org/external/datamapper/api/v1/${encodedIndicator}/${iso3}`,
+    ];
 
-      if (!response.ok) continue;
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          headers,
+          next: {
+            revalidate: 86400,
+          },
+        });
 
-      const json = await response.json();
-      const exact = exactExtract(json, indicator.code, iso3);
-      const values = Object.keys(exact).length > 0 ? exact : looseExtract(json);
+        lastStatus = `${response.status} ${response.statusText}`;
 
-      if (Object.keys(values).length > 0) {
-        return {
-          ...indicator,
-          values,
-          debugStatus: lastStatus,
-        };
+        if (!response.ok) {
+          continue;
+        }
+
+        const json = await response.json();
+        const values = extractValues(json, indicator.code, indicatorId, iso3);
+
+        if (Object.keys(values).length > 0) {
+          return {
+            ...indicator,
+            values,
+            debugStatus: lastStatus,
+            indicatorId,
+          };
+        }
+      } catch {
+        continue;
       }
-    } catch {
-      continue;
     }
   }
 

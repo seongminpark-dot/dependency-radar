@@ -526,23 +526,23 @@ export async function GET(
     });
   }
 
-  const annualResult = await getTradeLayer({
+  const monthlyResult = await getTradeLayer({
     reporterCode,
-    frequency: "A",
-    periods: buildAnnualPeriods(8),
+    frequency: "M",
+    periods: buildMonthlyPeriods(36),
     apiKey,
   });
 
-  const monthlyResult = annualResult.layer
+  const annualResult = monthlyResult.layer
     ? null
     : await getTradeLayer({
         reporterCode,
-        frequency: "M",
-        periods: buildMonthlyPeriods(36),
+        frequency: "A",
+        periods: buildAnnualPeriods(8),
         apiKey,
       });
 
-  const layer = annualResult.layer ?? monthlyResult?.layer ?? null;
+  const layer = monthlyResult.layer ?? annualResult?.layer ?? null;
 
   if (!layer) {
     return NextResponse.json({
@@ -555,8 +555,8 @@ export async function GET(
       latestPeriod: null,
       metrics: null,
       debug: {
-        annual: annualResult.debug,
-        monthly: monthlyResult?.debug ?? null,
+        monthly: monthlyResult.debug,
+        annual: annualResult?.debug ?? null,
       },
     });
   }
