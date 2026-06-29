@@ -6,6 +6,7 @@ import RegionalInsightSection from "@/components/RegionalInsightSection";
 import HistoricalTrendSection from "@/components/HistoricalTrendSection";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
+import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -551,6 +552,12 @@ export default function CountryDetailClient({
         language={language}
       />
       <OfficialTariffPanel
+        iso3={row.iso3}
+        countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
+        language={language}
+      />
+
+      <OfficialEnergyPanel
         iso3={row.iso3}
         countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
         language={language}

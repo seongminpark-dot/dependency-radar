@@ -6,6 +6,7 @@ import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
+import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
@@ -1250,6 +1251,24 @@ export default function StatsDashboard({
             iso3={tariffRow.iso3}
             countryName={`${getFlagEmoji(tariffRow.iso2)} ${getLocalizedCountryName(
               tariffRow,
+              language
+            )}`}
+            language={language}
+          />
+        ) : null;
+      })()}
+
+      {(() => {
+        const energyRow =
+          rows.find((item) => item.iso2 === visitorCountry) ??
+          rows.find((item) => item.iso3 === "USA") ??
+          rows[0];
+
+        return energyRow ? (
+          <OfficialEnergyPanel
+            iso3={energyRow.iso3}
+            countryName={`${getFlagEmoji(energyRow.iso2)} ${getLocalizedCountryName(
+              energyRow,
               language
             )}`}
             language={language}
