@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
+import OfficialFreshnessPanel from "@/components/OfficialFreshnessPanel";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
@@ -1273,6 +1274,18 @@ export default function StatsDashboard({
             )}`}
             language={language}
           />
+        ) : null;
+      })()}
+
+      {(() => {
+        const freshnessRow =
+          rows.find((item) => item.iso2 === visitorCountry) ??
+          rows.find((item) => item.iso3 === "KOR") ??
+          rows.find((item) => item.iso3 === "USA") ??
+          rows[0];
+
+        return freshnessRow ? (
+          <OfficialFreshnessPanel row={freshnessRow} language={language} />
         ) : null;
       })()}
 
