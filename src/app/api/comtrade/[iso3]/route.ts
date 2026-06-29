@@ -34,30 +34,9 @@ const reporterOverrides: Record<string, string> = {
 };
 
 const foodCodes = [
-  "01",
-  "02",
-  "03",
-  "04",
-  "05",
-  "06",
-  "07",
-  "08",
-  "09",
-  "10",
-  "11",
-  "12",
-  "13",
-  "14",
-  "15",
-  "16",
-  "17",
-  "18",
-  "19",
-  "20",
-  "21",
-  "22",
-  "23",
-  "24",
+  "01", "02", "03", "04", "05", "06", "07", "08",
+  "09", "10", "11", "12", "13", "14", "15", "16",
+  "17", "18", "19", "20", "21", "22", "23", "24",
 ];
 
 function normalizeIso3(value: string) {
@@ -142,6 +121,7 @@ function readPeriod(row: ComtradeRow) {
   const value = String(raw);
 
   if (/^\d{8}$/.test(value)) return value.slice(0, 4);
+
   return value;
 }
 
@@ -212,28 +192,31 @@ async function fetchRows({
   flowCode: "M" | "X";
   apiKey: string;
 }) {
-  const allRows: ComtradeRow[] = [];
+  const partnerOptions = ["0", ""];
   let lastStatus = "";
+  let lastUrl = "";
   let lastError = "";
 
-  for (const period of periods) {
+  for (const partnerCode of partnerOptions) {
     const params = new URLSearchParams({
-      cmdCode,
-      partnerCode: "0",
       reporterCode,
-      period,
       flowCode,
-      partner2Code: "0",
-      customsCode: "C00",
-      motCode: "0",
-      includeDesc: "TRUE",
+      cmdCode,
+      period: periods.join(","),
+      maxrecords: "50000",
       maxRecords: "50000",
+      includeDesc: "true",
       format: "json",
       breakdownMode: "classic",
       "subscription-key": apiKey,
     });
 
+    if (partnerCode) {
+      params.set("partnerCode", partnerCode);
+    }
+
     const url = `${API_BASE}/C/${frequency}/HS?${params.toString()}`;
+    lastUrl = url.replace(apiKey, "HIDDEN");
 
     try {
       const response = await fetch(url, {
@@ -253,18 +236,22 @@ async function fetchRows({
       const rows = Array.isArray(json.data) ? json.data : [];
 
       if (rows.length > 0) {
-        allRows.push(...rows);
+        return {
+          rows,
+          lastStatus,
+          lastUrl,
+          lastError,
+        };
       }
     } catch (error) {
       lastError = error instanceof Error ? error.message : "Unknown fetch error";
     }
-
-    if (allRows.length > 0) break;
   }
 
   return {
-    rows: allRows,
+    rows: [] as ComtradeRow[],
     lastStatus,
+    lastUrl,
     lastError,
   };
 }
@@ -296,7 +283,9 @@ async function fetchGroupedRows({
   if (combined.rows.length > 0) return combined;
 
   const rows: ComtradeRow[] = [];
-  const diagnostics: string[] = [];
+  let lastStatus = "";
+  let lastUrl = "";
+  let lastError = "";
 
   for (const code of cmdCodes) {
     const result = await fetchRows({
@@ -309,18 +298,18 @@ async function fetchGroupedRows({
     });
 
     rows.push(...result.rows);
+    lastStatus = result.lastStatus;
+    lastUrl = result.lastUrl;
+    lastError = result.lastError;
 
-    if (result.lastStatus || result.lastError) {
-      diagnostics.push(`${code}: ${result.lastStatus} ${result.lastError}`);
-    }
-
-    if (rows.length > 0 && frequency === "M") break;
+    if (rows.length > 0) break;
   }
 
   return {
     rows,
-    lastStatus: diagnostics.join(" | "),
-    lastError: "",
+    lastStatus,
+    lastUrl,
+    lastError,
   };
 }
 
@@ -383,14 +372,16 @@ async function getTradeLayer({
       layer: null,
       debug: {
         frequency,
-        importsStatus: imports.lastStatus,
-        importsError: imports.lastError,
-        exportsStatus: exports.lastStatus,
-        exportsError: exports.lastError,
         importRows: imports.rows.length,
         exportRows: exports.rows.length,
         fuelRows: fuel.rows.length,
         foodRows: food.rows.length,
+        importsStatus: imports.lastStatus,
+        exportsStatus: exports.lastStatus,
+        importsUrl: imports.lastUrl,
+        exportsUrl: exports.lastUrl,
+        importsError: imports.lastError,
+        exportsError: exports.lastError,
       },
     };
   }
@@ -404,8 +395,10 @@ async function getTradeLayer({
   const previousImport = getPointByPeriod(importSeries, previousPeriod);
   const previousExport = getPointByPeriod(exportSeries, previousPeriod);
 
-  const latestFuel = getPointByPeriod(fuelSeries, latestPeriod) ?? getLatestPoint(fuelSeries);
-  const latestFood = getPointByPeriod(foodSeries, latestPeriod) ?? getLatestPoint(foodSeries);
+  const latestFuel =
+    getPointByPeriod(fuelSeries, latestPeriod) ?? getLatestPoint(fuelSeries);
+  const latestFood =
+    getPointByPeriod(foodSeries, latestPeriod) ?? getLatestPoint(foodSeries);
 
   const previousFuel = getPointByPeriod(
     fuelSeries,
@@ -418,7 +411,9 @@ async function getTradeLayer({
   );
 
   const tradeBalanceValue =
-    exportAtPeriod && importAtPeriod ? exportAtPeriod.value - importAtPeriod.value : null;
+    exportAtPeriod && importAtPeriod
+      ? exportAtPeriod.value - importAtPeriod.value
+      : null;
 
   const previousTradeBalanceValue =
     previousExport && previousImport
@@ -489,6 +484,8 @@ async function getTradeLayer({
       foodRows: food.rows.length,
       importsStatus: imports.lastStatus,
       exportsStatus: exports.lastStatus,
+      importsUrl: imports.lastUrl,
+      exportsUrl: exports.lastUrl,
     },
   };
 }
@@ -529,37 +526,37 @@ export async function GET(
     });
   }
 
-  const monthlyResult = await getTradeLayer({
+  const annualResult = await getTradeLayer({
     reporterCode,
-    frequency: "M",
-    periods: buildMonthlyPeriods(36),
+    frequency: "A",
+    periods: buildAnnualPeriods(8),
     apiKey,
   });
 
-  const annualResult = monthlyResult.layer
+  const monthlyResult = annualResult.layer
     ? null
     : await getTradeLayer({
         reporterCode,
-        frequency: "A",
-        periods: buildAnnualPeriods(8),
+        frequency: "M",
+        periods: buildMonthlyPeriods(36),
         apiKey,
       });
 
-  const layer = monthlyResult.layer ?? annualResult?.layer ?? null;
+  const layer = annualResult.layer ?? monthlyResult?.layer ?? null;
 
   if (!layer) {
     return NextResponse.json({
       configured: true,
       iso3: country,
       source: "UN Comtrade API",
-      note: "No monthly or annual import/export data was returned for this reporter.",
+      note: "No annual or monthly import/export data was returned for this reporter.",
       reporterCode,
       frequency: null,
       latestPeriod: null,
       metrics: null,
       debug: {
-        monthly: monthlyResult.debug,
-        annual: annualResult?.debug ?? null,
+        annual: annualResult.debug,
+        monthly: monthlyResult?.debug ?? null,
       },
     });
   }
@@ -570,9 +567,9 @@ export async function GET(
     reporterCode,
     source: "UN Comtrade API",
     note:
-      layer.frequency === "M"
-        ? "Latest official monthly merchandise trade data."
-        : "Monthly data was unavailable, so latest official annual merchandise trade data is shown.",
+      layer.frequency === "A"
+        ? "Latest official annual merchandise trade data."
+        : "Latest official monthly merchandise trade data.",
     frequency: layer.frequency,
     latestPeriod: layer.latestPeriod,
     previousPeriod: layer.previousPeriod,

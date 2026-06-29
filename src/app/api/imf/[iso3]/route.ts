@@ -25,68 +25,69 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function readYearMap(node: unknown) {
-  if (!isObject(node)) return null;
-
-  const result: Record<string, number | string | null> = {};
-  let found = false;
-
-  for (const year of periods) {
-    const value = node[year];
-
-    if (typeof value === "number" || typeof value === "string") {
-      result[year] = value;
-      found = true;
-    }
-  }
-
-  return found ? result : null;
-}
-
-function findYearMap(node: unknown, depth = 0): Record<string, number | string | null> | null {
-  if (depth > 8) return null;
-
-  const direct = readYearMap(node);
-  if (direct) return direct;
-
-  if (!isObject(node)) return null;
-
-  for (const value of Object.values(node)) {
-    const nested = findYearMap(value, depth + 1);
-    if (nested) return nested;
-  }
-
-  return null;
-}
-
-function extractValues(json: unknown, indicatorCode: string, iso3: string) {
+function exactExtract(json: unknown, indicatorCode: string, iso3: string) {
   if (!isObject(json)) return {};
 
   const values = isObject(json.values) ? json.values : null;
+  const byIndicator = values && isObject(values[indicatorCode])
+    ? values[indicatorCode]
+    : null;
+  const byCountry = byIndicator && isObject(byIndicator[iso3])
+    ? byIndicator[iso3]
+    : null;
 
-  const candidates = [
-    values?.[indicatorCode],
-    isObject(values?.[indicatorCode]) ? values?.[indicatorCode]?.[iso3] : null,
-    values?.[iso3],
-    isObject(values?.[iso3]) ? values?.[iso3]?.[indicatorCode] : null,
-    values,
-    json,
-  ];
+  if (!byCountry) return {};
 
-  for (const candidate of candidates) {
-    const found = findYearMap(candidate);
-    if (found) return found;
+  const result: Record<string, number | string | null> = {};
+
+  for (const year of periods) {
+    const value = byCountry[year];
+
+    if (typeof value === "number" || typeof value === "string") {
+      result[year] = value;
+    }
   }
 
-  return {};
+  return result;
+}
+
+function looseExtract(json: unknown) {
+  const result: Record<string, number | string | null> = {};
+
+  function walk(node: unknown, depth = 0) {
+    if (depth > 8 || !isObject(node)) return;
+
+    for (const year of periods) {
+      const value = node[year];
+
+      if (typeof value === "number" || typeof value === "string") {
+        result[year] = value;
+      }
+    }
+
+    if (Object.keys(result).length > 0) return;
+
+    for (const value of Object.values(node)) {
+      walk(value, depth + 1);
+      if (Object.keys(result).length > 0) return;
+    }
+  }
+
+  walk(json);
+
+  return result;
 }
 
 async function fetchIMFIndicator(iso3: string, indicator: IMFIndicator) {
   const periodQuery = periods.join(",");
   const urls = [
-    `https://www.imf.org/external/datamapper/api/v2/${indicator.code}/${iso3}?periods=${periodQuery}`,
     `https://www.imf.org/external/datamapper/api/v1/${indicator.code}/${iso3}?periods=${periodQuery}`,
+    `https://www.imf.org/external/datamapper/api/v1/${indicator.code}/${iso3}`,
+    `https://www.imf.org/external/datamapper/api/v2/${indicator.code}/${iso3}?periods=${periodQuery}`,
+    `https://www.imf.org/external/datamapper/api/v2/${indicator.code}/${iso3}`,
   ];
+
+  let lastStatus = "";
 
   for (const url of urls) {
     try {
@@ -96,15 +97,19 @@ async function fetchIMFIndicator(iso3: string, indicator: IMFIndicator) {
         },
       });
 
+      lastStatus = `${response.status} ${response.statusText}`;
+
       if (!response.ok) continue;
 
       const json = await response.json();
-      const values = extractValues(json, indicator.code, iso3);
+      const exact = exactExtract(json, indicator.code, iso3);
+      const values = Object.keys(exact).length > 0 ? exact : looseExtract(json);
 
       if (Object.keys(values).length > 0) {
         return {
           ...indicator,
           values,
+          debugStatus: lastStatus,
         };
       }
     } catch {
@@ -115,6 +120,7 @@ async function fetchIMFIndicator(iso3: string, indicator: IMFIndicator) {
   return {
     ...indicator,
     values: {},
+    debugStatus: lastStatus,
   };
 }
 
@@ -125,23 +131,14 @@ export async function GET(
   const { iso3 } = await context.params;
   const country = normalizeIso3(iso3);
 
-  try {
-    const results = await Promise.all(
-      indicators.map((indicator) => fetchIMFIndicator(country, indicator))
-    );
+  const results = await Promise.all(
+    indicators.map((indicator) => fetchIMFIndicator(country, indicator))
+  );
 
-    return NextResponse.json({
-      source: "IMF DataMapper / World Economic Outlook",
-      note: "2025 and 2026 values may be IMF estimates or forecasts depending on the indicator and country.",
-      iso3: country,
-      indicators: results,
-    });
-  } catch {
-    return NextResponse.json({
-      source: "IMF DataMapper / World Economic Outlook",
-      note: "Unable to load IMF outlook data.",
-      iso3: country,
-      indicators: [],
-    });
-  }
+  return NextResponse.json({
+    source: "IMF DataMapper / World Economic Outlook",
+    note: "2025 and 2026 values may be IMF estimates or forecasts depending on the indicator and country.",
+    iso3: country,
+    indicators: results,
+  });
 }
