@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import CountryDetailClient from "@/components/CountryDetailClient";
 import { getCountryStats } from "@/lib/worldBank";
 import { siteConfig } from "@/lib/site";
+import { buildCountryMetadata } from "@/lib/countrySeo";
 
 export const revalidate = 86400;
 
