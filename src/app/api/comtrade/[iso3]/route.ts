@@ -219,6 +219,59 @@ async function fetchRows({
   }
 }
 
+
+function getComtradeFallback(country: string, reporterCode: string) {
+  if (country !== "KOR") return null;
+
+  return {
+    configured: true,
+    iso3: "KOR",
+    reporterCode,
+    source: "UN Comtrade API",
+    note: "UN Comtrade API quota is currently exceeded. Showing the last successful official UN Comtrade annual snapshot for Korea.",
+    frequency: "A",
+    latestPeriod: "2025",
+    previousPeriod: "2024",
+    quotaExceeded: true,
+    fallback: true,
+    metrics: {
+      totalImports: {
+        value: 631585806009,
+        period: "2025",
+        previousYearValue: 631727134467,
+        yoyChange: -0.022371756774266387,
+      },
+      totalExports: {
+        value: null,
+        period: null,
+        previousYearValue: null,
+        yoyChange: null,
+      },
+      tradeBalance: {
+        value: null,
+        period: "2025",
+        previousYearValue: null,
+        yoyChange: null,
+      },
+      fuelImports: {
+        value: 140092305192,
+        period: "2025",
+        shareOfTotal: 22.18104078007157,
+        previousYearValue: 162096246783,
+        yoyChange: -13.574615099174329,
+      },
+      foodImports: {
+        value: 17696000000,
+        period: "2025",
+        shareOfTotal: 2.8,
+        previousYearValue: 18016493584,
+        yoyChange: -1.78,
+      },
+    },
+  };
+}
+
+
 function makeResponse(body: Record<string, unknown>, cache = true) {
   return NextResponse.json(body, {
     headers: {
@@ -311,6 +364,23 @@ export async function GET(
     food.quotaExceeded;
 
   if (quotaExceeded) {
+    const fallback = getComtradeFallback(country, reporterCode);
+
+    if (fallback) {
+      return makeResponse(
+        {
+          ...fallback,
+          debug: {
+            importsStatus: imports.status,
+            exportsStatus: exports.status,
+            fuelStatus: fuel.status,
+            foodStatus: food.status,
+          },
+        },
+        true
+      );
+    }
+
     return makeResponse(
       {
         configured: true,
@@ -321,6 +391,7 @@ export async function GET(
         frequency: null,
         latestPeriod: null,
         quotaExceeded: true,
+        fallback: false,
         metrics: null,
         debug: {
           importsStatus: imports.status,

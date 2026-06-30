@@ -20,6 +20,7 @@ type ComtradeResponse = {
   note: string;
   frequency: "M" | "A" | null;
   latestPeriod: string | null;
+  fallback?: boolean;
   metrics: null | {
     totalImports: MetricValue;
     totalExports: MetricValue;
@@ -426,7 +427,7 @@ export default function LatestMonthlyTradePanel({
 
         <div className="mt-5 grid gap-4 md:grid-cols-[1fr_280px]">
           <p className="rounded-2xl border border-blue-400/20 bg-blue-400/10 p-4 text-xs leading-5 text-blue-50/80">
-            {t.note}
+            {data?.fallback ? "UN Comtrade API 한도 초과로 마지막 성공 공식 응답값을 임시 표시합니다. 추정치가 아니라 이전에 성공적으로 받은 공식 UN Comtrade 응답값입니다." : t.note}
           </p>
           <p className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 text-xs leading-5 text-slate-400">
             {t.source}: {data?.source ?? "UN Comtrade API"}
