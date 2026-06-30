@@ -20,7 +20,9 @@ type ComtradeResponse = {
   note: string;
   frequency: "M" | "A" | null;
   latestPeriod: string | null;
+  quotaExceeded?: boolean;
   fallback?: boolean;
+  emptyFallback?: boolean;
   metrics: null | {
     totalImports: MetricValue;
     totalExports: MetricValue;
@@ -50,11 +52,19 @@ const copy = {
     monthly: "월간 데이터",
     annual: "연간 데이터",
     noData:
-      "UN Comtrade에서 해당 국가의 월간/연간 무역 데이터가 반환되지 않았습니다. API key, reporter code, 또는 국가별 보고 가능성을 확인해야 합니다.",
+      "이 국가는 아직 저장된 UN Comtrade 공식 응답값이 없습니다. API 한도가 풀리면 공식값으로 자동 표시됩니다.",
     notConfigured: "COMTRADE_API_KEY가 Vercel 환경변수에 설정되어 있지 않습니다.",
     loading: "UN Comtrade 공식 무역 데이터를 불러오는 중입니다.",
     note:
       "국가별 보고 일정이 다르므로 모든 국가가 같은 최신 월까지 제공되지는 않습니다. 이 값은 추정치가 아니라 UN Comtrade에 보고된 공식 상품무역 데이터입니다.",
+    fallbackNote:
+      "UN Comtrade API 한도 초과로 마지막 성공 공식 응답값을 임시 표시합니다. 추정치가 아니라 이전에 성공적으로 받은 공식 UN Comtrade 응답값입니다.",
+    limitedTitle: "공식 API 한도 대기",
+    limitedDesc:
+      "이 국가에는 아직 저장된 공식 응답 스냅샷이 없어 숫자를 임의로 표시하지 않습니다.",
+    limitedNext:
+      "API 한도가 풀리면 실제 UN Comtrade 공식값으로 자동 교체됩니다.",
+    noEstimate: "추정값 미사용",
   },
   en: {
     label: "Latest official trade layer",
@@ -75,11 +85,19 @@ const copy = {
     monthly: "Monthly data",
     annual: "Annual data",
     noData:
-      "UN Comtrade returned no monthly or annual trade data for this country. Check API key, reporter code, or country reporting availability.",
+      "No saved official UN Comtrade response is available for this country yet. Official values will appear when the API limit resets.",
     notConfigured: "COMTRADE_API_KEY is not configured in Vercel environment variables.",
     loading: "Loading official UN Comtrade trade data.",
     note:
       "Country reporting schedules differ, so not every country reports up to the same latest month. These are reported official merchandise trade values, not estimates.",
+    fallbackNote:
+      "UN Comtrade API quota is currently exceeded, so the site is showing the last successful official response snapshot. This is not an estimate.",
+    limitedTitle: "Official API limit pending",
+    limitedDesc:
+      "No saved official response snapshot is available for this country, so estimated values are not displayed.",
+    limitedNext:
+      "When the API limit resets, official UN Comtrade values will be displayed automatically.",
+    noEstimate: "No estimated values",
   },
   ja: {
     label: "Latest official trade layer",
@@ -98,10 +116,15 @@ const copy = {
     reporter: "Reporter code",
     monthly: "月次データ",
     annual: "年次データ",
-    noData: "UN Comtradeデータが返されませんでした。",
+    noData: "この国の保存済み公式応答はまだありません。",
     notConfigured: "COMTRADE_API_KEYが設定されていません。",
     loading: "UN Comtradeデータを読み込んでいます。",
     note: "国ごとに報告時期が異なります。これは推定値ではありません。",
+    fallbackNote: "API制限中のため保存済み公式応答を表示しています。",
+    limitedTitle: "公式API制限中",
+    limitedDesc: "保存済み公式応答がないため推定値は表示しません。",
+    limitedNext: "制限解除後に公式値へ自動更新されます。",
+    noEstimate: "推定値なし",
   },
   zh: {
     label: "Latest official trade layer",
@@ -120,10 +143,15 @@ const copy = {
     reporter: "Reporter code",
     monthly: "月度数据",
     annual: "年度数据",
-    noData: "UN Comtrade 未返回数据。",
+    noData: "该国家尚无保存的官方响应。",
     notConfigured: "未设置 COMTRADE_API_KEY。",
     loading: "正在加载 UN Comtrade 数据。",
     note: "各国报告时间不同。这些是官方报告数据，不是估计值。",
+    fallbackNote: "API 限制期间显示保存的官方响应。",
+    limitedTitle: "官方 API 限制中",
+    limitedDesc: "没有保存的官方响应，因此不显示估算值。",
+    limitedNext: "限制解除后将自动显示官方数据。",
+    noEstimate: "不使用估算值",
   },
   es: {
     label: "Latest official trade layer",
@@ -142,10 +170,15 @@ const copy = {
     reporter: "Reporter code",
     monthly: "Datos mensuales",
     annual: "Datos anuales",
-    noData: "UN Comtrade no devolvió datos.",
+    noData: "No hay respuesta oficial guardada para este país.",
     notConfigured: "COMTRADE_API_KEY no está configurado.",
     loading: "Cargando datos UN Comtrade.",
     note: "Los calendarios de reporte varían por país. No son estimaciones.",
+    fallbackNote: "Se muestra una respuesta oficial guardada por límite de API.",
+    limitedTitle: "Límite de API oficial",
+    limitedDesc: "No se muestran estimaciones.",
+    limitedNext: "Los datos oficiales aparecerán cuando se reinicie el límite.",
+    noEstimate: "Sin estimaciones",
   },
   fr: {
     label: "Latest official trade layer",
@@ -164,10 +197,15 @@ const copy = {
     reporter: "Reporter code",
     monthly: "Données mensuelles",
     annual: "Données annuelles",
-    noData: "UN Comtrade n’a retourné aucune donnée.",
+    noData: "Aucune réponse officielle sauvegardée pour ce pays.",
     notConfigured: "COMTRADE_API_KEY n’est pas configuré.",
     loading: "Chargement des données UN Comtrade.",
     note: "Les calendriers de déclaration varient selon les pays. Ce ne sont pas des estimations.",
+    fallbackNote: "Réponse officielle sauvegardée affichée pendant la limite API.",
+    limitedTitle: "Limite API officielle",
+    limitedDesc: "Aucune estimation n’est affichée.",
+    limitedNext: "Les données officielles apparaîtront après réinitialisation.",
+    noEstimate: "Pas d’estimation",
   },
   de: {
     label: "Latest official trade layer",
@@ -186,10 +224,15 @@ const copy = {
     reporter: "Reporter code",
     monthly: "Monatsdaten",
     annual: "Jahresdaten",
-    noData: "UN Comtrade lieferte keine Daten.",
+    noData: "Keine gespeicherte offizielle Antwort für dieses Land.",
     notConfigured: "COMTRADE_API_KEY ist nicht konfiguriert.",
     loading: "UN-Comtrade-Daten werden geladen.",
     note: "Berichtszeitpunkte variieren je nach Land. Dies sind keine Schätzungen.",
+    fallbackNote: "Gespeicherte offizielle Antwort wird wegen API-Limit angezeigt.",
+    limitedTitle: "Offizielles API-Limit",
+    limitedDesc: "Es werden keine Schätzwerte angezeigt.",
+    limitedNext: "Offizielle Daten erscheinen nach dem Limit-Reset.",
+    noEstimate: "Keine Schätzwerte",
   },
 };
 
@@ -247,6 +290,21 @@ function formatPeriod(period: string | null, language: Language) {
   }
 
   return period;
+}
+
+function StatusCard({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-5">
+      <p className="text-xs text-slate-500">{title}</p>
+      <p className="mt-2 text-xl font-bold text-white">{value}</p>
+    </div>
+  );
 }
 
 function MetricCard({
@@ -384,6 +442,17 @@ export default function LatestMonthlyTradePanel({
           <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5 text-sm leading-6 text-amber-100">
             {t.notConfigured}
           </div>
+        ) : data?.emptyFallback ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            <StatusCard title={t.limitedTitle} value={data.latestPeriod ?? "API limited"} />
+            <StatusCard title={t.reporter} value={data.reporterCode ?? iso3} />
+            <StatusCard title={t.noEstimate} value="Official only" />
+            <div className="md:col-span-3 rounded-2xl border border-blue-400/20 bg-blue-400/10 p-5 text-sm leading-6 text-blue-50/80">
+              {t.limitedDesc}
+              <br />
+              {t.limitedNext}
+            </div>
+          </div>
         ) : !metrics ? (
           <div className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-5 text-sm text-slate-400">
             {t.noData}
@@ -427,7 +496,11 @@ export default function LatestMonthlyTradePanel({
 
         <div className="mt-5 grid gap-4 md:grid-cols-[1fr_280px]">
           <p className="rounded-2xl border border-blue-400/20 bg-blue-400/10 p-4 text-xs leading-5 text-blue-50/80">
-            {data?.fallback ? "UN Comtrade API 한도 초과로 마지막 성공 공식 응답값을 임시 표시합니다. 추정치가 아니라 이전에 성공적으로 받은 공식 UN Comtrade 응답값입니다." : t.note}
+            {data?.emptyFallback
+              ? t.limitedDesc
+              : data?.fallback
+                ? t.fallbackNote
+                : t.note}
           </p>
           <p className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 text-xs leading-5 text-slate-400">
             {t.source}: {data?.source ?? "UN Comtrade API"}

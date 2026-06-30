@@ -212,8 +212,8 @@ export default function OfficialFreshnessPanel({
 
       try {
         const [comtrade, eia, wits] = await Promise.all([
-          fetch(`/api/comtrade/${row.iso3}?fresh=${Date.now()}`, {
-            cache: "no-store",
+          fetch(`/api/comtrade/${row.iso3}`, {
+            cache: "force-cache",
             signal: controller.signal,
           })
             .then((r) => r.json())
@@ -222,17 +222,17 @@ export default function OfficialFreshnessPanel({
 
               await new Promise((resolve) => setTimeout(resolve, 700));
 
-              return fetch(`/api/comtrade/${row.iso3}?fresh=${Date.now()}&retry=1`, {
-                cache: "no-store",
+              return fetch(`/api/comtrade/${row.iso3}`, {
+                cache: "force-cache",
                 signal: controller.signal,
               }).then((r) => r.json());
             }),
           fetch(`/api/eia/${row.iso3}?fresh=${Date.now()}`, {
-            cache: "no-store",
+            cache: "force-cache",
             signal: controller.signal,
           }).then((r) => r.json()),
           fetch(`/api/wits/${row.iso3}?fresh=${Date.now()}`, {
-            cache: "no-store",
+            cache: "force-cache",
             signal: controller.signal,
           }).then((r) => r.json()),
         ]);

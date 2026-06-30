@@ -154,6 +154,93 @@ function getYoY(latest: SeriesPoint | undefined, previous: SeriesPoint | null) {
   return ((latest.value - previous.value) / Math.abs(previous.value)) * 100;
 }
 
+function makeStatusFallback(country: string, reporterCode: string | null, reason: string) {
+  return {
+    configured: true,
+    iso3: country,
+    reporterCode,
+    source: "UN Comtrade API",
+    note: reason,
+    frequency: null,
+    latestPeriod: "official API limited",
+    previousPeriod: null,
+    quotaExceeded: true,
+    fallback: true,
+    emptyFallback: true,
+    metrics: null,
+  };
+}
+
+function getComtradeFallback(country: string, reporterCode: string | null, reason: string) {
+  if (country === "KOR") {
+    return {
+      configured: true,
+      iso3: "KOR",
+      reporterCode,
+      source: "UN Comtrade API",
+      note:
+        "UN Comtrade API quota is currently exceeded. Showing the last successful official UN Comtrade annual snapshot for Korea.",
+      frequency: "A",
+      latestPeriod: "2025",
+      previousPeriod: "2024",
+      quotaExceeded: true,
+      fallback: true,
+      emptyFallback: false,
+      metrics: {
+        totalImports: {
+          value: 631585806009,
+          period: "2025",
+          previousYearValue: 631727134467,
+          yoyChange: -0.022371756774266387,
+        },
+        totalExports: {
+          value: null,
+          period: null,
+          previousYearValue: null,
+          yoyChange: null,
+        },
+        tradeBalance: {
+          value: null,
+          period: "2025",
+          previousYearValue: null,
+          yoyChange: null,
+        },
+        fuelImports: {
+          value: 140092305192,
+          period: "2025",
+          shareOfTotal: 22.18104078007157,
+          previousYearValue: 162096246783,
+          yoyChange: -13.574615099174329,
+        },
+        foodImports: {
+          value: 17696000000,
+          period: "2025",
+          shareOfTotal: 2.8,
+          previousYearValue: 18016493584,
+          yoyChange: -1.78,
+        },
+      },
+    };
+  }
+
+  return makeStatusFallback(
+    country,
+    reporterCode,
+    reason ||
+      "UN Comtrade API is temporarily limited. No estimated values are shown for this country until an official response is available."
+  );
+}
+
+function makeResponse(body: Record<string, unknown>, cache = true) {
+  return NextResponse.json(body, {
+    headers: {
+      "Cache-Control": cache
+        ? "public, s-maxage=21600, stale-while-revalidate=86400"
+        : "no-store",
+    },
+  });
+}
+
 async function fetchRows({
   reporterCode,
   cmdCode,
@@ -219,69 +306,6 @@ async function fetchRows({
   }
 }
 
-
-function getComtradeFallback(country: string, reporterCode: string) {
-  if (country !== "KOR") return null;
-
-  return {
-    configured: true,
-    iso3: "KOR",
-    reporterCode,
-    source: "UN Comtrade API",
-    note: "UN Comtrade API quota is currently exceeded. Showing the last successful official UN Comtrade annual snapshot for Korea.",
-    frequency: "A",
-    latestPeriod: "2025",
-    previousPeriod: "2024",
-    quotaExceeded: true,
-    fallback: true,
-    metrics: {
-      totalImports: {
-        value: 631585806009,
-        period: "2025",
-        previousYearValue: 631727134467,
-        yoyChange: -0.022371756774266387,
-      },
-      totalExports: {
-        value: null,
-        period: null,
-        previousYearValue: null,
-        yoyChange: null,
-      },
-      tradeBalance: {
-        value: null,
-        period: "2025",
-        previousYearValue: null,
-        yoyChange: null,
-      },
-      fuelImports: {
-        value: 140092305192,
-        period: "2025",
-        shareOfTotal: 22.18104078007157,
-        previousYearValue: 162096246783,
-        yoyChange: -13.574615099174329,
-      },
-      foodImports: {
-        value: 17696000000,
-        period: "2025",
-        shareOfTotal: 2.8,
-        previousYearValue: 18016493584,
-        yoyChange: -1.78,
-      },
-    },
-  };
-}
-
-
-function makeResponse(body: Record<string, unknown>, cache = true) {
-  return NextResponse.json(body, {
-    headers: {
-      "Cache-Control": cache
-        ? "public, s-maxage=21600, stale-while-revalidate=86400"
-        : "no-store",
-    },
-  });
-}
-
 export async function GET(
   _request: Request,
   context: { params: Promise<{ iso3: string }> }
@@ -310,17 +334,12 @@ export async function GET(
 
   if (!reporterCode) {
     return makeResponse(
-      {
-        configured: true,
-        iso3: country,
-        source: "UN Comtrade API",
-        note: "Reporter code was not found for this ISO3 country code.",
-        reporterCode: null,
-        frequency: null,
-        latestPeriod: null,
-        metrics: null,
-      },
-      false
+      getComtradeFallback(
+        country,
+        null,
+        "Reporter code was not found for this ISO3 country code."
+      ),
+      true
     );
   }
 
@@ -364,35 +383,13 @@ export async function GET(
     food.quotaExceeded;
 
   if (quotaExceeded) {
-    const fallback = getComtradeFallback(country, reporterCode);
-
-    if (fallback) {
-      return makeResponse(
-        {
-          ...fallback,
-          debug: {
-            importsStatus: imports.status,
-            exportsStatus: exports.status,
-            fuelStatus: fuel.status,
-            foodStatus: food.status,
-          },
-        },
-        true
-      );
-    }
-
     return makeResponse(
       {
-        configured: true,
-        iso3: country,
-        source: "UN Comtrade API",
-        note: "UN Comtrade API quota exceeded. Try again after the API quota resets.",
-        reporterCode,
-        frequency: null,
-        latestPeriod: null,
-        quotaExceeded: true,
-        fallback: false,
-        metrics: null,
+        ...getComtradeFallback(
+          country,
+          reporterCode,
+          "UN Comtrade API quota is currently exceeded. The site does not display estimated trade values for countries without a saved official snapshot."
+        ),
         debug: {
           importsStatus: imports.status,
           exportsStatus: exports.status,
@@ -400,7 +397,7 @@ export async function GET(
           foodStatus: food.status,
         },
       },
-      false
+      true
     );
   }
 
@@ -414,28 +411,12 @@ export async function GET(
 
   if (!latestImport && !latestExport) {
     return makeResponse(
-      {
-        configured: true,
-        iso3: country,
-        source: "UN Comtrade API",
-        note: "No annual import/export data was returned for this reporter.",
+      getComtradeFallback(
+        country,
         reporterCode,
-        frequency: null,
-        latestPeriod: null,
-        quotaExceeded: false,
-        metrics: null,
-        debug: {
-          importRows: imports.rows.length,
-          exportRows: exports.rows.length,
-          fuelRows: fuel.rows.length,
-          foodRows: food.rows.length,
-          importsStatus: imports.status,
-          exportsStatus: exports.status,
-          fuelStatus: fuel.status,
-          foodStatus: food.status,
-        },
-      },
-      false
+        "No annual import/export data was returned from UN Comtrade for this reporter. No estimated values are shown."
+      ),
+      true
     );
   }
 
@@ -493,6 +474,8 @@ export async function GET(
     latestPeriod,
     previousPeriod,
     quotaExceeded: false,
+    fallback: false,
+    emptyFallback: false,
     metrics: {
       totalImports: {
         value: importAtPeriod?.value ?? null,
