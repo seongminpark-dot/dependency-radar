@@ -11,6 +11,7 @@ import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 import WorldBankTableOverview from "@/components/WorldBankTableOverview";
+import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -81,7 +82,7 @@ const copy = {
     minimumDataCount: "최소 데이터 수",
     latestYearFilter: "World Bank 최신 연도",
     allYears: "전체 연도",
-    downloadCsv: "CSV 다운로드",
+    downloadCsv: "CSV 내보내기",
     dataFilters: "데이터 필터",
     filterDescription:
       "데이터 제공 여부와 최신 연도를 기준으로 국가를 필터링하고, 현재 보이는 표를 CSV로 저장할 수 있습니다.",
@@ -141,7 +142,7 @@ const copy = {
     minimumDataCount: "Minimum data count",
     latestYearFilter: "World Bank latest year",
     allYears: "All years",
-    downloadCsv: "Download CSV",
+    downloadCsv: "Export CSV",
     dataFilters: "Data filters",
     filterDescription:
       "Filter countries by data availability and latest year, then export the visible table as CSV.",
@@ -1303,6 +1304,8 @@ export default function StatsDashboard({
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
 
       <WorldBankTableOverview rows={rows} language={language} />
+
+      <WorldBankExplorerControlsPanel language={language} />
 <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <div className="mb-6">
