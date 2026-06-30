@@ -52,7 +52,7 @@ const copy = {
     indicators: "정확 지표",
     source: "주요 출처",
     sourceValue: "World Bank API",
-    searchPlaceholder: "국가 검색",
+    searchPlaceholder: "국가명 / ISO 코드 / 지역 검색",
     allRegions: "전체 지역",
     showing: "표시 중",
     tableTitle: "World Bank 연간 구조 지표",
@@ -111,7 +111,7 @@ const copy = {
     indicators: "Exact indicators",
     source: "Primary sources",
     sourceValue: "World Bank API",
-    searchPlaceholder: "Search country",
+    searchPlaceholder: "Search country, ISO code, or region",
     allRegions: "All regions",
     showing: "Showing",
     tableTitle: "World Bank annual structural indicators",
@@ -823,7 +823,7 @@ function LoadingScreen({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#070914] text-white">
+    <main className="dependency-radar-page flex min-h-screen items-center justify-center bg-[#070914] text-white">
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
         <p className="text-xl font-bold">{t.siteName}</p>
         <p className="mt-3 text-sm text-slate-400">{t.loading}</p>

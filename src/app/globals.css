@@ -39,3 +39,90 @@ body {
 ::selection {
   background: rgba(129, 140, 248, 0.35);
 }
+
+/* Dependency Radar homepage UI polish */
+.dependency-radar-page input:not([type="checkbox"]):not([type="radio"]),
+.dependency-radar-page select {
+  min-height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(11, 15, 28, 0.86);
+  color: rgba(255, 255, 255, 0.94);
+  padding: 0 14px;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.dependency-radar-page input:not([type="checkbox"]):not([type="radio"])::placeholder {
+  color: rgba(148, 163, 184, 0.72);
+}
+
+.dependency-radar-page input:not([type="checkbox"]):not([type="radio"]):focus,
+.dependency-radar-page select:focus {
+  border-color: rgba(129, 140, 248, 0.72);
+  background: rgba(15, 23, 42, 0.96);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.16);
+}
+
+.dependency-radar-page select {
+  cursor: pointer;
+}
+
+.dependency-radar-page table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.dependency-radar-page thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(11, 15, 28, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.dependency-radar-page tbody tr {
+  transition:
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.dependency-radar-page tbody tr:hover {
+  background: rgba(99, 102, 241, 0.075);
+}
+
+.dependency-radar-page th,
+.dependency-radar-page td {
+  vertical-align: middle;
+}
+
+.dependency-radar-page button {
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.dependency-radar-page button:hover {
+  opacity: 0.92;
+}
+
+.dependency-radar-page a {
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 768px) {
+  .dependency-radar-page input:not([type="checkbox"]):not([type="radio"]),
+  .dependency-radar-page select {
+    width: 100%;
+  }
+
+  .dependency-radar-page thead th {
+    position: static;
+  }
+}
+
