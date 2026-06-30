@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
+import OfficialSourceOverview from "@/components/OfficialSourceOverview";
+import HomeBottomLinks from "@/components/HomeBottomLinks";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
@@ -1223,7 +1225,9 @@ export default function StatsDashboard({
         indicatorCount={7}
       />
 
-      {(() => {
+      
+      <OfficialSourceOverview language={language} />
+{(() => {
         const tradeRow =
           rows.find((item) => item.iso2 === visitorCountry) ??
           rows.find((item) => item.iso3 === "USA") ??
@@ -1763,6 +1767,7 @@ export default function StatsDashboard({
           </div>
         </div>
       </footer>
-    </main>
+          <HomeBottomLinks language={language} />
+</main>
   );
 }
