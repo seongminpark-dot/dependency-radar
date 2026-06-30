@@ -10,6 +10,7 @@ import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
+import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1300,6 +1301,8 @@ export default function StatsDashboard({
             })()}
 
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
+
+      <WorldBankTableOverview rows={rows} language={language} />
 <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <div className="mb-6">
