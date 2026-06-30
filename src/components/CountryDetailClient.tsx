@@ -8,6 +8,7 @@ import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
+import CountryOfficialDataStack from "@/components/CountryOfficialDataStack";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -671,6 +672,13 @@ export default function CountryDetailClient({
           </div>
         </div>
       </footer>
-    </main>
+    
+      <CountryOfficialDataStack
+        row={row}
+        language={language}
+        includePanels={false}
+      />
+
+</main>
   );
 }
