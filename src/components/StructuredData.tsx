@@ -6,6 +6,7 @@ export default function StructuredData() {
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
     name: "Dependency Radar",
     url: siteUrl,
     email: "kevinsmp123@gmail.com",
@@ -14,37 +15,43 @@ export default function StructuredData() {
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
     name: "Dependency Radar",
     url: siteUrl,
     description:
       "Dependency Radar is a global statistics platform integrating official country-level supply dependency, trade, tariff, logistics, and energy indicators.",
     inLanguage: ["ko", "en", "ja", "zh", "es", "fr", "de"],
     publisher: {
-      "@type": "Organization",
-      name: "Dependency Radar",
-      email: "kevinsmp123@gmail.com",
+      "@id": `${siteUrl}/#organization`,
     },
   };
 
   const dataset = {
     "@context": "https://schema.org",
     "@type": "Dataset",
+    "@id": `${siteUrl}/#dataset`,
     name: "Dependency Radar Official Country Statistics Dataset",
     description:
-      "An integrated country-level statistics dataset covering supply dependency, merchandise trade, tariffs, logistics, and energy indicators. The dataset combines official public indicators from World Bank, UN Comtrade, WITS, and the U.S. Energy Information Administration for comparison and educational research purposes.",
+      "Dependency Radar Official Country Statistics Dataset is an integrated country-level statistics dataset for comparing supply dependency, merchandise trade, tariff, logistics, and energy indicators. It combines official public data sources including World Bank World Development Indicators, UN Comtrade, WITS, and the U.S. Energy Information Administration. The dataset is intended for educational, research, and comparative analysis purposes.",
     url: siteUrl,
-    sameAs: siteUrl,
+    sameAs: [
+      siteUrl,
+      `${siteUrl}/sources`,
+      `${siteUrl}/methodology`,
+    ],
     license: `${siteUrl}/terms`,
     isAccessibleForFree: true,
     inLanguage: ["ko", "en", "ja", "zh", "es", "fr", "de"],
     creator: {
       "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
       name: "Dependency Radar",
       url: siteUrl,
       email: "kevinsmp123@gmail.com",
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
       name: "Dependency Radar",
       url: siteUrl,
       email: "kevinsmp123@gmail.com",
@@ -67,16 +74,10 @@ export default function StructuredData() {
       "EIA",
     ],
     citation: [
-      "https://databank.worldbank.org/source/world-development-indicators",
-      "https://comtradeplus.un.org/",
-      "https://wits.worldbank.org/",
-      "https://www.eia.gov/opendata/",
-    ],
-    isBasedOn: [
-      "https://databank.worldbank.org/source/world-development-indicators",
-      "https://comtradeplus.un.org/",
-      "https://wits.worldbank.org/",
-      "https://www.eia.gov/opendata/",
+      "World Bank World Development Indicators: https://databank.worldbank.org/source/world-development-indicators",
+      "UN Comtrade Database: https://comtradeplus.un.org/",
+      "WITS Trade Stats Tariff Data: https://wits.worldbank.org/",
+      "U.S. Energy Information Administration Open Data: https://www.eia.gov/opendata/",
     ],
     temporalCoverage: "1960/2026",
     spatialCoverage: {
@@ -86,13 +87,17 @@ export default function StructuredData() {
     distribution: [
       {
         "@type": "DataDownload",
-        name: "Dependency Radar country statistics web dashboard",
+        name: "Dependency Radar web dashboard",
+        description:
+          "Interactive web dashboard for country-level supply dependency, trade, tariff, logistics, and energy indicators.",
         encodingFormat: "text/html",
         contentUrl: siteUrl,
       },
       {
         "@type": "DataDownload",
         name: "Dependency Radar sitemap",
+        description:
+          "Sitemap listing public pages available in the Dependency Radar website.",
         encodingFormat: "application/xml",
         contentUrl: `${siteUrl}/sitemap.xml`,
       },
