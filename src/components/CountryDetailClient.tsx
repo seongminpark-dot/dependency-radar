@@ -8,7 +8,6 @@ import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
-import OfficialFreshnessPanel from "@/components/OfficialFreshnessPanel";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -544,11 +543,6 @@ export default function CountryDetailClient({
           </div>
         </div>
       </section>
-
-
-
-      <OfficialFreshnessPanel row={row} language={language} />
-
       <LatestMonthlyTradePanel
         iso3={row.iso3}
         countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
