@@ -23,7 +23,7 @@ const copy: Record<
 > = {
   ko: {
     badge: "Official statistics dashboard",
-    title: "국가별 공급망 의존도를 공식 통계로 비교합니다.",
+    title: "국가별 무역·에너지 의존도를 공식 통계로 비교합니다.",
     subtitle:
       "World Bank 연간 구조 지표와 UN Comtrade 최신 공식 무역 데이터를 함께 보여주는 글로벌 공급망·무역 통계 플랫폼입니다.",
     official: "공식 연간 지표와 최신 무역 데이터 분리",

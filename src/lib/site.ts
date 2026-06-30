@@ -4,7 +4,7 @@ const productionUrl = (
 ).replace(/\/$/, "");
 
 export const siteConfig = {
-  name: "Dependency Radar",
+  name: "Trade Dependency Atlas",
   url: productionUrl,
   description:
     "A global statistics platform for country dependency, supply exposure, imports, tariffs, and logistics indicators using public World Bank data.",

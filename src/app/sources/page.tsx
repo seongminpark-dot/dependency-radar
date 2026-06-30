@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sources | Dependency Radar",
+  title: "Sources | Trade Dependency Atlas",
   description:
-    "Official data sources used by Dependency Radar, including World Bank WDI, UN Comtrade, WITS, and EIA.",
+    "Official data sources used by Trade Dependency Atlas, including World Bank WDI, UN Comtrade, WITS, and EIA.",
 };
 
 const sourceGroups = [
@@ -78,11 +78,11 @@ export default function SourcesPage() {
         </p>
 
         <h1 className="mt-4 max-w-4xl text-5xl font-bold leading-tight">
-          공식 공공 데이터 출처를 통합해 국가별 의존도와 공급망 취약성을 비교합니다.
+          공식 공공 데이터 출처를 통합해 국가별 무역·에너지 의존도을 비교합니다.
         </h1>
 
         <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
-          Dependency Radar는 임의 점수나 추정값을 우선하지 않고, World Bank,
+          Trade Dependency Atlas는 임의 점수나 추정값을 우선하지 않고, World Bank,
           UN Comtrade, WITS, EIA 같은 공식 공공 데이터 출처의 최신 제공값을
           출처별로 분리해 표시합니다. 각 지표의 최신 연도는 국가와 데이터베이스
           갱신 주기에 따라 다를 수 있습니다.

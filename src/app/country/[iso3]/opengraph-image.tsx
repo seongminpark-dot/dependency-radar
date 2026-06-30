@@ -107,7 +107,7 @@ export default async function Image({
             >
               ⦿
             </div>
-            Dependency Radar
+            Trade Dependency Atlas
           </div>
 
           <div

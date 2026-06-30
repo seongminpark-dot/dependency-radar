@@ -38,7 +38,7 @@ export async function generateMetadata({
         canonical: `/country/${row.iso3}`,
       },
       openGraph: {
-        title: `${title} | Dependency Radar`,
+        title: `${title} | Trade Dependency Atlas`,
         description,
         url: `${siteConfig.url}/country/${row.iso3}`,
         type: "website",
@@ -53,7 +53,7 @@ export async function generateMetadata({
       },
       twitter: {
         card: "summary_large_image",
-        title: `${title} | Dependency Radar`,
+        title: `${title} | Trade Dependency Atlas`,
         description,
         images: ["/opengraph-image"],
       },

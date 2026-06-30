@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Methodology | Dependency Radar",
+  title: "Methodology | Trade Dependency Atlas",
   description:
-    "Methodology for Dependency Radar official country dependency, trade, tariff, and energy indicators.",
+    "Methodology for Trade Dependency Atlas official country dependency, trade, tariff, and energy indicators.",
 };
 
 const layers = [
@@ -85,7 +85,7 @@ export default function MethodologyPage() {
         </h1>
 
         <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
-          Dependency Radar는 하나의 임의 위험점수 대신, 공식 공공 데이터 출처의
+          Trade Dependency Atlas는 하나의 임의 위험점수 대신, 공식 공공 데이터 출처의
           값과 제공 연도를 함께 표시합니다. 데이터가 없는 국가나 지표에는 값을
           추정해 채우지 않고, 공식 데이터 사용 가능 상태를 표시합니다.
         </p>

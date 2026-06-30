@@ -12,6 +12,7 @@ import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
+import PublicInfoSearch from "@/components/PublicInfoSearch";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -37,16 +38,16 @@ type SortConfig = {
 
 const copy = {
   ko: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "데이터",
     navCompare: "국가 비교",
     navMethod: "분석 기준",
     navContact: "문의",
-    heroBadge: "Global Country Dependency Statistics",
-    heroTitle: "국가별 의존도와 공급망 취약성을 실제 통계로 비교합니다.",
+    heroBadge: "Global Trade Dependency Statistics",
+    heroTitle: "국가별 무역·에너지 의존도을 실제 통계로 비교합니다.",
     heroText:
-      "Dependency Radar는 임의의 위험도 점수 대신, World Bank 공개 지표를 기반으로 국가별 에너지, 연료, 식량, 수입, 관세, 물류 데이터를 비교하는 전문 통계 플랫폼입니다.",
+      "Trade Dependency Atlas는 임의의 위험도 점수 대신, World Bank 공개 지표를 기반으로 국가별 에너지, 연료, 식량, 수입, 관세, 물류 데이터를 비교하는 전문 통계 플랫폼입니다.",
     currentCountry: "현재 접속 국가",
     countries: "국가/경제권",
     indicators: "정확 지표",
@@ -95,17 +96,17 @@ const copy = {
     latestYear: "World Bank 최신 연도",
   },
   en: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "Data",
     navCompare: "Compare",
     navMethod: "Methodology",
     navContact: "Contact",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle:
       "Compare national dependency and supply-chain exposure with real statistics.",
     heroText:
-      "Dependency Radar is a professional statistics platform that compares energy, fuel, food, import, tariff, and logistics indicators from public World Bank data instead of using arbitrary 100-point risk scores.",
+      "Trade Dependency Atlas is a professional statistics platform that compares energy, fuel, food, import, tariff, and logistics indicators from public World Bank data instead of using arbitrary 100-point risk scores.",
     currentCountry: "Current country",
     countries: "Countries/Economies",
     indicators: "Exact indicators",
@@ -155,16 +156,16 @@ const copy = {
     latestYear: "World Bank latest year",
   },
   ja: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "データ",
     navCompare: "比較",
     navMethod: "分析基準",
     navContact: "お問い合わせ",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle: "各国の依存度とサプライチェーン脆弱性を実統計で比較します。",
     heroText:
-      "Dependency Radarは任意の100点リスクスコアではなく、World Bankの公開指標を基に各国のエネルギー、燃料、食料、輸入、関税、物流データを比較する統計プラットフォームです。",
+      "Trade Dependency Atlasは任意の100点リスクスコアではなく、World Bankの公開指標を基に各国のエネルギー、燃料、食料、輸入、関税、物流データを比較する統計プラットフォームです。",
     currentCountry: "現在の接続国",
     countries: "国/経済圏",
     indicators: "正確な指標",
@@ -212,16 +213,16 @@ const copy = {
     latestYear: "最新データ年",
   },
   zh: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "数据",
     navCompare: "比较",
     navMethod: "方法论",
     navContact: "联系",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle: "用真实统计数据比较各国依赖度与供应链脆弱性。",
     heroText:
-      "Dependency Radar 不使用任意的100分风险分数，而是基于 World Bank 公开指标比较各国能源、燃料、食品、进口、关税和物流数据。",
+      "Trade Dependency Atlas 不使用任意的100分风险分数，而是基于 World Bank 公开指标比较各国能源、燃料、食品、进口、关税和物流数据。",
     currentCountry: "当前访问国家",
     countries: "国家/经济体",
     indicators: "精确指标",
@@ -268,17 +269,17 @@ const copy = {
     latestYear: "最新数据年份",
   },
   es: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "Datos",
     navCompare: "Comparar",
     navMethod: "Metodología",
     navContact: "Contacto",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle:
       "Compara la dependencia nacional y la exposición de la cadena de suministro con estadísticas reales.",
     heroText:
-      "Dependency Radar compara indicadores públicos del World Bank sobre energía, combustibles, alimentos, importaciones, aranceles y logística, sin usar puntuaciones arbitrarias de riesgo.",
+      "Trade Dependency Atlas compara indicadores públicos del World Bank sobre energía, combustibles, alimentos, importaciones, aranceles y logística, sin usar puntuaciones arbitrarias de riesgo.",
     currentCountry: "País actual",
     countries: "Países/Economías",
     indicators: "Indicadores exactos",
@@ -327,17 +328,17 @@ const copy = {
     latestYear: "Último año de datos",
   },
   fr: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "Données",
     navCompare: "Comparer",
     navMethod: "Méthodologie",
     navContact: "Contact",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle:
       "Comparez la dépendance nationale et l’exposition des chaînes d’approvisionnement avec des statistiques réelles.",
     heroText:
-      "Dependency Radar compare les indicateurs publics de la World Bank sur l’énergie, les combustibles, l’alimentation, les importations, les droits de douane et la logistique.",
+      "Trade Dependency Atlas compare les indicateurs publics de la World Bank sur l’énergie, les combustibles, l’alimentation, les importations, les droits de douane et la logistique.",
     currentCountry: "Pays actuel",
     countries: "Pays/Économies",
     indicators: "Indicateurs exacts",
@@ -386,17 +387,17 @@ const copy = {
     latestYear: "Dernière année disponible",
   },
   de: {
-    siteName: "Dependency Radar",
-    subtitle: "Country Dependency & Supply Exposure Data",
+    siteName: "Trade Dependency Atlas",
+    subtitle: "Global Trade & Dependency Data",
     navData: "Daten",
     navCompare: "Vergleich",
     navMethod: "Methodik",
     navContact: "Kontakt",
-    heroBadge: "Global Country Dependency Statistics",
+    heroBadge: "Global Trade Dependency Statistics",
     heroTitle:
       "Vergleichen Sie nationale Abhängigkeit und Lieferkettenrisiken mit echten Statistiken.",
     heroText:
-      "Dependency Radar vergleicht öffentliche World-Bank-Indikatoren zu Energie, Brennstoffen, Lebensmitteln, Importen, Zöllen und Logistik.",
+      "Trade Dependency Atlas vergleicht öffentliche World-Bank-Indikatoren zu Energie, Brennstoffen, Lebensmitteln, Importen, Zöllen und Logistik.",
     currentCountry: "Aktuelles Land",
     countries: "Länder/Volkswirtschaften",
     indicators: "Exakte Indikatoren",
@@ -1227,7 +1228,9 @@ export default function StatsDashboard({
         indicatorCount={7}
       />
       
-      <OfficialSourceOverview language={language} />
+      
+      <PublicInfoSearch rows={rows} language={language} />
+<OfficialSourceOverview language={language} />
       {(() => {
               const tradeRow =
                 rows.find((item) => item.iso2 === visitorCountry) ??

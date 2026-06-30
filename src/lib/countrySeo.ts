@@ -52,9 +52,9 @@ export function buildCountryMetadata(iso3: string): Metadata {
   const flag = getCountryFlag(code);
   const displayName = `${flag ? `${flag} ` : ""}${countryName}`;
 
-  const title = `${countryName} Supply Dependency, Trade, Tariff & Energy Statistics | Dependency Radar`;
+  const title = `${countryName} Trade, Tariff, Energy & Dependency Statistics | Trade Dependency Atlas`;
 
-  const description = `${countryName} country dashboard integrating official World Bank WDI, UN Comtrade, WITS/WTO, and EIA data for supply dependency, merchandise trade, tariff, logistics, and energy indicators.`;
+  const description = `${countryName} country data page integrating official World Bank WDI, UN Comtrade, WITS/WTO, and EIA data for merchandise trade, tariff, logistics, energy, and supply dependency indicators.`;
 
   const canonicalPath = `/country/${code}`;
   const canonicalUrl = `${siteUrl}${canonicalPath}`;
@@ -70,7 +70,7 @@ export function buildCountryMetadata(iso3: string): Metadata {
       title,
       description,
       url: canonicalUrl,
-      siteName: "Dependency Radar",
+      siteName: "Trade Dependency Atlas",
       type: "website",
       locale: "en_US",
     },
@@ -95,7 +95,7 @@ export function buildCountryMetadata(iso3: string): Metadata {
       "UN Comtrade",
       "WITS",
       "EIA",
-      "Dependency Radar",
+      "Trade Dependency Atlas",
       displayName,
     ],
   };

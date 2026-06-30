@@ -460,7 +460,7 @@ export default function CountryDetailClient({
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#070914] text-white">
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
-          <p className="text-xl font-bold">Dependency Radar</p>
+          <p className="text-xl font-bold">Trade Dependency Atlas</p>
           <p className="mt-3 text-sm text-slate-400">Preparing country data.</p>
         </div>
       </main>
@@ -473,7 +473,7 @@ export default function CountryDetailClient({
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
             <a href="/" className="text-lg font-bold hover:text-indigo-200">
-              Dependency Radar
+              Trade Dependency Atlas
             </a>
             <p className="text-xs text-slate-400">{t.subtitle}</p>
           </div>
