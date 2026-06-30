@@ -1,7 +1,8 @@
 import StatsDashboard from "@/components/StatsDashboard";
 import { getCountryStats } from "@/lib/worldBank";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export const revalidate = 86400;
 
 export default async function Home() {
   try {
