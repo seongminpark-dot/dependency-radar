@@ -13,3 +13,4 @@ https://dependency-radar-three.vercel.app/country/GBR
 https://dependency-radar-three.vercel.app/country/CAN
 https://dependency-radar-three.vercel.app/country/AUS
 https://dependency-radar-three.vercel.app/country/IND
+https://dependency-radar-three.vercel.app/methodology
