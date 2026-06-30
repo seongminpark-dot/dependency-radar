@@ -126,3 +126,139 @@ body {
   }
 }
 
+/* Dependency Radar mobile optimization */
+@media (max-width: 1024px) {
+  .dependency-radar-page section {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .dependency-radar-page h1 {
+    font-size: clamp(2.25rem, 7vw, 4rem);
+    line-height: 1.08;
+  }
+
+  .dependency-radar-page h2 {
+    font-size: clamp(1.75rem, 5.8vw, 3rem);
+    line-height: 1.14;
+  }
+
+  .dependency-radar-page h3 {
+    font-size: clamp(1.25rem, 4.6vw, 2rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .dependency-radar-page {
+    overflow-x: hidden;
+  }
+
+  .dependency-radar-page section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .dependency-radar-page h1 {
+    font-size: clamp(2rem, 10vw, 3rem);
+    letter-spacing: -0.04em;
+  }
+
+  .dependency-radar-page h2 {
+    font-size: clamp(1.55rem, 7vw, 2.4rem);
+    letter-spacing: -0.035em;
+  }
+
+  .dependency-radar-page p {
+    word-break: keep-all;
+  }
+
+  .dependency-radar-page input:not([type="checkbox"]):not([type="radio"]),
+  .dependency-radar-page select,
+  .dependency-radar-page button {
+    min-height: 46px;
+    font-size: 0.95rem;
+  }
+
+  .dependency-radar-page table {
+    min-width: 960px;
+    font-size: 0.86rem;
+  }
+
+  .dependency-radar-page th,
+  .dependency-radar-page td {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+  }
+
+  .dependency-radar-page thead th {
+    position: static;
+  }
+
+  .dependency-radar-page svg {
+    max-width: 100%;
+  }
+
+  .dependency-radar-page a,
+  .dependency-radar-page button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@media (max-width: 520px) {
+  .dependency-radar-page section {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .dependency-radar-page h1 {
+    font-size: clamp(1.85rem, 11vw, 2.6rem);
+  }
+
+  .dependency-radar-page h2 {
+    font-size: clamp(1.4rem, 8vw, 2.1rem);
+  }
+
+  .dependency-radar-page p {
+    font-size: 0.94rem;
+    line-height: 1.72;
+  }
+
+  .dependency-radar-page table {
+    min-width: 900px;
+  }
+}
+
+@supports selector(:has(table)) {
+  .dependency-radar-page section:has(table),
+  .dependency-radar-page div:has(> table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dependency-radar-page section:has(table)::after,
+  .dependency-radar-page div:has(> table)::after {
+    content: "";
+  }
+}
+
+/* Horizontal scroll hint for dense data tables */
+@media (max-width: 768px) {
+  .dependency-radar-page section:has(table) {
+    scrollbar-width: thin;
+  }
+
+  .dependency-radar-page section:has(table)::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .dependency-radar-page section:has(table)::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.45);
+    border-radius: 999px;
+  }
+
+  .dependency-radar-page section:has(table)::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+  }
+}
+
