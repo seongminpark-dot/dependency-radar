@@ -296,7 +296,7 @@ function makeStatusFallback(
     source: "UN Comtrade API",
     note: reason,
     frequency: null,
-    latestPeriod: "official API limited",
+    latestPeriod: null,
     previousPeriod: null,
     quotaExceeded: true,
     apiLimited: true,
@@ -559,7 +559,7 @@ export async function GET(
         {
           ...snapshotToPayload(
             cachedSnapshot,
-            "UN Comtrade API quota is currently exceeded. Showing the last saved official response.",
+            "Showing the latest saved official UN Comtrade response snapshot.",
             true
           ),
           debug: {
@@ -576,7 +576,7 @@ export async function GET(
     const manualKorea = getManualKoreaSnapshot(
       country,
       reporterCode,
-      "UN Comtrade API quota is currently exceeded. Showing the last successful official UN Comtrade annual snapshot for Korea."
+      "Showing a saved official UN Comtrade annual snapshot for Korea."
     );
 
     if (manualKorea) {
@@ -601,7 +601,7 @@ export async function GET(
         ...makeStatusFallback(
           country,
           reporterCode,
-          "UN Comtrade API quota is currently exceeded. No estimated values are shown for this country until an official response is saved."
+          "Official UN Comtrade data is not available in the saved snapshot for this country yet. No estimated values are shown."
         ),
         debug: {
           importsStatus: imports.status,

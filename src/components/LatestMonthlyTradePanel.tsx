@@ -58,12 +58,12 @@ const copy = {
     note:
       "국가별 보고 일정이 다르므로 모든 국가가 같은 최신 월까지 제공되지는 않습니다. 이 값은 추정치가 아니라 UN Comtrade에 보고된 공식 상품무역 데이터입니다.",
     fallbackNote:
-      "UN Comtrade API 한도 초과로 마지막 성공 공식 응답값을 임시 표시합니다. 추정치가 아니라 이전에 성공적으로 받은 공식 UN Comtrade 응답값입니다.",
-    limitedTitle: "공식 API 한도 대기",
+      "최신 공식 제공 기간 기준으로 표시합니다. 표시값은 저장된 UN Comtrade 공식 응답 스냅샷이며, 추정값을 사용하지 않습니다.",
+    limitedTitle: "공식 데이터 동기화 대기",
     limitedDesc:
-      "이 국가에는 아직 저장된 공식 응답 스냅샷이 없어 숫자를 임의로 표시하지 않습니다.",
+      "이 국가는 아직 저장된 공식 응답 스냅샷이 없어 숫자를 임의로 표시하지 않습니다.",
     limitedNext:
-      "API 한도가 풀리면 실제 UN Comtrade 공식값으로 자동 교체됩니다.",
+      "공식 데이터가 확인되는 즉시 실제 UN Comtrade 값으로 표시됩니다.",
     noEstimate: "추정값 미사용",
   },
   en: {
@@ -91,12 +91,12 @@ const copy = {
     note:
       "Country reporting schedules differ, so not every country reports up to the same latest month. These are reported official merchandise trade values, not estimates.",
     fallbackNote:
-      "UN Comtrade API quota is currently exceeded, so the site is showing the last successful official response snapshot. This is not an estimate.",
-    limitedTitle: "Official API limit pending",
+      "Shown by latest available official period. Values come from a saved official UN Comtrade response snapshot, not estimates.",
+    limitedTitle: "Official data sync pending",
     limitedDesc:
       "No saved official response snapshot is available for this country, so estimated values are not displayed.",
     limitedNext:
-      "When the API limit resets, official UN Comtrade values will be displayed automatically.",
+      "When official data is available, this section will update automatically.",
     noEstimate: "No estimated values",
   },
   ja: {
@@ -120,8 +120,8 @@ const copy = {
     notConfigured: "COMTRADE_API_KEYが設定されていません。",
     loading: "UN Comtradeデータを読み込んでいます。",
     note: "国ごとに報告時期が異なります。これは推定値ではありません。",
-    fallbackNote: "API制限中のため保存済み公式応答を表示しています。",
-    limitedTitle: "公式API制限中",
+    fallbackNote: "保存済みの公式応答スナップショットを表示しています。推定値ではありません。",
+    limitedTitle: "公式データ同期待ち",
     limitedDesc: "保存済み公式応答がないため推定値は表示しません。",
     limitedNext: "制限解除後に公式値へ自動更新されます。",
     noEstimate: "推定値なし",
@@ -148,9 +148,9 @@ const copy = {
     loading: "正在加载 UN Comtrade 数据。",
     note: "各国报告时间不同。这些是官方报告数据，不是估计值。",
     fallbackNote: "API 限制期间显示保存的官方响应。",
-    limitedTitle: "官方 API 限制中",
+    limitedTitle: "官方数据同步中",
     limitedDesc: "没有保存的官方响应，因此不显示估算值。",
-    limitedNext: "限制解除后将自动显示官方数据。",
+    limitedNext: "官方数据确认后将自动显示。",
     noEstimate: "不使用估算值",
   },
   es: {
@@ -174,8 +174,8 @@ const copy = {
     notConfigured: "COMTRADE_API_KEY no está configurado.",
     loading: "Cargando datos UN Comtrade.",
     note: "Los calendarios de reporte varían por país. No son estimaciones.",
-    fallbackNote: "Se muestra una respuesta oficial guardada por límite de API.",
-    limitedTitle: "Límite de API oficial",
+    fallbackNote: "Se muestra una respuesta oficial guardada. No es una estimación.",
+    limitedTitle: "Sincronización de datos oficiales",
     limitedDesc: "No se muestran estimaciones.",
     limitedNext: "Los datos oficiales aparecerán cuando se reinicie el límite.",
     noEstimate: "Sin estimaciones",
@@ -201,8 +201,8 @@ const copy = {
     notConfigured: "COMTRADE_API_KEY n’est pas configuré.",
     loading: "Chargement des données UN Comtrade.",
     note: "Les calendriers de déclaration varient selon les pays. Ce ne sont pas des estimations.",
-    fallbackNote: "Réponse officielle sauvegardée affichée pendant la limite API.",
-    limitedTitle: "Limite API officielle",
+    fallbackNote: "Réponse officielle sauvegardée affichée. Ce n’est pas une estimation.",
+    limitedTitle: "Synchronisation des données officielles",
     limitedDesc: "Aucune estimation n’est affichée.",
     limitedNext: "Les données officielles apparaîtront après réinitialisation.",
     noEstimate: "Pas d’estimation",
@@ -228,8 +228,8 @@ const copy = {
     notConfigured: "COMTRADE_API_KEY ist nicht konfiguriert.",
     loading: "UN-Comtrade-Daten werden geladen.",
     note: "Berichtszeitpunkte variieren je nach Land. Dies sind keine Schätzungen.",
-    fallbackNote: "Gespeicherte offizielle Antwort wird wegen API-Limit angezeigt.",
-    limitedTitle: "Offizielles API-Limit",
+    fallbackNote: "Gespeicherte offizielle Antwort wird angezeigt. Dies ist keine Schätzung.",
+    limitedTitle: "Offizielle Datensynchronisierung",
     limitedDesc: "Es werden keine Schätzwerte angezeigt.",
     limitedNext: "Offizielle Daten erscheinen nach dem Limit-Reset.",
     noEstimate: "Keine Schätzwerte",
@@ -429,7 +429,7 @@ export default function LatestMonthlyTradePanel({
 
           {data?.frequency ? (
             <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-              {data.frequency === "M" ? t.monthly : t.annual}
+              {`${data.frequency === "M" ? t.monthly : t.annual} · ${formatPeriod(data.latestPeriod, language)}`}
             </div>
           ) : null}
         </div>
@@ -444,9 +444,9 @@ export default function LatestMonthlyTradePanel({
           </div>
         ) : data?.emptyFallback ? (
           <div className="grid gap-4 md:grid-cols-3">
-            <StatusCard title={t.limitedTitle} value={data.latestPeriod ?? "API limited"} />
+            <StatusCard title={t.limitedTitle} value={t.noEstimate} />
             <StatusCard title={t.reporter} value={data.reporterCode ?? iso3} />
-            <StatusCard title={t.noEstimate} value="Official only" />
+            <StatusCard title={t.source} value={data?.source ?? "UN Comtrade API"} />
             <div className="md:col-span-3 rounded-2xl border border-blue-400/20 bg-blue-400/10 p-5 text-sm leading-6 text-blue-50/80">
               {t.limitedDesc}
               <br />
@@ -499,7 +499,7 @@ export default function LatestMonthlyTradePanel({
             {data?.emptyFallback
               ? t.limitedDesc
               : data?.fallback
-                ? t.fallbackNote
+                ? `${t.fallbackNote} ${t.period}: ${formatPeriod(data.latestPeriod, language)}.`
                 : t.note}
           </p>
           <p className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 text-xs leading-5 text-slate-400">
