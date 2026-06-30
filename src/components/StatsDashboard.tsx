@@ -1224,64 +1224,83 @@ export default function StatsDashboard({
         countryCount={rows.length}
         indicatorCount={7}
       />
-
       
       <OfficialSourceOverview language={language} />
-{(() => {
-        const tradeRow =
-          rows.find((item) => item.iso2 === visitorCountry) ??
-          rows.find((item) => item.iso3 === "USA") ??
-          rows[0];
-
-        return tradeRow ? (
-          <LatestMonthlyTradePanel
-            iso3={tradeRow.iso3}
-            countryName={`${getFlagEmoji(tradeRow.iso2)} ${getLocalizedCountryName(
-              tradeRow,
-              language
-            )}`}
-            language={language}
-          />
-        ) : null;
-      })()}
       {(() => {
-        const tariffRow =
-          rows.find((item) => item.iso2 === visitorCountry) ??
-          rows.find((item) => item.iso3 === "USA") ??
-          rows[0];
-
-        return tariffRow ? (
-          <OfficialTariffPanel
-            iso3={tariffRow.iso3}
-            countryName={`${getFlagEmoji(tariffRow.iso2)} ${getLocalizedCountryName(
-              tariffRow,
-              language
-            )}`}
-            language={language}
-          />
-        ) : null;
-      })()}
+              const tradeRow =
+                rows.find((item) => item.iso2 === visitorCountry) ??
+                rows.find((item) => item.iso3 === "USA") ??
+                rows[0];
+      
+              return tradeRow ? (
+                <LatestMonthlyTradePanel
+                  iso3={tradeRow.iso3}
+                  countryName={`${getFlagEmoji(tradeRow.iso2)} ${getLocalizedCountryName(
+                    tradeRow,
+                    language
+                  )}`}
+                  language={language}
+                />
+              ) : null;
+            })()}
 
       {(() => {
-        const energyRow =
-          rows.find((item) => item.iso2 === visitorCountry) ??
-          rows.find((item) => item.iso3 === "USA") ??
-          rows[0];
+              const tariffRow =
+                rows.find((item) => item.iso2 === visitorCountry) ??
+                rows.find((item) => item.iso3 === "USA") ??
+                rows[0];
+      
+              return tariffRow ? (
+                <OfficialTariffPanel
+                  iso3={tariffRow.iso3}
+                  countryName={`${getFlagEmoji(tariffRow.iso2)} ${getLocalizedCountryName(
+                    tariffRow,
+                    language
+                  )}`}
+                  language={language}
+                />
+              ) : null;
+            })()}
+      
+            {(() => {
+              const energyRow =
+                rows.find((item) => item.iso2 === visitorCountry) ??
+                rows.find((item) => item.iso3 === "USA") ??
+                rows[0];
+      
+              return energyRow ? (
+                <OfficialEnergyPanel
+                  iso3={energyRow.iso3}
+                  countryName={`${getFlagEmoji(energyRow.iso2)} ${getLocalizedCountryName(
+                    energyRow,
+                    language
+                  )}`}
+                  language={language}
+                />
+              ) : null;
+            })()}
 
-        return energyRow ? (
-          <OfficialEnergyPanel
-            iso3={energyRow.iso3}
-            countryName={`${getFlagEmoji(energyRow.iso2)} ${getLocalizedCountryName(
-              energyRow,
-              language
-            )}`}
-            language={language}
-          />
-        ) : null;
-      })()}
+      {(() => {
+              const tariffRow =
+                rows.find((item) => item.iso2 === visitorCountry) ??
+                rows.find((item) => item.iso3 === "KOR") ??
+                rows.find((item) => item.iso3 === "USA") ??
+                rows[0];
+      
+              return tariffRow ? (
+                <OfficialTariffPanel
+                  iso3={tariffRow.iso3}
+                  countryName={`${getFlagEmoji(tariffRow.iso2)} ${getLocalizedCountryName(
+                    tariffRow,
+                    language
+                  )}`}
+                  language={language}
+                />
+              ) : null;
+            })()}
+
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
-
-      <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
+<section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <div className="mb-6">
             <p className="text-sm font-medium text-indigo-300">
@@ -1767,7 +1786,7 @@ export default function StatsDashboard({
           </div>
         </div>
       </footer>
-          <HomeBottomLinks language={language} />
+      <HomeBottomLinks language={language} />
 </main>
   );
 }
