@@ -1,3 +1,3 @@
 Datlora deploy check
-UTC: 2026-07-01T22:02:03.974915+00:00
-Data challenge enabled: yes
+UTC: 2026-07-01T22:11:29.441640+00:00
+Enhanced data challenge enabled: yes

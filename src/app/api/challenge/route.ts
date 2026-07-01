@@ -30,6 +30,13 @@ type ChallengeItem = {
   year: string;
 };
 
+type CountryMetric = ChallengeItem & {
+  metricKey: string;
+  metricLabelKo: string;
+  metricLabelEn: string;
+  formattedValue: string;
+};
+
 const metricConfigs: MetricConfig[] = [
   {
     key: "importsGdp",
@@ -200,6 +207,14 @@ function readStat(row: LocalCountryRow, key: string) {
   };
 }
 
+function getCountryName(row: LocalCountryRow, iso3: string) {
+  return (
+    getStringValue(row, ["name", "countryName", "displayName", "nameEn"]) ||
+    countryMeta.get(iso3)?.name ||
+    iso3
+  );
+}
+
 function getItemsForMetric(rows: LocalCountryRow[], metric: MetricConfig): ChallengeItem[] {
   return rows
     .map((row) => {
@@ -209,14 +224,10 @@ function getItemsForMetric(rows: LocalCountryRow[], metric: MetricConfig): Chall
 
       if (!meta || !stat) return null;
 
-      const name =
-        getStringValue(row, ["name", "countryName", "displayName", "nameEn"]) ||
-        meta.name;
-
       return {
         iso3,
         iso2: meta.iso2,
-        countryName: name,
+        countryName: getCountryName(row, iso3),
         value: stat.value,
         year: stat.year,
       };
@@ -224,8 +235,45 @@ function getItemsForMetric(rows: LocalCountryRow[], metric: MetricConfig): Chall
     .filter((item): item is ChallengeItem => Boolean(item));
 }
 
+function getCountryMetrics(row: LocalCountryRow) {
+  const iso3 = getStringValue(row, ["iso3", "cca3", "countryiso3code"]).toUpperCase();
+  const meta = countryMeta.get(iso3);
+
+  if (!meta) return null;
+
+  const metrics = metricConfigs
+    .map((metric) => {
+      const stat = readStat(row, metric.key);
+
+      if (!stat) return null;
+
+      return {
+        metric,
+        value: stat.value,
+        year: stat.year,
+      };
+    })
+    .filter(
+      (item): item is { metric: MetricConfig; value: number; year: string } =>
+        Boolean(item)
+    );
+
+  if (metrics.length < 3) return null;
+
+  return {
+    iso3,
+    iso2: meta.iso2,
+    countryName: getCountryName(row, iso3),
+    metrics,
+  };
+}
+
 function pickRandom<T>(items: T[]) {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffle<T>(items: T[]) {
+  return [...items].sort(() => Math.random() - 0.5);
 }
 
 function formatValue(value: number, unit: MetricConfig["unit"]) {
@@ -246,12 +294,7 @@ function formatValue(value: number, unit: MetricConfig["unit"]) {
   });
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const requestedMetric = url.searchParams.get("metric");
-
-  const rows = await getLocalWorldBankRows();
-
+function buildHigherLower(rows: LocalCountryRow[], requestedMetric: string | null) {
   const available = metricConfigs
     .map((metric) => ({
       metric,
@@ -259,15 +302,7 @@ export async function GET(request: Request) {
     }))
     .filter((entry) => entry.items.length >= 2);
 
-  if (available.length === 0) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "No challenge data available.",
-      },
-      { status: 200 }
-    );
-  }
+  if (available.length === 0) return null;
 
   const selected =
     available.find((entry) => entry.metric.key === requestedMetric) ??
@@ -285,34 +320,204 @@ export async function GET(request: Request) {
 
   const correct = left.value >= right.value ? "left" : "right";
 
-  return NextResponse.json(
-    {
-      ok: true,
-      metric: selected.metric,
-      questionKo: selected.metric.questionKo,
-      questionEn: selected.metric.questionEn,
-      left: {
-        ...left,
-        formattedValue: formatValue(left.value, selected.metric.unit),
-      },
-      right: {
-        ...right,
-        formattedValue: formatValue(right.value, selected.metric.unit),
-      },
-      correct,
-      explanationKo:
-        correct === "left"
-          ? `${left.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`
-          : `${right.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`,
-      explanationEn:
-        correct === "left"
-          ? `${left.countryName} has a higher ${selected.metric.labelEn}.`
-          : `${right.countryName} has a higher ${selected.metric.labelEn}.`,
+  return {
+    ok: true,
+    mode: "higher-lower",
+    metric: selected.metric,
+    questionKo: selected.metric.questionKo,
+    questionEn: selected.metric.questionEn,
+    left: {
+      ...left,
+      formattedValue: formatValue(left.value, selected.metric.unit),
     },
+    right: {
+      ...right,
+      formattedValue: formatValue(right.value, selected.metric.unit),
+    },
+    correct,
+    explanationKo:
+      correct === "left"
+        ? `${left.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`
+        : `${right.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`,
+    explanationEn:
+      correct === "left"
+        ? `${left.countryName} has a higher ${selected.metric.labelEn}.`
+        : `${right.countryName} has a higher ${selected.metric.labelEn}.`,
+  };
+}
+
+function buildCountryDuel(rows: LocalCountryRow[]) {
+  const countriesWithMetrics = rows
+    .map(getCountryMetrics)
+    .filter(
+      (
+        item
+      ): item is NonNullable<ReturnType<typeof getCountryMetrics>> =>
+        Boolean(item)
+    );
+
+  if (countriesWithMetrics.length < 2) return null;
+
+  let left = pickRandom(countriesWithMetrics);
+  let right = pickRandom(countriesWithMetrics);
+
+  for (let i = 0; i < 30; i += 1) {
+    if (left.iso3 !== right.iso3) break;
+    right = pickRandom(countriesWithMetrics);
+  }
+
+  const commonMetrics = metricConfigs
+    .map((metric) => {
+      const leftMetric = left.metrics.find((item) => item.metric.key === metric.key);
+      const rightMetric = right.metrics.find((item) => item.metric.key === metric.key);
+
+      if (!leftMetric || !rightMetric) return null;
+
+      const winner =
+        leftMetric.value > rightMetric.value
+          ? "left"
+          : rightMetric.value > leftMetric.value
+            ? "right"
+            : "tie";
+
+      return {
+        key: metric.key,
+        labelKo: metric.labelKo,
+        labelEn: metric.labelEn,
+        unit: metric.unit,
+        leftValue: leftMetric.value,
+        rightValue: rightMetric.value,
+        leftFormatted: formatValue(leftMetric.value, metric.unit),
+        rightFormatted: formatValue(rightMetric.value, metric.unit),
+        leftYear: leftMetric.year,
+        rightYear: rightMetric.year,
+        winner,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const leftScore = commonMetrics.filter((metric) => metric.winner === "left").length;
+  const rightScore = commonMetrics.filter((metric) => metric.winner === "right").length;
+
+  if (leftScore === rightScore) {
+    return buildCountryDuel(rows);
+  }
+
+  const correct = leftScore > rightScore ? "left" : "right";
+
+  return {
+    ok: true,
+    mode: "duel",
+    questionKo: "어느 나라가 더 많은 지표에서 높은 값을 가질까요?",
+    questionEn: "Which country has higher values across more indicators?",
+    left: {
+      iso3: left.iso3,
+      iso2: left.iso2,
+      countryName: left.countryName,
+      score: leftScore,
+    },
+    right: {
+      iso3: right.iso3,
+      iso2: right.iso2,
+      countryName: right.countryName,
+      score: rightScore,
+    },
+    metrics: commonMetrics,
+    correct,
+    explanationKo:
+      correct === "left"
+        ? `${left.countryName}이 ${leftScore}:${rightScore}로 더 많은 지표에서 높은 값을 보였습니다.`
+        : `${right.countryName}이 ${rightScore}:${leftScore}로 더 많은 지표에서 높은 값을 보였습니다.`,
+    explanationEn:
+      correct === "left"
+        ? `${left.countryName} has higher values in more indicators.`
+        : `${right.countryName} has higher values in more indicators.`,
+  };
+}
+
+function buildDataDetective(rows: LocalCountryRow[]) {
+  const candidates = rows
+    .map(getCountryMetrics)
+    .filter(
+      (
+        item
+      ): item is NonNullable<ReturnType<typeof getCountryMetrics>> =>
+        Boolean(item)
+    );
+
+  if (candidates.length < 4) return null;
+
+  const target = pickRandom(candidates);
+  const clues = shuffle(target.metrics).slice(0, 3);
+
+  const wrongOptions = shuffle(
+    candidates.filter((item) => item.iso3 !== target.iso3)
+  ).slice(0, 3);
+
+  const options = shuffle([
     {
-      headers: {
-        "Cache-Control": "no-store",
+      iso3: target.iso3,
+      iso2: target.iso2,
+      countryName: target.countryName,
+    },
+    ...wrongOptions.map((item) => ({
+      iso3: item.iso3,
+      iso2: item.iso2,
+      countryName: item.countryName,
+    })),
+  ]);
+
+  return {
+    ok: true,
+    mode: "detective",
+    questionKo: "아래 공식 지표를 보고 어느 나라인지 맞혀보세요.",
+    questionEn: "Guess the country from these official indicators.",
+    target: {
+      iso3: target.iso3,
+      iso2: target.iso2,
+      countryName: target.countryName,
+    },
+    clues: clues.map((item) => ({
+      labelKo: item.metric.labelKo,
+      labelEn: item.metric.labelEn,
+      value: item.value,
+      formattedValue: formatValue(item.value, item.metric.unit),
+      year: item.year,
+    })),
+    options,
+    correct: target.iso3,
+    explanationKo: `정답은 ${target.countryName}입니다.`,
+    explanationEn: `The correct answer is ${target.countryName}.`,
+  };
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const mode = url.searchParams.get("mode") ?? "higher-lower";
+  const requestedMetric = url.searchParams.get("metric");
+
+  const rows = await getLocalWorldBankRows();
+
+  const payload =
+    mode === "duel"
+      ? buildCountryDuel(rows)
+      : mode === "detective"
+        ? buildDataDetective(rows)
+        : buildHigherLower(rows, requestedMetric);
+
+  if (!payload) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "No challenge data available.",
       },
-    }
-  );
+      { status: 200 }
+    );
+  }
+
+  return NextResponse.json(payload, {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }
