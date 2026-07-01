@@ -1205,6 +1205,9 @@ export default function StatsDashboard({
           <a href="/challenge" className="transition hover:text-white">
             {language === "ko" ? "데이터 챌린지" : "Challenge"}
           </a>
+          <a href="/risk-lab" className="transition hover:text-white">
+            Risk Lab
+          </a>
           <a href="/sources" className="transition hover:text-white">
             {language === "ko" ? "출처" : "Sources"}
           </a>

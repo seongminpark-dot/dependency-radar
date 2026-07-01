@@ -641,6 +641,7 @@ async function compareHtml(request: Request) {
         <a href="/topics">주제별 통계</a>
         <a href="/compare?a=KOR&b=USA">국가 비교</a>
         <a href="/challenge">데이터 챌린지</a>
+        <a href="/risk-lab">Risk Lab</a>
         <a href="/sources">출처</a>
       </nav>
     </div>
