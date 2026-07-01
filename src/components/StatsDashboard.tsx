@@ -1191,20 +1191,20 @@ export default function StatsDashboard({
             <p className="text-xs text-slate-400">{t.subtitle}</p>
           </div>
 
-          <nav className="hidden gap-6 text-sm text-slate-300 md:flex">
-            <a href="#data" className="hover:text-white">
-              {t.navData}
-            </a>
-            <a href="/compare?a=KOR&b=USA" className="hover:text-white">
-              {t.navCompare}
-            </a>
-            <a href="#method" className="hover:text-white">
-              {t.navMethod}
-            </a>
-            <a href="#contact" className="hover:text-white">
-              {t.navContact}
-            </a>
-          </nav>
+          <nav className="hidden gap-6 text-sm font-semibold text-slate-300 md:flex">
+          <a href="#country-search" className="transition hover:text-white">
+            {language === "ko" ? "국가 검색" : "Country search"}
+          </a>
+          <a href="/topics" className="transition hover:text-white">
+            {language === "ko" ? "주제별 통계" : "Topics"}
+          </a>
+          <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
+            {language === "ko" ? "국가 비교" : "Compare"}
+          </a>
+          <a href="/sources" className="transition hover:text-white">
+            {language === "ko" ? "출처" : "Sources"}
+          </a>
+        </nav>
 
           <select
             value={language}

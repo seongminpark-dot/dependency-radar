@@ -582,11 +582,80 @@ async function topicHtml(slug: string) {
         flex-direction: column;
       }
     }
+  
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      background: rgba(7,10,20,.86);
+      backdrop-filter: blur(16px);
+    }
+    .site-nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .site-brand {
+      color: #fff;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+    .site-menu {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .site-menu a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .site-menu a:hover {
+      color: #fff;
+    }
+    @media (max-width: 760px) {
+      .site-nav-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .site-menu {
+        gap: 10px;
+      }
+      .site-menu a {
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 999px;
+        padding: 8px 11px;
+        background: rgba(255,255,255,.04);
+        font-size: 12px;
+      }
+    }
+
   </style>
 </head>
 <body>
+  <header class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="/">Trade Dependency Atlas</a>
+      <nav class="site-menu" aria-label="Main navigation">
+        <a href="/#country-search">국가 검색</a>
+        <a href="/topics">주제별 통계</a>
+        <a href="/compare?a=KOR&b=USA">국가 비교</a>
+        <a href="/sources">출처</a>
+      </nav>
+    </div>
+  </header>
+
   <main>
-    <a class="back" href="/topics">← Topics</a>
+    <a class="back" href="/topics">← 주제 목록</a>
     <p class="label">${escapeHtml(topic.label)}</p>
     <h1>${escapeHtml(topic.titleKo)}</h1>
     <p class="intro">${escapeHtml(topic.descriptionKo)}</p>

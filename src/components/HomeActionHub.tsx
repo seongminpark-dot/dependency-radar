@@ -203,7 +203,7 @@ export default function HomeActionHub({
   }, [query, data]);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 pb-14">
+    <section id="country-search" className="mx-auto max-w-7xl px-6 pb-14">
       <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.075] to-white/[0.025] p-6 shadow-2xl shadow-black/20 lg:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">
           {t.label}
