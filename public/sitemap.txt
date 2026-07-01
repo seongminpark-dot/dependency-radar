@@ -24,3 +24,9 @@ https://dependency-radar-three.vercel.app/country/NOR
 https://dependency-radar-three.vercel.app/country/SGP
 https://dependency-radar-three.vercel.app/country/SWE
 https://dependency-radar-three.vercel.app/country/USA
+https://dependency-radar-three.vercel.app/topics
+https://dependency-radar-three.vercel.app/topics/fuel-import-dependency
+https://dependency-radar-three.vercel.app/topics/food-import-dependency
+https://dependency-radar-three.vercel.app/topics/imports-gdp
+https://dependency-radar-three.vercel.app/topics/tariff-rate
+https://dependency-radar-three.vercel.app/topics/energy-statistics

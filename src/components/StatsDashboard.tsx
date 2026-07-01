@@ -13,6 +13,7 @@ import { getFlagEmoji } from "@/lib/flags";
 import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
 import PublicInfoSearch from "@/components/PublicInfoSearch";
+import TopicEntryCards from "@/components/TopicEntryCards";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1230,6 +1231,8 @@ export default function StatsDashboard({
       
       
       <PublicInfoSearch rows={rows} language={language} />
+
+      <TopicEntryCards language={language} />
 <OfficialSourceOverview language={language} />
       {(() => {
               const tradeRow =
