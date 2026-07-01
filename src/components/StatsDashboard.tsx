@@ -1208,6 +1208,9 @@ export default function StatsDashboard({
           <a href="/risk-lab" className="transition hover:text-white">
             Risk Lab
           </a>
+          <a href="/world-voyage" className="transition hover:text-white">
+            World Voyage 3D
+          </a>
           <a href="/sources" className="transition hover:text-white">
             {language === "ko" ? "출처" : "Sources"}
           </a>

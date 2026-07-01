@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// datlora.risklab.powerup.v1
+
 function html() {
   return `<!doctype html>
 <html lang="ko">
@@ -85,7 +87,7 @@ function html() {
     .hud {
       margin-top: 30px;
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 12px;
     }
     .hud-card {
@@ -332,6 +334,67 @@ function html() {
     .share-status.error {
       color: #fecaca;
     }
+    .timer-shell {
+      margin-top: 22px;
+      height: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(15,23,42,.75);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .timer-bar {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #34d399, #67e8f9);
+      border-radius: 999px;
+      transition: width .18s linear, background .18s ease;
+    }
+    .timer-bar.warn {
+      background: linear-gradient(90deg, #facc15, #fb923c);
+    }
+    .timer-bar.danger {
+      background: linear-gradient(90deg, #fb7185, #ef4444);
+    }
+    .stage-banner {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid rgba(125,211,252,.22);
+      background: rgba(14,165,233,.1);
+      color: #e0f2fe;
+      border-radius: 20px;
+      padding: 15px 16px;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+    .stage-banner.show {
+      display: block;
+      animation: stagePop .42s ease both;
+    }
+    .stage-banner.good {
+      border-color: rgba(52,211,153,.32);
+      background: rgba(16,185,129,.12);
+      color: #d1fae5;
+    }
+    .stage-banner.bad {
+      border-color: rgba(248,113,113,.32);
+      background: rgba(239,68,68,.12);
+      color: #fee2e2;
+    }
+    .risk-card.locked {
+      pointer-events: none;
+      opacity: .82;
+    }
+    @keyframes stagePop {
+      from {
+        transform: translateY(8px) scale(.98);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
     .note {
       margin-top: 28px;
       border: 1px solid rgba(251,191,36,.25);
@@ -380,6 +443,7 @@ function html() {
         <a href="/compare?a=KOR&b=USA">국가 비교</a>
         <a href="/challenge">데이터 챌린지</a>
         <a href="/risk-lab">Risk Lab</a>
+        <a href="/world-voyage">World Voyage 3D</a>
         <a href="/sources">출처</a>
       </nav>
     </div>
@@ -414,6 +478,10 @@ function html() {
         <p>생명</p>
         <strong id="lives">3</strong>
       </div>
+      <div class="hud-card">
+        <p>제한 시간</p>
+        <strong id="timer">18초</strong>
+      </div>
     </section>
 
     <section class="lab">
@@ -426,6 +494,11 @@ function html() {
         <div class="objective" id="objective">가장 노출도가 높은 국가를 선택하세요.</div>
       </div>
 
+      <div class="timer-shell" aria-hidden="true">
+        <div class="timer-bar" id="timer-bar"></div>
+      </div>
+      <div class="stage-banner" id="stage-banner"></div>
+
       <div class="arena">
         <div class="cards" id="cards"></div>
       </div>
@@ -437,6 +510,7 @@ function html() {
         <button class="secondary" type="button" id="new-run-button">새 게임</button>
         <button class="secondary" type="button" id="share-button">최고 기록 공유</button>
         <a class="secondary" href="/challenge">Data Challenge</a>
+        <a class="secondary" href="/world-voyage">World Voyage 3D</a>
         <a class="secondary" href="/topics">주제별 통계</a>
       </div>
       <p class="share-status muted" id="share-status" aria-live="polite"></p>
@@ -461,6 +535,9 @@ function html() {
 
     let current = null;
     let answered = false;
+    let timerId = null;
+    let timeLeft = 18;
+    let timeLimit = 18;
 
     function loadBest() {
       try {
@@ -485,6 +562,88 @@ function html() {
       document.getElementById("round").textContent = state.round;
       document.getElementById("combo").textContent = state.combo;
       document.getElementById("lives").textContent = "♥".repeat(state.lives) || "0";
+      updateTimerHud();
+    }
+
+    function getRoundTimeLimit() {
+      return Math.max(8, 18 - Math.floor((state.round - 1) / 3) * 2);
+    }
+
+    function getDifficultyLabel() {
+      if (state.round >= 13) return "난이도 HARD";
+      if (state.round >= 7) return "난이도 MEDIUM";
+      return "난이도 EASY";
+    }
+
+    function updateTimerHud() {
+      const timer = document.getElementById("timer");
+      const bar = document.getElementById("timer-bar");
+
+      if (timer) {
+        timer.textContent = Math.max(0, Math.ceil(timeLeft)) + "초";
+      }
+
+      if (bar) {
+        const percent = Math.max(0, Math.min(100, (timeLeft / timeLimit) * 100));
+        bar.style.width = percent + "%";
+
+        if (percent <= 25) {
+          bar.className = "timer-bar danger";
+        } else if (percent <= 50) {
+          bar.className = "timer-bar warn";
+        } else {
+          bar.className = "timer-bar";
+        }
+      }
+    }
+
+    function stopTimer() {
+      if (timerId) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+
+      timeLimit = getRoundTimeLimit();
+      timeLeft = timeLimit;
+      updateTimerHud();
+
+      timerId = window.setInterval(function() {
+        if (answered || state.lives <= 0) {
+          stopTimer();
+          return;
+        }
+
+        timeLeft = Math.max(0, timeLeft - 0.2);
+        updateTimerHud();
+
+        if (timeLeft <= 0) {
+          handleTimeOut();
+        }
+      }, 200);
+    }
+
+    function setStageBanner(message, type) {
+      const banner = document.getElementById("stage-banner");
+      if (!banner) return;
+
+      banner.textContent = message || "";
+
+      if (!message) {
+        banner.className = "stage-banner";
+        return;
+      }
+
+      banner.className = "stage-banner show " + (type || "");
+    }
+
+    function lockCards() {
+      Array.from(document.querySelectorAll(".risk-card")).forEach(function(card) {
+        card.classList.add("locked");
+      });
     }
 
     function getShareScore() {
@@ -617,6 +776,11 @@ function html() {
 
     async function loadRound() {
       answered = false;
+      stopTimer();
+      timeLimit = getRoundTimeLimit();
+      timeLeft = timeLimit;
+      updateTimerHud();
+      setStageBanner("", "");
 
       document.getElementById("result").className = "result";
       document.getElementById("result").textContent = "";
@@ -642,7 +806,8 @@ function html() {
         document.getElementById("scenario-label").textContent = data.scenario.labelKo;
         document.getElementById("scenario-title").textContent = data.scenario.titleKo;
         document.getElementById("scenario-desc").textContent = data.scenario.descriptionKo;
-        document.getElementById("objective").textContent = data.scenario.objectiveKo;
+        document.getElementById("objective").textContent =
+          data.scenario.objectiveKo + " · " + getDifficultyLabel() + " · 제한 " + getRoundTimeLimit() + "초";
 
         document.getElementById("cards").innerHTML = data.countries.map(cardHtml).join("");
 
@@ -651,6 +816,7 @@ function html() {
             answer(card.getAttribute("data-iso3"));
           });
         });
+        startTimer();
       } catch {
         document.getElementById("scenario-label").textContent = "Network error";
         document.getElementById("scenario-title").textContent = "시나리오를 불러오지 못했습니다.";
@@ -670,10 +836,37 @@ function html() {
       });
     }
 
+    function handleTimeOut() {
+      if (!current || answered || state.lives <= 0) return;
+
+      answered = true;
+      stopTimer();
+      lockCards();
+      revealCards(null);
+
+      state.lives -= 1;
+      state.combo = 0;
+
+      const result = document.getElementById("result");
+      result.className = "result show wrong";
+      result.textContent = "시간 초과입니다. " + current.explanationKo;
+
+      setStageBanner("시간 초과 · 생명 -1", "bad");
+
+      saveBest();
+      updateHud();
+
+      if (state.lives <= 0) {
+        result.textContent += " 게임이 종료되었습니다. 새 게임을 시작해보세요.";
+      }
+    }
+
     function answer(selectedIso3) {
       if (!current || answered || state.lives <= 0) return;
 
       answered = true;
+      stopTimer();
+      lockCards();
 
       const isCorrect = selectedIso3 === current.correctIso3;
       revealCards(selectedIso3);
@@ -681,16 +874,35 @@ function html() {
       const result = document.getElementById("result");
 
       if (isCorrect) {
-        const gained = 100 + state.combo * 25 + state.round * 5;
+        const remainingSeconds = Math.max(0, Math.ceil(timeLeft));
+        const timeBonus = remainingSeconds * 8;
+        const stageBonus = state.round % 5 === 0 ? 250 + state.round * 10 : 0;
+        const gained = 100 + state.combo * 25 + state.round * 5 + timeBonus + stageBonus;
+
         state.score += gained;
         state.combo += 1;
+
         result.className = "result show correct";
-        result.textContent = "정답입니다. " + current.explanationKo + " +" + gained + "점";
+        result.textContent =
+          "정답입니다. " +
+          current.explanationKo +
+          " 기본/콤보/라운드/시간 보너스 합계 +" +
+          gained +
+          "점";
+
+        if (stageBonus > 0) {
+          setStageBanner("Stage Clear · 5라운드 보너스 +" + stageBonus + "점", "good");
+        } else if (state.combo >= 3) {
+          setStageBanner("Combo x" + state.combo + " · 연속 정답 보너스가 커지고 있습니다.", "good");
+        } else {
+          setStageBanner("시간 보너스 +" + timeBonus + "점", "good");
+        }
       } else {
         state.lives -= 1;
         state.combo = 0;
         result.className = "result show wrong";
         result.textContent = "아쉽습니다. " + current.explanationKo;
+        setStageBanner("오답 · 생명 -1 · 콤보 초기화", "bad");
       }
 
       saveBest();
@@ -703,12 +915,15 @@ function html() {
 
     function nextRound() {
       if (state.lives <= 0) return;
+      stopTimer();
       state.round += 1;
       updateHud();
       loadRound();
     }
 
     function newRun() {
+      stopTimer();
+
       state = {
         score: 0,
         round: 1,
@@ -716,6 +931,10 @@ function html() {
         lives: 3,
         bestScore: loadBest()
       };
+
+      timeLimit = getRoundTimeLimit();
+      timeLeft = timeLimit;
+
       updateHud();
       loadRound();
     }
