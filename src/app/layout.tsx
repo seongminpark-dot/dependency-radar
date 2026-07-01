@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site";
 import VisitorCountryRail from "@/components/VisitorCountryRail";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -63,6 +64,7 @@ export default function RootLayout({
         <VisitorCountryRail />
         <StructuredData />
         {children}
+              <Analytics />
       </body>
     </html>
   );
