@@ -14,6 +14,7 @@ import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
 import PublicInfoSearch from "@/components/PublicInfoSearch";
 import TopicEntryCards from "@/components/TopicEntryCards";
+import CompareEntryCard from "@/components/CompareEntryCard";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1196,7 +1197,7 @@ export default function StatsDashboard({
             <a href="#data" className="hover:text-white">
               {t.navData}
             </a>
-            <a href="#compare" className="hover:text-white">
+            <a href="/compare?a=KOR&b=USA" className="hover:text-white">
               {t.navCompare}
             </a>
             <a href="#method" className="hover:text-white">
@@ -1233,6 +1234,8 @@ export default function StatsDashboard({
       <PublicInfoSearch rows={rows} language={language} />
 
       <TopicEntryCards language={language} />
+
+      <CompareEntryCard language={language} />
 <OfficialSourceOverview language={language} />
       {(() => {
               const tradeRow =

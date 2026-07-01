@@ -30,3 +30,4 @@ https://dependency-radar-three.vercel.app/topics/food-import-dependency
 https://dependency-radar-three.vercel.app/topics/imports-gdp
 https://dependency-radar-three.vercel.app/topics/tariff-rate
 https://dependency-radar-three.vercel.app/topics/energy-statistics
+https://dependency-radar-three.vercel.app/compare
