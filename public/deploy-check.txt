@@ -1,3 +1,3 @@
 Trade Dependency Atlas deploy check
-UTC: 2026-07-01T13:41:17.372942+00:00
-Home data jump bar enabled: yes
+UTC: 2026-07-01T13:48:08.833830+00:00
+Country summary cards enabled: yes
