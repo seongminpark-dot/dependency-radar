@@ -1202,6 +1202,9 @@ export default function StatsDashboard({
           <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
             {language === "ko" ? "국가 비교" : "Compare"}
           </a>
+          <a href="/challenge" className="transition hover:text-white">
+            {language === "ko" ? "데이터 챌린지" : "Challenge"}
+          </a>
           <a href="/sources" className="transition hover:text-white">
             {language === "ko" ? "출처" : "Sources"}
           </a>

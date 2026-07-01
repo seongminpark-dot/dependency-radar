@@ -292,12 +292,20 @@ export default function HomeActionHub({
                 ))}
               </div>
 
-              <a
-                href="/compare?a=KOR&b=USA"
-                className="mt-4 inline-flex rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-bold text-[#06130d]"
-              >
-                {t.compareNow} →
-              </a>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a
+                  href="/compare?a=KOR&b=USA"
+                  className="inline-flex rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-bold text-[#06130d]"
+                >
+                  {t.compareNow} →
+                </a>
+                <a
+                  href="/challenge"
+                  className="inline-flex rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm font-semibold text-white hover:bg-white/[0.07]"
+                >
+                  {isKo ? "데이터 챌린지" : "Data Challenge"} →
+                </a>
+              </div>
             </div>
 
             <div className="rounded-3xl border border-indigo-400/20 bg-indigo-400/10 p-5">
