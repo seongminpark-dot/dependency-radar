@@ -12,9 +12,7 @@ import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
-import PublicInfoSearch from "@/components/PublicInfoSearch";
-import TopicEntryCards from "@/components/TopicEntryCards";
-import CompareEntryCard from "@/components/CompareEntryCard";
+import HomeActionHub from "@/components/HomeActionHub";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1229,15 +1227,9 @@ export default function StatsDashboard({
         countryCount={rows.length}
         indicatorCount={7}
       />
-      
-      
-      <PublicInfoSearch rows={rows} language={language} />
 
-      <TopicEntryCards language={language} />
-
-      <CompareEntryCard language={language} />
-<OfficialSourceOverview language={language} />
-      {(() => {
+      <HomeActionHub rows={rows} language={language} />
+{(() => {
               const tradeRow =
                 rows.find((item) => item.iso2 === visitorCountry) ??
                 rows.find((item) => item.iso3 === "USA") ??
@@ -1801,6 +1793,8 @@ export default function StatsDashboard({
           </div>
         </div>
       </footer>
+      <OfficialSourceOverview language={language} />
+
       <HomeBottomLinks language={language} />
 </main>
   );
