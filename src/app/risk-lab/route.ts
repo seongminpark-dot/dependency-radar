@@ -318,6 +318,20 @@ function html() {
       color: #e2e8f0;
       border: 1px solid rgba(255,255,255,.1) !important;
     }
+    .share-status {
+      margin: 12px 0 0;
+      min-height: 22px;
+      color: #a7f3d0;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    .share-status.muted {
+      color: #94a3b8;
+    }
+    .share-status.error {
+      color: #fecaca;
+    }
     .note {
       margin-top: 28px;
       border: 1px solid rgba(251,191,36,.25);
@@ -421,9 +435,11 @@ function html() {
       <div class="actions">
         <button class="primary" type="button" id="next-button">다음 라운드</button>
         <button class="secondary" type="button" id="new-run-button">새 게임</button>
+        <button class="secondary" type="button" id="share-button">최고 기록 공유</button>
         <a class="secondary" href="/challenge">Data Challenge</a>
         <a class="secondary" href="/topics">주제별 통계</a>
       </div>
+      <p class="share-status muted" id="share-status" aria-live="polite"></p>
     </section>
 
     <section class="note">
@@ -469,6 +485,97 @@ function html() {
       document.getElementById("round").textContent = state.round;
       document.getElementById("combo").textContent = state.combo;
       document.getElementById("lives").textContent = "♥".repeat(state.lives) || "0";
+    }
+
+    function getShareScore() {
+      return Math.max(Number(state.bestScore || 0), Number(state.score || 0));
+    }
+
+    function setShareStatus(message, isError) {
+      const status = document.getElementById("share-status");
+      if (!status) return;
+
+      status.textContent = message || "";
+
+      if (!message) {
+        status.className = "share-status muted";
+        return;
+      }
+
+      status.className = isError ? "share-status error" : "share-status";
+    }
+
+    async function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      return copied;
+    }
+
+    async function shareRiskLab() {
+      saveBest();
+      updateHud();
+
+      const bestScore = getShareScore();
+      const publicUrl = "https://datlora.com/risk-lab";
+      const scoreText = bestScore.toLocaleString("ko-KR");
+      const fullText =
+        "Datlora Risk Lab 최고 점수 " +
+        scoreText +
+        "점. 공식 국가 데이터로 공급망 충격을 플레이해보세요: " +
+        publicUrl;
+
+      setShareStatus("공유 준비 중입니다.", false);
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: "Datlora Risk Lab",
+            text:
+              "Datlora Risk Lab 최고 점수 " +
+              scoreText +
+              "점. 공식 국가 데이터로 공급망 충격을 플레이해보세요.",
+            url: publicUrl
+          });
+
+          setShareStatus("공유 창을 열었습니다.", false);
+          return;
+        }
+
+        const copied = await copyToClipboard(fullText);
+
+        if (copied) {
+          setShareStatus("공유 문구가 복사되었습니다. 원하는 곳에 붙여넣으면 됩니다.", false);
+          return;
+        }
+
+        throw new Error("Copy failed");
+      } catch (error) {
+        if (error && error.name === "AbortError") {
+          setShareStatus("공유가 취소되었습니다.", true);
+          return;
+        }
+
+        try {
+          await copyToClipboard(fullText);
+          setShareStatus("공유 문구가 복사되었습니다. 원하는 곳에 붙여넣으면 됩니다.", false);
+        } catch {
+          setShareStatus("복사가 되지 않았습니다. 주소창의 링크를 직접 복사해 주세요.", true);
+        }
+      }
     }
 
     function flagEmoji(iso2) {
@@ -518,6 +625,7 @@ function html() {
       document.getElementById("scenario-title").textContent = "시나리오를 불러오는 중입니다.";
       document.getElementById("scenario-desc").textContent = "";
       document.getElementById("objective").textContent = "가장 노출도가 높은 국가를 선택하세요.";
+      setShareStatus("", false);
 
       try {
         const response = await fetch("/api/risk-lab", { cache: "no-store" });
@@ -614,6 +722,7 @@ function html() {
 
     document.getElementById("next-button").addEventListener("click", nextRound);
     document.getElementById("new-run-button").addEventListener("click", newRun);
+    document.getElementById("share-button").addEventListener("click", shareRiskLab);
 
     state.bestScore = loadBest();
     updateHud();
