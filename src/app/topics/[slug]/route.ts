@@ -61,13 +61,15 @@ function formatValue(value: number, unit: Topic["rankingUnit"]) {
   return formatted;
 }
 
-async function fetchWorldBankRanking(topic: Topic) {
-  const url = `https://api.worldbank.org/v2/country/all/indicator/${topic.indicatorCode}?format=json&per_page=20000&MRV=1`;
+async function fetchWorldBankRows(topic: Topic, query: string) {
+  const indicator = encodeURIComponent(topic.indicatorCode);
+  const url = `https://api.worldbank.org/v2/country/all/indicator/${indicator}?${query}`;
 
   try {
     const response = await fetch(url, {
-      next: {
-        revalidate: 86400,
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
       },
     });
 
@@ -75,30 +77,67 @@ async function fetchWorldBankRanking(topic: Topic) {
 
     const json = await response.json();
 
-    const rows: WorldBankRow[] = Array.isArray(json?.[1]) ? json[1] : [];
-
-    return rows
-      .map((row) => {
-        const iso3 = row.countryiso3code?.toUpperCase() ?? "";
-        const country = validCountries.get(iso3);
-        const value = Number(row.value);
-
-        if (!country || Number.isNaN(value)) return null;
-
-        return {
-          iso3,
-          iso2: country.iso2,
-          countryName: country.name,
-          value,
-          year: row.date ?? "",
-        };
-      })
-      .filter((row): row is NonNullable<typeof row> => Boolean(row))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 20);
+    return Array.isArray(json?.[1]) ? (json[1] as WorldBankRow[]) : [];
   } catch {
     return [];
   }
+}
+
+function rowsToRanking(rows: WorldBankRow[], topic: Topic) {
+  const latestByCountry = new Map<
+    string,
+    {
+      iso3: string;
+      iso2: string;
+      countryName: string;
+      value: number;
+      year: string;
+    }
+  >();
+
+  for (const row of rows) {
+    const iso3 = row.countryiso3code?.toUpperCase() ?? "";
+    const country = validCountries.get(iso3);
+    const value = Number(row.value);
+    const year = row.date ?? "";
+
+    if (!country || Number.isNaN(value) || value === null) continue;
+
+    const previous = latestByCountry.get(iso3);
+
+    if (!previous || Number(year) > Number(previous.year || 0)) {
+      latestByCountry.set(iso3, {
+        iso3,
+        iso2: country.iso2,
+        countryName: country.name,
+        value,
+        year,
+      });
+    }
+  }
+
+  return Array.from(latestByCountry.values())
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 20);
+}
+
+async function fetchWorldBankRanking(topic: Topic) {
+  const queries = [
+    "format=json&per_page=20000&MRNEV=1",
+    "format=json&per_page=20000&date=2010:2026",
+    "format=json&per_page=20000&date=2000:2026",
+  ];
+
+  for (const query of queries) {
+    const rows = await fetchWorldBankRows(topic, query);
+    const ranking = rowsToRanking(rows, topic);
+
+    if (ranking.length > 0) {
+      return ranking;
+    }
+  }
+
+  return [];
 }
 
 function rankingHtml(
@@ -110,7 +149,7 @@ function rankingHtml(
       <section class="box wide">
         <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
         <p class="muted">
-          현재 이 지표의 상위 국가 목록을 불러오지 못했습니다. 공식 출처가 응답하면 자동으로 표시됩니다.
+          현재 이 지표의 상위 국가 목록을 준비 중입니다. 공식 출처의 최신 비어 있지 않은 값이 확인되면 자동으로 표시됩니다.
         </p>
       </section>
     `;
@@ -438,7 +477,7 @@ export async function GET(
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600",
     },
   });
 }
