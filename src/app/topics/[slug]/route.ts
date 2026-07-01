@@ -1,7 +1,37 @@
 import { NextResponse } from "next/server";
-import { getTopic, topics } from "@/lib/topicContent";
+import countries from "world-countries";
+import { getTopic, topics, type Topic } from "@/lib/topicContent";
 
 export const dynamic = "force-dynamic";
+
+type WorldBankRow = {
+  countryiso3code?: string;
+  date?: string;
+  value?: number | null;
+  country?: {
+    value?: string;
+  };
+};
+
+type CountryRecord = {
+  cca2?: string;
+  cca3?: string;
+  name?: {
+    common?: string;
+  };
+};
+
+const validCountries = new Map(
+  (countries as CountryRecord[])
+    .filter((country) => country.cca3 && country.cca2)
+    .map((country) => [
+      country.cca3!.toUpperCase(),
+      {
+        iso2: country.cca2!.toUpperCase(),
+        name: country.name?.common ?? country.cca3!,
+      },
+    ])
+);
 
 function escapeHtml(value: string) {
   return value
@@ -11,10 +41,123 @@ function escapeHtml(value: string) {
     .replaceAll('"', "&quot;");
 }
 
-function topicHtml(slug: string) {
+function getFlagEmoji(iso2: string) {
+  if (!iso2 || iso2.length !== 2) return "";
+
+  return iso2
+    .toUpperCase()
+    .replace(/./g, (char) =>
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+}
+
+function formatValue(value: number, unit: Topic["rankingUnit"]) {
+  const formatted = value.toLocaleString("ko-KR", {
+    maximumFractionDigits: 2,
+  });
+
+  if (unit === "%") return `${formatted}%`;
+
+  return formatted;
+}
+
+async function fetchWorldBankRanking(topic: Topic) {
+  const url = `https://api.worldbank.org/v2/country/all/indicator/${topic.indicatorCode}?format=json&per_page=20000&MRV=1`;
+
+  try {
+    const response = await fetch(url, {
+      next: {
+        revalidate: 86400,
+      },
+    });
+
+    if (!response.ok) return [];
+
+    const json = await response.json();
+
+    const rows: WorldBankRow[] = Array.isArray(json?.[1]) ? json[1] : [];
+
+    return rows
+      .map((row) => {
+        const iso3 = row.countryiso3code?.toUpperCase() ?? "";
+        const country = validCountries.get(iso3);
+        const value = Number(row.value);
+
+        if (!country || Number.isNaN(value)) return null;
+
+        return {
+          iso3,
+          iso2: country.iso2,
+          countryName: country.name,
+          value,
+          year: row.date ?? "",
+        };
+      })
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+function rankingHtml(
+  topic: Topic,
+  ranking: Awaited<ReturnType<typeof fetchWorldBankRanking>>
+) {
+  if (ranking.length === 0) {
+    return `
+      <section class="box wide">
+        <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
+        <p class="muted">
+          현재 이 지표의 상위 국가 목록을 불러오지 못했습니다. 공식 출처가 응답하면 자동으로 표시됩니다.
+        </p>
+      </section>
+    `;
+  }
+
+  const rows = ranking
+    .map(
+      (item, index) => `
+        <a class="rank-row" href="/country/${item.iso3}">
+          <div>
+            <p class="rank-name">#${index + 1} ${getFlagEmoji(item.iso2)} ${escapeHtml(
+              item.countryName
+            )}</p>
+            <p class="rank-meta">${item.iso3} · 제공 연도 ${escapeHtml(item.year || "—")}</p>
+          </div>
+          <strong>${formatValue(item.value, topic.rankingUnit)}</strong>
+        </a>
+      `
+    )
+    .join("");
+
+  return `
+    <section class="box wide">
+      <div class="section-head">
+        <div>
+          <p class="small-label">Official ranking</p>
+          <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
+        </div>
+        <p class="source-pill">World Bank WDI · ${escapeHtml(topic.indicatorCode)}</p>
+      </div>
+      <p class="muted">
+        아래 순위는 World Bank API가 제공하는 각 국가의 최신 공식 제공 연도 기준입니다.
+        국가별 최신 연도는 다를 수 있으며, 값이 없는 국가는 순위에서 제외됩니다.
+      </p>
+      <div class="rank-list">
+        ${rows}
+      </div>
+    </section>
+  `;
+}
+
+async function topicHtml(slug: string) {
   const topic = getTopic(slug);
 
   if (!topic) return null;
+
+  const ranking = await fetchWorldBankRanking(topic);
 
   const questions = topic.questionsKo
     .map((question) => `<li>${escapeHtml(question)}</li>`)
@@ -60,7 +203,8 @@ function topicHtml(slug: string) {
       border-radius: 16px;
       padding: 12px 16px;
     }
-    .label {
+    .label,
+    .small-label {
       color: #67e8f9;
       font-size: 13px;
       font-weight: 700;
@@ -102,6 +246,9 @@ function topicHtml(slug: string) {
       border-radius: 28px;
       padding: 26px;
     }
+    .wide {
+      margin-top: 36px;
+    }
     .box h2 {
       margin: 0 0 18px;
       font-size: 24px;
@@ -127,6 +274,63 @@ function topicHtml(slug: string) {
       text-decoration: none;
       font-size: 14px;
       font-weight: 650;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    .source-pill {
+      margin: 0;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0b0f1c;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #cbd5e1;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .muted {
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .rank-list {
+      margin-top: 20px;
+      display: grid;
+      gap: 10px;
+    }
+    .rank-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0b0f1c;
+      border-radius: 18px;
+      padding: 16px 18px;
+      transition: background .15s ease, transform .15s ease;
+    }
+    .rank-row:hover {
+      background: rgba(255,255,255,.075);
+      transform: translateY(-1px);
+    }
+    .rank-name {
+      margin: 0;
+      color: white;
+      font-weight: 750;
+    }
+    .rank-meta {
+      margin: 5px 0 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+    .rank-row strong {
+      color: #c7d2fe;
+      font-size: 18px;
+      white-space: nowrap;
     }
     .cta {
       margin-top: 36px;
@@ -159,6 +363,13 @@ function topicHtml(slug: string) {
       .grid {
         grid-template-columns: 1fr;
       }
+      .section-head {
+        flex-direction: column;
+      }
+      .rank-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -174,6 +385,8 @@ function topicHtml(slug: string) {
       ${escapeHtml(topic.sourceKo)}<br />
       ${escapeHtml(topic.sourceEn)}
     </section>
+
+    ${rankingHtml(topic, ranking)}
 
     <section class="grid">
       <div class="box">
@@ -211,7 +424,7 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const html = topicHtml(slug);
+  const html = await topicHtml(slug);
 
   if (!html) {
     return new NextResponse("Topic not found", {

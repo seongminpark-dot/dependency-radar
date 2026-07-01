@@ -9,6 +9,10 @@ export type Topic = {
   sourceEn: string;
   questionsKo: string[];
   indicatorsKo: string[];
+  indicatorCode: string;
+  indicatorNameKo: string;
+  rankingTitleKo: string;
+  rankingUnit: "%" | "index";
 };
 
 export const topics: Topic[] = [
@@ -29,6 +33,10 @@ export const topics: Topic[] = [
       "World Bank 구조 지표와 UN Comtrade 무역 데이터는 어떻게 다르게 해석해야 하는가?",
     ],
     indicatorsKo: ["연료 수입 비중", "연료 수입액", "에너지 순수입", "EIA 에너지 지표"],
+    indicatorCode: "TM.VAL.FUEL.ZS.UN",
+    indicatorNameKo: "연료 수입 비중",
+    rankingTitleKo: "연료 수입 비중 상위 국가",
+    rankingUnit: "%",
   },
   {
     slug: "food-import-dependency",
@@ -47,6 +55,10 @@ export const topics: Topic[] = [
       "최신 공식 데이터가 없는 국가는 어떻게 표시되는가?",
     ],
     indicatorsKo: ["식량/농산물 수입액", "총 수입 대비 비중", "전년 대비 변화"],
+    indicatorCode: "TM.VAL.FOOD.ZS.UN",
+    indicatorNameKo: "식량 수입 비중",
+    rankingTitleKo: "식량 수입 비중 상위 국가",
+    rankingUnit: "%",
   },
   {
     slug: "imports-gdp",
@@ -65,6 +77,10 @@ export const topics: Topic[] = [
       "이 지표는 무역수지와 어떻게 다르게 해석해야 하는가?",
     ],
     indicatorsKo: ["수입/GDP", "총 수입액", "최신 제공 연도"],
+    indicatorCode: "NE.IMP.GNFS.ZS",
+    indicatorNameKo: "수입/GDP",
+    rankingTitleKo: "수입/GDP 비중 상위 국가",
+    rankingUnit: "%",
   },
   {
     slug: "tariff-rate",
@@ -83,6 +99,10 @@ export const topics: Topic[] = [
       "가중평균 관세와 단순평균 관세는 어떻게 다른가?",
     ],
     indicatorsKo: ["가중평균 관세율", "단순평균 관세율", "MFN 관세율"],
+    indicatorCode: "TM.TAX.MRCH.WM.AR.ZS",
+    indicatorNameKo: "가중평균 관세율",
+    rankingTitleKo: "가중평균 관세율 상위 국가",
+    rankingUnit: "%",
   },
   {
     slug: "energy-statistics",
@@ -101,6 +121,10 @@ export const topics: Topic[] = [
       "에너지 지표와 무역 지표는 어떻게 함께 해석해야 하는가?",
     ],
     indicatorsKo: ["석유 및 기타 액체", "총에너지", "천연가스", "에너지 순수입"],
+    indicatorCode: "EG.IMP.CONS.ZS",
+    indicatorNameKo: "에너지 순수입",
+    rankingTitleKo: "에너지 수입 노출도 상위 국가",
+    rankingUnit: "%",
   },
 ];
 
