@@ -30,11 +30,10 @@ type ChallengeItem = {
   year: string;
 };
 
-type CountryMetric = ChallengeItem & {
-  metricKey: string;
-  metricLabelKo: string;
-  metricLabelEn: string;
-  formattedValue: string;
+type StatEntry = {
+  metric: MetricConfig;
+  value: number;
+  year: string;
 };
 
 const metricConfigs: MetricConfig[] = [
@@ -85,6 +84,42 @@ const metricConfigs: MetricConfig[] = [
     unit: "index",
     questionKo: "어느 나라의 물류지수가 더 높을까요?",
     questionEn: "Which country has a higher logistics index?",
+  },
+];
+
+const shockScenarios = [
+  {
+    key: "fuel-shock",
+    labelKo: "Oil Shock",
+    titleKo: "국제 유가가 급등한다면 어느 나라가 더 노출될까요?",
+    descKo: "연료 수입 비중과 에너지 순수입 비중을 중심으로 비교합니다.",
+    weights: {
+      fuelImportShare: 0.55,
+      energyImportPercent: 0.3,
+      importsGdp: 0.15,
+    },
+  },
+  {
+    key: "food-shock",
+    labelKo: "Food Shock",
+    titleKo: "식량 가격이 급등한다면 어느 나라가 더 노출될까요?",
+    descKo: "식량 수입 비중과 수입/GDP 비중을 중심으로 비교합니다.",
+    weights: {
+      foodImportShare: 0.65,
+      importsGdp: 0.25,
+      energyImportPercent: 0.1,
+    },
+  },
+  {
+    key: "supply-shock",
+    labelKo: "Supply Shock",
+    titleKo: "글로벌 공급망 충격이 온다면 어느 나라가 더 노출될까요?",
+    descKo: "수입/GDP, 연료 수입 비중, 식량 수입 비중을 함께 비교합니다.",
+    weights: {
+      importsGdp: 0.45,
+      fuelImportShare: 0.3,
+      foodImportShare: 0.25,
+    },
   },
 ];
 
@@ -175,7 +210,7 @@ async function getLocalWorldBankRows() {
 
         if (rows.length > 0) return rows;
       } catch {
-        // 일부 함수는 인자가 필요할 수 있어서 무시
+        // ignore functions that require arguments
       }
     }
 
@@ -185,7 +220,7 @@ async function getLocalWorldBankRows() {
   }
 }
 
-function readStat(row: LocalCountryRow, key: string) {
+function readStat(row: LocalCountryRow, key: string): { value: number; year: string } | null {
   const raw = row[key];
 
   if (!raw || typeof raw !== "object") return null;
@@ -215,6 +250,32 @@ function getCountryName(row: LocalCountryRow, iso3: string) {
   );
 }
 
+function formatValue(value: number, unit: MetricConfig["unit"]) {
+  if (unit === "usd") {
+    return `US$${value.toLocaleString("en-US", {
+      maximumFractionDigits: 0,
+    })}`;
+  }
+
+  if (unit === "%") {
+    return `${value.toLocaleString("ko-KR", {
+      maximumFractionDigits: 2,
+    })}%`;
+  }
+
+  return value.toLocaleString("ko-KR", {
+    maximumFractionDigits: 2,
+  });
+}
+
+function pickRandom<T>(items: T[]) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffle<T>(items: T[]) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
 function getItemsForMetric(rows: LocalCountryRow[], metric: MetricConfig): ChallengeItem[] {
   return rows
     .map((row) => {
@@ -235,7 +296,7 @@ function getItemsForMetric(rows: LocalCountryRow[], metric: MetricConfig): Chall
     .filter((item): item is ChallengeItem => Boolean(item));
 }
 
-function getCountryMetrics(row: LocalCountryRow) {
+function getCountryMetricEntries(row: LocalCountryRow) {
   const iso3 = getStringValue(row, ["iso3", "cca3", "countryiso3code"]).toUpperCase();
   const meta = countryMeta.get(iso3);
 
@@ -253,10 +314,7 @@ function getCountryMetrics(row: LocalCountryRow) {
         year: stat.year,
       };
     })
-    .filter(
-      (item): item is { metric: MetricConfig; value: number; year: string } =>
-        Boolean(item)
-    );
+    .filter((item): item is StatEntry => Boolean(item));
 
   if (metrics.length < 3) return null;
 
@@ -266,32 +324,6 @@ function getCountryMetrics(row: LocalCountryRow) {
     countryName: getCountryName(row, iso3),
     metrics,
   };
-}
-
-function pickRandom<T>(items: T[]) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function shuffle<T>(items: T[]) {
-  return [...items].sort(() => Math.random() - 0.5);
-}
-
-function formatValue(value: number, unit: MetricConfig["unit"]) {
-  if (unit === "usd") {
-    return `US$${value.toLocaleString("en-US", {
-      maximumFractionDigits: 0,
-    })}`;
-  }
-
-  if (unit === "%") {
-    return `${value.toLocaleString("ko-KR", {
-      maximumFractionDigits: 2,
-    })}%`;
-  }
-
-  return value.toLocaleString("ko-KR", {
-    maximumFractionDigits: 2,
-  });
 }
 
 function buildHigherLower(rows: LocalCountryRow[], requestedMetric: string | null) {
@@ -313,8 +345,6 @@ function buildHigherLower(rows: LocalCountryRow[], requestedMetric: string | nul
 
   for (let i = 0; i < 30; i += 1) {
     if (left.iso3 !== right.iso3 && left.value !== right.value) break;
-
-    left = pickRandom(selected.items);
     right = pickRandom(selected.items);
   }
 
@@ -323,9 +353,8 @@ function buildHigherLower(rows: LocalCountryRow[], requestedMetric: string | nul
   return {
     ok: true,
     mode: "higher-lower",
-    metric: selected.metric,
+    badgeKo: selected.metric.labelKo,
     questionKo: selected.metric.questionKo,
-    questionEn: selected.metric.questionEn,
     left: {
       ...left,
       formattedValue: formatValue(left.value, selected.metric.unit),
@@ -339,110 +368,14 @@ function buildHigherLower(rows: LocalCountryRow[], requestedMetric: string | nul
       correct === "left"
         ? `${left.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`
         : `${right.countryName}의 ${selected.metric.labelKo} 값이 더 높습니다.`,
-    explanationEn:
-      correct === "left"
-        ? `${left.countryName} has a higher ${selected.metric.labelEn}.`
-        : `${right.countryName} has a higher ${selected.metric.labelEn}.`,
   };
 }
 
-function buildCountryDuel(rows: LocalCountryRow[]) {
-  const countriesWithMetrics = rows
-    .map(getCountryMetrics)
-    .filter(
-      (
-        item
-      ): item is NonNullable<ReturnType<typeof getCountryMetrics>> =>
-        Boolean(item)
-    );
-
-  if (countriesWithMetrics.length < 2) return null;
-
-  let left = pickRandom(countriesWithMetrics);
-  let right = pickRandom(countriesWithMetrics);
-
-  for (let i = 0; i < 30; i += 1) {
-    if (left.iso3 !== right.iso3) break;
-    right = pickRandom(countriesWithMetrics);
-  }
-
-  const commonMetrics = metricConfigs
-    .map((metric) => {
-      const leftMetric = left.metrics.find((item) => item.metric.key === metric.key);
-      const rightMetric = right.metrics.find((item) => item.metric.key === metric.key);
-
-      if (!leftMetric || !rightMetric) return null;
-
-      const winner =
-        leftMetric.value > rightMetric.value
-          ? "left"
-          : rightMetric.value > leftMetric.value
-            ? "right"
-            : "tie";
-
-      return {
-        key: metric.key,
-        labelKo: metric.labelKo,
-        labelEn: metric.labelEn,
-        unit: metric.unit,
-        leftValue: leftMetric.value,
-        rightValue: rightMetric.value,
-        leftFormatted: formatValue(leftMetric.value, metric.unit),
-        rightFormatted: formatValue(rightMetric.value, metric.unit),
-        leftYear: leftMetric.year,
-        rightYear: rightMetric.year,
-        winner,
-      };
-    })
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-  const leftScore = commonMetrics.filter((metric) => metric.winner === "left").length;
-  const rightScore = commonMetrics.filter((metric) => metric.winner === "right").length;
-
-  if (leftScore === rightScore) {
-    return buildCountryDuel(rows);
-  }
-
-  const correct = leftScore > rightScore ? "left" : "right";
-
-  return {
-    ok: true,
-    mode: "duel",
-    questionKo: "어느 나라가 더 많은 지표에서 높은 값을 가질까요?",
-    questionEn: "Which country has higher values across more indicators?",
-    left: {
-      iso3: left.iso3,
-      iso2: left.iso2,
-      countryName: left.countryName,
-      score: leftScore,
-    },
-    right: {
-      iso3: right.iso3,
-      iso2: right.iso2,
-      countryName: right.countryName,
-      score: rightScore,
-    },
-    metrics: commonMetrics,
-    correct,
-    explanationKo:
-      correct === "left"
-        ? `${left.countryName}이 ${leftScore}:${rightScore}로 더 많은 지표에서 높은 값을 보였습니다.`
-        : `${right.countryName}이 ${rightScore}:${leftScore}로 더 많은 지표에서 높은 값을 보였습니다.`,
-    explanationEn:
-      correct === "left"
-        ? `${left.countryName} has higher values in more indicators.`
-        : `${right.countryName} has higher values in more indicators.`,
-  };
-}
-
-function buildDataDetective(rows: LocalCountryRow[]) {
+function buildDetective(rows: LocalCountryRow[]) {
   const candidates = rows
-    .map(getCountryMetrics)
-    .filter(
-      (
-        item
-      ): item is NonNullable<ReturnType<typeof getCountryMetrics>> =>
-        Boolean(item)
+    .map(getCountryMetricEntries)
+    .filter((item): item is NonNullable<ReturnType<typeof getCountryMetricEntries>> =>
+      Boolean(item)
     );
 
   if (candidates.length < 4) return null;
@@ -470,24 +403,126 @@ function buildDataDetective(rows: LocalCountryRow[]) {
   return {
     ok: true,
     mode: "detective",
+    badgeKo: "Data Detective",
     questionKo: "아래 공식 지표를 보고 어느 나라인지 맞혀보세요.",
-    questionEn: "Guess the country from these official indicators.",
-    target: {
-      iso3: target.iso3,
-      iso2: target.iso2,
-      countryName: target.countryName,
-    },
     clues: clues.map((item) => ({
       labelKo: item.metric.labelKo,
-      labelEn: item.metric.labelEn,
-      value: item.value,
       formattedValue: formatValue(item.value, item.metric.unit),
       year: item.year,
     })),
     options,
     correct: target.iso3,
     explanationKo: `정답은 ${target.countryName}입니다.`,
-    explanationEn: `The correct answer is ${target.countryName}.`,
+  };
+}
+
+function buildRankRush(rows: LocalCountryRow[]) {
+  const available = metricConfigs
+    .map((metric) => ({
+      metric,
+      items: getItemsForMetric(rows, metric),
+    }))
+    .filter((entry) => entry.items.length >= 4);
+
+  if (available.length === 0) return null;
+
+  const selected = pickRandom(available);
+  const options = shuffle(selected.items).slice(0, 4);
+  const correctItem = [...options].sort((a, b) => b.value - a.value)[0];
+
+  return {
+    ok: true,
+    mode: "rank-rush",
+    badgeKo: "Rank Rush",
+    questionKo: `다음 4개 국가 중 ${selected.metric.labelKo}이 가장 높은 국가는 어디일까요?`,
+    metric: selected.metric,
+    options: options.map((item) => ({
+      ...item,
+      formattedValue: formatValue(item.value, selected.metric.unit),
+    })),
+    correct: correctItem.iso3,
+    explanationKo: `${correctItem.countryName}의 ${selected.metric.labelKo} 값이 가장 높습니다.`,
+  };
+}
+
+function getMetricByKey(metrics: StatEntry[], key: string) {
+  return metrics.find((item) => item.metric.key === key);
+}
+
+function buildShockScenario(rows: LocalCountryRow[]) {
+  const scenario = pickRandom(shockScenarios);
+
+  const candidates = rows
+    .map(getCountryMetricEntries)
+    .filter((item): item is NonNullable<ReturnType<typeof getCountryMetricEntries>> =>
+      Boolean(item)
+    )
+    .map((item) => {
+      let score = 0;
+      const factors: {
+        labelKo: string;
+        formattedValue: string;
+        year: string;
+        weight: number;
+      }[] = [];
+
+      for (const [key, weight] of Object.entries(scenario.weights)) {
+        const metric = getMetricByKey(item.metrics, key);
+
+        if (!metric) continue;
+
+        const normalizedValue = Math.max(0, metric.value);
+        score += normalizedValue * weight;
+
+        factors.push({
+          labelKo: metric.metric.labelKo,
+          formattedValue: formatValue(metric.value, metric.metric.unit),
+          year: metric.year,
+          weight,
+        });
+      }
+
+      if (factors.length < 2) return null;
+
+      return {
+        iso3: item.iso3,
+        iso2: item.iso2,
+        countryName: item.countryName,
+        score,
+        formattedValue: `${score.toLocaleString("ko-KR", {
+          maximumFractionDigits: 1,
+        })} pts`,
+        year: "Datlora scenario score",
+        factors,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  if (candidates.length < 2) return null;
+
+  let left = pickRandom(candidates);
+  let right = pickRandom(candidates);
+
+  for (let i = 0; i < 30; i += 1) {
+    if (left.iso3 !== right.iso3 && Math.abs(left.score - right.score) > 0.1) break;
+    right = pickRandom(candidates);
+  }
+
+  const correct = left.score >= right.score ? "left" : "right";
+
+  return {
+    ok: true,
+    mode: "shock",
+    badgeKo: scenario.labelKo,
+    questionKo: scenario.titleKo,
+    scenarioKo: scenario.descKo,
+    left,
+    right,
+    correct,
+    explanationKo:
+      correct === "left"
+        ? `${left.countryName}의 시나리오 노출 점수가 더 높습니다.`
+        : `${right.countryName}의 시나리오 노출 점수가 더 높습니다.`,
   };
 }
 
@@ -499,11 +534,13 @@ export async function GET(request: Request) {
   const rows = await getLocalWorldBankRows();
 
   const payload =
-    mode === "duel"
-      ? buildCountryDuel(rows)
-      : mode === "detective"
-        ? buildDataDetective(rows)
-        : buildHigherLower(rows, requestedMetric);
+    mode === "detective"
+      ? buildDetective(rows)
+      : mode === "rank-rush"
+        ? buildRankRush(rows)
+        : mode === "shock"
+          ? buildShockScenario(rows)
+          : buildHigherLower(rows, requestedMetric);
 
   if (!payload) {
     return NextResponse.json(
