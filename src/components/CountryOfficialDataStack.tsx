@@ -3,6 +3,7 @@
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
+import CountryAutoSummary from "@/components/CountryAutoSummary";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 type LooseCountryRow = Record<string, unknown>;
@@ -385,6 +386,13 @@ export default function CountryOfficialDataStack({
               </div>
             </div>
           </div>
+
+          <CountryAutoSummary
+            row={row}
+            iso3={resolvedIso3}
+            countryName={resolvedCountryName}
+            language={lang}
+          />
 
           <CountrySummaryCards row={row} language={lang} />
 
