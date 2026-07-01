@@ -1,10 +1,10 @@
 const productionUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://dependency-radar-three.vercel.app"
+  "https://datlora.com"
 ).replace(/\/$/, "");
 
 export const siteConfig = {
-  name: "Trade Dependency Atlas",
+  name: "Datlora",
   url: productionUrl,
   description:
     "A global statistics platform for country dependency, supply exposure, imports, tariffs, and logistics indicators using public World Bank data.",

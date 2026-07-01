@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Methodology | Trade Dependency Atlas",
+  title: "Methodology | Datlora",
   description:
-    "Methodology for Trade Dependency Atlas official country dependency, trade, tariff, and energy indicators.",
+    "Methodology for Datlora official country dependency, trade, tariff, and energy indicators.",
 };
 
 const layers = [
@@ -85,7 +85,7 @@ export default function MethodologyPage() {
         </h1>
 
         <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
-          Trade Dependency Atlas는 하나의 임의 위험점수 대신, 공식 공공 데이터 출처의
+          Datlora는 하나의 임의 위험점수 대신, 공식 공공 데이터 출처의
           값과 제공 연도를 함께 표시합니다. 데이터가 없는 국가나 지표에는 값을
           추정해 채우지 않고, 공식 데이터 사용 가능 상태를 표시합니다.
         </p>

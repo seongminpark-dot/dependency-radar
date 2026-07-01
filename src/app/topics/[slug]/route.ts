@@ -227,7 +227,7 @@ async function fetchWorldBankRows(topic: Topic, query: string) {
       cache: "no-store",
       headers: {
         Accept: "application/json",
-        "User-Agent": "Trade Dependency Atlas",
+        "User-Agent": "Datlora",
       },
     });
 
@@ -386,7 +386,7 @@ async function topicHtml(slug: string) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(topic.titleEn)} | Trade Dependency Atlas</title>
+  <title>${escapeHtml(topic.titleEn)} | Datlora</title>
   <meta name="description" content="${escapeHtml(topic.descriptionEn)}" />
   <style>
     body {
@@ -644,7 +644,7 @@ async function topicHtml(slug: string) {
 <body>
   <header class="site-nav">
     <div class="site-nav-inner">
-      <a class="site-brand" href="/">Trade Dependency Atlas</a>
+      <a class="site-brand" href="/">Datlora</a>
       <nav class="site-menu" aria-label="Main navigation">
         <a href="/#country-search">국가 검색</a>
         <a href="/topics">주제별 통계</a>

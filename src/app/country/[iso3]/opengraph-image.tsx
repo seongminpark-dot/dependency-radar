@@ -107,7 +107,7 @@ export default async function Image({
             >
               ⦿
             </div>
-            Trade Dependency Atlas
+            Datlora
           </div>
 
           <div

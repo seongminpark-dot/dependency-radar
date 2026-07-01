@@ -104,7 +104,7 @@ export async function GET(
       cache: "no-store",
       headers: {
         Accept: "application/json",
-        "User-Agent": "Trade Dependency Atlas",
+        "User-Agent": "Datlora",
       },
     });
 

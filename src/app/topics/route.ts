@@ -22,7 +22,7 @@ function pageHtml() {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Topics | Trade Dependency Atlas</title>
+  <title>Topics | Datlora</title>
   <meta name="description" content="국가별 무역, 에너지, 관세, 수입 의존도 정보를 주제별로 탐색합니다." />
   <style>
     body {
@@ -169,7 +169,7 @@ function pageHtml() {
 <body>
   <header class="site-nav">
     <div class="site-nav-inner">
-      <a class="site-brand" href="/">Trade Dependency Atlas</a>
+      <a class="site-brand" href="/">Datlora</a>
       <nav class="site-menu" aria-label="Main navigation">
         <a href="/#country-search">국가 검색</a>
         <a href="/topics">주제별 통계</a>
@@ -184,7 +184,7 @@ function pageHtml() {
     <p class="top">Topics</p>
     <h1>국가를 고르기 전에, 필요한 지표부터 찾아보세요.</h1>
     <p class="intro">
-      Trade Dependency Atlas는 국가별 무역, 에너지, 관세, 수입 의존도 정보를
+      Datlora는 국가별 무역, 에너지, 관세, 수입 의존도 정보를
       주제별로 탐색할 수 있도록 정리합니다. 각 페이지는 공식 출처의 최신 제공 연도를 기준으로 해석합니다.
     </p>
     <section class="grid">

@@ -12,7 +12,7 @@ type CountryRecord = {
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://dependency-radar-three.vercel.app";
+  "https://datlora.com";
 
 function normalizeIso3(value: string) {
   return value.trim().toUpperCase();
@@ -52,7 +52,7 @@ export function buildCountryMetadata(iso3: string): Metadata {
   const flag = getCountryFlag(code);
   const displayName = `${flag ? `${flag} ` : ""}${countryName}`;
 
-  const title = `${countryName} Trade, Tariff, Energy & Dependency Statistics | Trade Dependency Atlas`;
+  const title = `${countryName} Trade, Tariff, Energy & Dependency Statistics | Datlora`;
 
   const description = `${countryName} country data page integrating official World Bank WDI, UN Comtrade, WITS/WTO, and EIA data for merchandise trade, tariff, logistics, energy, and supply dependency indicators.`;
 
@@ -70,7 +70,7 @@ export function buildCountryMetadata(iso3: string): Metadata {
       title,
       description,
       url: canonicalUrl,
-      siteName: "Trade Dependency Atlas",
+      siteName: "Datlora",
       type: "website",
       locale: "en_US",
     },
@@ -95,7 +95,7 @@ export function buildCountryMetadata(iso3: string): Metadata {
       "UN Comtrade",
       "WITS",
       "EIA",
-      "Trade Dependency Atlas",
+      "Datlora",
       displayName,
     ],
   };

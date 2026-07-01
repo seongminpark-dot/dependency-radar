@@ -7,7 +7,7 @@ const copy = {
     label: "Official data architecture",
     title: "공식 데이터 레이어를 분리해 최신성과 신뢰성을 함께 제공합니다.",
     subtitle:
-      "Trade Dependency Atlas는 하나의 임의 점수로 국가를 평가하지 않고, 출처별 공식 지표를 분리해 보여줍니다. 각 데이터베이스의 최신 제공 연도는 서로 다를 수 있습니다.",
+      "Datlora는 하나의 임의 점수로 국가를 평가하지 않고, 출처별 공식 지표를 분리해 보여줍니다. 각 데이터베이스의 최신 제공 연도는 서로 다를 수 있습니다.",
     worldBankRole: "장기 연간 구조 지표",
     worldBankDesc:
       "수입/GDP, 에너지 의존도, 물류지수 등 국가별 구조 비교의 기준 데이터입니다.",
@@ -29,7 +29,7 @@ const copy = {
     label: "Official data architecture",
     title: "Official data layers are separated for both freshness and reliability.",
     subtitle:
-      "Trade Dependency Atlas does not rank countries with a single arbitrary score. It separates official indicators by source, because the latest available year can differ across databases.",
+      "Datlora does not rank countries with a single arbitrary score. It separates official indicators by source, because the latest available year can differ across databases.",
     worldBankRole: "Annual structural baseline",
     worldBankDesc:
       "Used for long-term country comparison such as imports/GDP, dependency, logistics, and structural indicators.",
@@ -51,7 +51,7 @@ const copy = {
     label: "Official data architecture",
     title: "公式データレイヤーを分離して最新性と信頼性を両立します。",
     subtitle:
-      "Trade Dependency Atlasは単一の任意スコアではなく、公式指標を出典別に分けて表示します。",
+      "Datloraは単一の任意スコアではなく、公式指標を出典別に分けて表示します。",
     worldBankRole: "年次構造指標",
     worldBankDesc: "長期的な国家比較の基準データです。",
     comtradeRole: "最新公式貿易データ",
@@ -68,7 +68,7 @@ const copy = {
   zh: {
     label: "Official data architecture",
     title: "通过分离官方数据层，同时保证最新性与可靠性。",
-    subtitle: "Trade Dependency Atlas 按来源分离官方指标，而不是使用单一任意评分。",
+    subtitle: "Datlora 按来源分离官方指标，而不是使用单一任意评分。",
     worldBankRole: "年度结构指标",
     worldBankDesc: "用于长期国家结构比较。",
     comtradeRole: "最新官方贸易数据",
@@ -85,7 +85,7 @@ const copy = {
   es: {
     label: "Official data architecture",
     title: "Las capas oficiales se separan para combinar actualidad y fiabilidad.",
-    subtitle: "Trade Dependency Atlas separa indicadores oficiales por fuente.",
+    subtitle: "Datlora separa indicadores oficiales por fuente.",
     worldBankRole: "Base estructural anual",
     worldBankDesc: "Base para comparación estructural de largo plazo.",
     comtradeRole: "Comercio oficial reciente",
@@ -102,7 +102,7 @@ const copy = {
   fr: {
     label: "Official data architecture",
     title: "Les couches officielles séparent fraîcheur et fiabilité.",
-    subtitle: "Trade Dependency Atlas sépare les indicateurs officiels par source.",
+    subtitle: "Datlora sépare les indicateurs officiels par source.",
     worldBankRole: "Base structurelle annuelle",
     worldBankDesc: "Base de comparaison structurelle à long terme.",
     comtradeRole: "Commerce officiel récent",
@@ -119,7 +119,7 @@ const copy = {
   de: {
     label: "Official data architecture",
     title: "Offizielle Datenebenen verbinden Aktualität und Verlässlichkeit.",
-    subtitle: "Trade Dependency Atlas trennt offizielle Indikatoren nach Quellen.",
+    subtitle: "Datlora trennt offizielle Indikatoren nach Quellen.",
     worldBankRole: "Jährliche Strukturindikatoren",
     worldBankDesc: "Langfristige strukturelle Vergleichsdaten.",
     comtradeRole: "Aktuelle offizielle Handelsdaten",

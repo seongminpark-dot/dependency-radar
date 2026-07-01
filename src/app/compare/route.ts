@@ -394,7 +394,7 @@ async function compareHtml(request: Request) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(leftName)} vs ${escapeHtml(rightName)} | Trade Dependency Atlas</title>
+  <title>${escapeHtml(leftName)} vs ${escapeHtml(rightName)} | Datlora</title>
   <meta name="description" content="두 국가의 무역, 에너지, 관세, 물류, 수입 의존도 지표를 공식 데이터 기준으로 비교합니다." />
   <style>
     body {
@@ -635,7 +635,7 @@ async function compareHtml(request: Request) {
 <body>
   <header class="site-nav">
     <div class="site-nav-inner">
-      <a class="site-brand" href="/">Trade Dependency Atlas</a>
+      <a class="site-brand" href="/">Datlora</a>
       <nav class="site-menu" aria-label="Main navigation">
         <a href="/#country-search">국가 검색</a>
         <a href="/topics">주제별 통계</a>

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Trade Dependency Atlas official country statistics dashboard";
+export const alt = "Datlora official country statistics dashboard";
 export const size = {
   width: 1200,
   height: 630,
@@ -49,7 +49,7 @@ export default function Image() {
             >
               ⦿
             </div>
-            Trade Dependency Atlas
+            Datlora
           </div>
 
           <div
@@ -82,7 +82,7 @@ export default function Image() {
               width: "fit-content",
             }}
           >
-            Global Trade & Dependency Data
+            Global Trade & Energy Intelligence
           </div>
 
           <div

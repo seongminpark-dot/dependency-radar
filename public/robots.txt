@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dependency-radar-three.vercel.app/sitemap.xml
-Sitemap: https://dependency-radar-three.vercel.app/sitemap.txt
+Sitemap: https://datlora.com/sitemap.xml
+Sitemap: https://datlora.com/sitemap.txt
