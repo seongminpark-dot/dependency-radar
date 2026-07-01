@@ -13,6 +13,7 @@ import { getFlagEmoji } from "@/lib/flags";
 import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
 import HomeActionHub from "@/components/HomeActionHub";
+import HomeDataJumpBar from "@/components/HomeDataJumpBar";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1229,6 +1230,13 @@ export default function StatsDashboard({
       />
 
       <HomeActionHub rows={rows} language={language} />
+
+      <HomeDataJumpBar language={language} />
+      <div id="latest-trade" className="scroll-mt-28" />
+      <div id="energy-data" className="scroll-mt-28" />
+      <div id="tariff-data" className="scroll-mt-28" />
+
+
 {(() => {
               const tradeRow =
                 rows.find((item) => item.iso2 === visitorCountry) ??
@@ -1301,8 +1309,12 @@ export default function StatsDashboard({
                 />
               ) : null;
             })()}
+      <div id="world-map" className="scroll-mt-28" />
+
 
       <WorldMap rows={rows} language={language} visitorCountry={visitorCountry} />
+      <div id="world-bank-table" className="scroll-mt-28" />
+
 
       <WorldBankTableOverview rows={rows} language={language} />
 

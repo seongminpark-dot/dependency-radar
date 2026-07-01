@@ -262,3 +262,18 @@ body {
   }
 }
 
+/* Homepage compact navigation and anchor behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+.dependency-radar-page [id] {
+  scroll-margin-top: 96px;
+}
+
+@media (max-width: 768px) {
+  .dependency-radar-page [id] {
+    scroll-margin-top: 72px;
+  }
+}
+
