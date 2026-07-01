@@ -1,3 +1,3 @@
 Trade Dependency Atlas deploy check
-UTC: 2026-07-01T13:48:08.833830+00:00
-Country summary cards enabled: yes
+UTC: 2026-07-01T14:04:33.969025+00:00
+Historical trend fixed: yes
