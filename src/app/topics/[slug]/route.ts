@@ -21,6 +21,17 @@ type CountryRecord = {
   };
 };
 
+type LocalCountryRow = Record<string, unknown>;
+
+type RankingItem = {
+  iso3: string;
+  iso2: string;
+  countryName: string;
+  value: number;
+  year: string;
+  source: string;
+};
+
 const validCountries = new Map(
   (countries as CountryRecord[])
     .filter((country) => country.cca3 && country.cca2)
@@ -57,8 +68,154 @@ function formatValue(value: number, unit: Topic["rankingUnit"]) {
   });
 
   if (unit === "%") return `${formatted}%`;
+  if (unit === "usd") return `US$${formatted}`;
 
   return formatted;
+}
+
+function isUsefulRankingValue(value: unknown) {
+  if (value === null || value === undefined || value === "") return false;
+
+  const numberValue = Number(value);
+
+  if (!Number.isFinite(numberValue)) return false;
+
+  return numberValue > 0;
+}
+
+function getStringValue(row: LocalCountryRow, keys: string[]) {
+  for (const key of keys) {
+    const value = row[key];
+
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return "";
+}
+
+function readLocalStat(row: LocalCountryRow, key: string) {
+  const raw = row[key];
+
+  if (!raw || typeof raw !== "object") return null;
+
+  const stat = raw as Record<string, unknown>;
+
+  if (!isUsefulRankingValue(stat.value)) return null;
+
+  return {
+    value: Number(stat.value),
+    year:
+      typeof stat.year === "string" || typeof stat.year === "number"
+        ? String(stat.year)
+        : "",
+  };
+}
+
+function isCountryRow(value: unknown): value is LocalCountryRow {
+  if (!value || typeof value !== "object") return false;
+
+  const row = value as LocalCountryRow;
+  const iso3 = getStringValue(row, ["iso3", "cca3", "countryiso3code"]);
+
+  if (!iso3) return false;
+
+  return [
+    "energyImportPercent",
+    "fuelImportShare",
+    "foodImportShare",
+    "importsGdp",
+    "tariffRate",
+    "logisticsIndex",
+  ].some((key) => {
+    const stat = row[key];
+    return Boolean(stat && typeof stat === "object");
+  });
+}
+
+function findRowsInValue(value: unknown, depth = 0): LocalCountryRow[] {
+  if (depth > 3) return [];
+
+  if (Array.isArray(value)) {
+    if (value.some(isCountryRow)) {
+      return value.filter(isCountryRow);
+    }
+
+    for (const item of value) {
+      const nested = findRowsInValue(item, depth + 1);
+      if (nested.length > 0) return nested;
+    }
+
+    return [];
+  }
+
+  if (value && typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+
+    for (const key of ["rows", "data", "countries", "countryRows", "worldBankRows"]) {
+      const nested = findRowsInValue(objectValue[key], depth + 1);
+      if (nested.length > 0) return nested;
+    }
+  }
+
+  return [];
+}
+
+async function getLocalWorldBankRows() {
+  try {
+    const module = await import("@/lib/worldBank");
+    const values = Object.values(module as Record<string, unknown>);
+
+    for (const value of values) {
+      const rows = findRowsInValue(value);
+      if (rows.length > 0) return rows;
+    }
+
+    for (const value of values) {
+      if (typeof value !== "function") continue;
+
+      try {
+        const result = await (value as () => unknown | Promise<unknown>)();
+        const rows = findRowsInValue(result);
+
+        if (rows.length > 0) return rows;
+      } catch {
+        // 일부 함수는 인자가 필요할 수 있으므로 무시
+      }
+    }
+
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function getLocalRanking(rows: LocalCountryRow[], topic: Topic) {
+  return rows
+    .map((row) => {
+      const iso3 = getStringValue(row, ["iso3", "cca3", "countryiso3code"]).toUpperCase();
+      const country = validCountries.get(iso3);
+      const stat = readLocalStat(row, topic.statKey);
+
+      if (!country || !stat) return null;
+
+      const name =
+        getStringValue(row, ["name", "countryName", "displayName", "nameEn"]) ||
+        country.name;
+
+      return {
+        iso3,
+        iso2: country.iso2,
+        countryName: name,
+        value: stat.value,
+        year: stat.year,
+        source: "World Bank WDI local dataset",
+      };
+    })
+    .filter((item): item is RankingItem => Boolean(item))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 20);
 }
 
 async function fetchWorldBankRows(topic: Topic, query: string) {
@@ -70,6 +227,7 @@ async function fetchWorldBankRows(topic: Topic, query: string) {
       cache: "no-store",
       headers: {
         Accept: "application/json",
+        "User-Agent": "Trade Dependency Atlas",
       },
     });
 
@@ -83,26 +241,18 @@ async function fetchWorldBankRows(topic: Topic, query: string) {
   }
 }
 
-function rowsToRanking(rows: WorldBankRow[], topic: Topic) {
-  const latestByCountry = new Map<
-    string,
-    {
-      iso3: string;
-      iso2: string;
-      countryName: string;
-      value: number;
-      year: string;
-    }
-  >();
+function rowsToApiRanking(rows: WorldBankRow[], topic: Topic) {
+  const latestByCountry = new Map<string, RankingItem>();
 
   for (const row of rows) {
     const iso3 = row.countryiso3code?.toUpperCase() ?? "";
     const country = validCountries.get(iso3);
+
+    if (!country) continue;
+    if (!isUsefulRankingValue(row.value)) continue;
+
     const value = Number(row.value);
     const year = row.date ?? "";
-
-    if (!country || Number.isNaN(value) || value === null) continue;
-
     const previous = latestByCountry.get(iso3);
 
     if (!previous || Number(year) > Number(previous.year || 0)) {
@@ -112,6 +262,7 @@ function rowsToRanking(rows: WorldBankRow[], topic: Topic) {
         countryName: country.name,
         value,
         year,
+        source: "World Bank API",
       });
     }
   }
@@ -122,6 +273,13 @@ function rowsToRanking(rows: WorldBankRow[], topic: Topic) {
 }
 
 async function fetchWorldBankRanking(topic: Topic) {
+  const localRows = await getLocalWorldBankRows();
+  const localRanking = getLocalRanking(localRows, topic);
+
+  if (localRanking.length > 0) {
+    return localRanking;
+  }
+
   const queries = [
     "format=json&per_page=20000&MRNEV=1",
     "format=json&per_page=20000&date=2010:2026",
@@ -130,7 +288,7 @@ async function fetchWorldBankRanking(topic: Topic) {
 
   for (const query of queries) {
     const rows = await fetchWorldBankRows(topic, query);
-    const ranking = rowsToRanking(rows, topic);
+    const ranking = rowsToApiRanking(rows, topic);
 
     if (ranking.length > 0) {
       return ranking;
@@ -140,19 +298,27 @@ async function fetchWorldBankRanking(topic: Topic) {
   return [];
 }
 
-function rankingHtml(
-  topic: Topic,
-  ranking: Awaited<ReturnType<typeof fetchWorldBankRanking>>
-) {
+function fallbackRankingHtml(topic: Topic) {
+  return `
+    <section class="box wide">
+      <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
+      <p class="muted">
+        이 지표는 현재 국가별 최신 공식값 목록을 충분히 확보하지 못했습니다.
+        값을 임의로 채우지 않고, 국가 상세 페이지와 공식 출처 기준 설명을 우선 표시합니다.
+      </p>
+      <div class="fallback-grid">
+        <a href="/country/KOR">🇰🇷 대한민국 상세 보기</a>
+        <a href="/country/USA">🇺🇸 United States 상세 보기</a>
+        <a href="/country/JPN">🇯🇵 Japan 상세 보기</a>
+        <a href="/country/CHN">🇨🇳 China 상세 보기</a>
+      </div>
+    </section>
+  `;
+}
+
+function rankingHtml(topic: Topic, ranking: RankingItem[]) {
   if (ranking.length === 0) {
-    return `
-      <section class="box wide">
-        <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
-        <p class="muted">
-          현재 이 지표의 상위 국가 목록을 준비 중입니다. 공식 출처의 최신 비어 있지 않은 값이 확인되면 자동으로 표시됩니다.
-        </p>
-      </section>
-    `;
+    return fallbackRankingHtml(topic);
   }
 
   const rows = ranking
@@ -163,7 +329,9 @@ function rankingHtml(
             <p class="rank-name">#${index + 1} ${getFlagEmoji(item.iso2)} ${escapeHtml(
               item.countryName
             )}</p>
-            <p class="rank-meta">${item.iso3} · 제공 연도 ${escapeHtml(item.year || "—")}</p>
+            <p class="rank-meta">${item.iso3} · 제공 연도 ${escapeHtml(
+              item.year || "—"
+            )} · ${escapeHtml(item.source)}</p>
           </div>
           <strong>${formatValue(item.value, topic.rankingUnit)}</strong>
         </a>
@@ -178,10 +346,12 @@ function rankingHtml(
           <p class="small-label">Official ranking</p>
           <h2>${escapeHtml(topic.rankingTitleKo)}</h2>
         </div>
-        <p class="source-pill">World Bank WDI · ${escapeHtml(topic.indicatorCode)}</p>
+        <p class="source-pill">${escapeHtml(topic.indicatorNameKo)} · ${escapeHtml(
+          topic.indicatorCode
+        )}</p>
       </div>
       <p class="muted">
-        아래 순위는 World Bank API가 제공하는 각 국가의 최신 공식 제공 연도 기준입니다.
+        아래 순위는 공식 출처에서 확인 가능한 최신 비어 있지 않은 값 기준입니다.
         국가별 최신 연도는 다를 수 있으며, 값이 없는 국가는 순위에서 제외됩니다.
       </p>
       <div class="rank-list">
@@ -297,13 +467,15 @@ async function topicHtml(slug: string) {
       color: #cbd5e1;
       line-height: 1.6;
     }
-    .chips {
+    .chips,
+    .fallback-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
     .chips span,
-    .links a {
+    .links a,
+    .fallback-grid a {
       display: inline-block;
       border: 1px solid rgba(255,255,255,.1);
       background: #0b0f1c;
