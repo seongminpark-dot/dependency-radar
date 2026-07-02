@@ -441,3 +441,234 @@
     font-size: clamp(32px, 11vw, 46px);
   }
 }
+
+
+/* atlas-compact-layout-v1 */
+.main {
+  max-width: 1320px;
+  padding: 24px 22px 56px;
+}
+
+.hero {
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+}
+
+.title {
+  max-width: 820px;
+  margin: 10px 0 10px;
+  font-size: clamp(34px, 5.2vw, 58px);
+}
+
+.subtitle {
+  max-width: 720px;
+  font-size: 15.5px;
+  line-height: 1.62;
+}
+
+.statusCard {
+  padding: 15px;
+  border-radius: 22px;
+}
+
+.statusCard strong {
+  font-size: 25px;
+}
+
+.resourceGrid {
+  margin-top: 16px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.resourceCard {
+  min-height: 68px;
+  padding: 10px 12px;
+  border-radius: 16px;
+}
+
+.resourceCard strong {
+  margin-top: 6px;
+  font-size: 18px;
+}
+
+.layout {
+  margin-top: 16px;
+  grid-template-columns: minmax(0, 0.98fr) minmax(340px, 0.78fr);
+  gap: 14px;
+}
+
+.worldPanel {
+  min-height: 500px;
+  border-radius: 26px;
+}
+
+.canvas {
+  height: 500px;
+}
+
+.worldOverlay {
+  left: 14px;
+  right: 14px;
+  top: 14px;
+}
+
+.chip {
+  padding: 10px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+}
+
+.worldFooter {
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  gap: 8px;
+}
+
+.footerBox {
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+
+.footerBox strong {
+  font-size: 12px;
+}
+
+.sideStack {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sideStack::-webkit-scrollbar {
+  width: 7px;
+}
+
+.sideStack::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.04);
+  border-radius: 999px;
+}
+
+.sideStack::-webkit-scrollbar-thumb {
+  background: rgba(103,232,249,0.26);
+  border-radius: 999px;
+}
+
+.panel {
+  padding: 15px;
+  border-radius: 22px;
+}
+
+.panel h2 {
+  font-size: 18px;
+}
+
+.panelDescription {
+  margin-top: 7px;
+  font-size: 12.5px;
+  line-height: 1.48;
+}
+
+.buttonRow {
+  margin-top: 11px;
+  gap: 7px;
+}
+
+.button {
+  padding: 9px 12px;
+  border-radius: 13px;
+  font-size: 12px;
+}
+
+.messageBar {
+  margin-top: 12px;
+  padding: 11px 12px;
+  border-radius: 15px;
+  font-size: 12.5px;
+}
+
+.packReveal {
+  margin-top: 11px;
+  padding: 12px;
+  border-radius: 15px;
+}
+
+.countryGrid {
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.countryGrid::-webkit-scrollbar {
+  width: 7px;
+}
+
+.countryGrid::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.04);
+  border-radius: 999px;
+}
+
+.countryGrid::-webkit-scrollbar-thumb {
+  background: rgba(52,211,153,0.28);
+  border-radius: 999px;
+}
+
+.countryCard {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.countryHeader strong {
+  font-size: 14px;
+}
+
+.badge {
+  padding: 5px 7px;
+  font-size: 10.5px;
+}
+
+@media (max-width: 1320px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sideStack {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .worldPanel {
+    min-height: 480px;
+  }
+
+  .canvas {
+    height: 480px;
+  }
+}
+
+@media (max-width: 780px) {
+  .main {
+    padding: 20px 14px 50px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .resourceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .worldPanel {
+    min-height: 430px;
+  }
+
+  .canvas {
+    height: 430px;
+  }
+
+  .worldFooter {
+    grid-template-columns: 1fr;
+  }
+}

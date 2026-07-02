@@ -25,7 +25,7 @@ function WorldGlobe({ selectedColor }: { selectedColor: string }) {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[0, -0.16, 0]} scale={1.18}>
       <mesh castShadow>
         <sphereGeometry args={[1.78, 64, 64]} />
         <meshStandardMaterial
@@ -127,7 +127,7 @@ function AtlasScene({
   ownedIds: string[];
 }) {
   return (
-    <Canvas className={styles.canvas} shadows camera={{ position: [0, 2.8, 7.2], fov: 42 }}>
+    <Canvas className={styles.canvas} shadows camera={{ position: [0, 2.35, 6.3], fov: 40 }}>
       <color attach="background" args={["#040b16"]} />
       <fog attach="fog" args={["#040b16", 8, 18]} />
 
