@@ -1246,7 +1246,7 @@ export default function StatsDashboard({
       />
 
       <div id="issue-watch" className="scroll-mt-28">
-        <HomeIssueWatch />
+        <HomeIssueWatch language={language} />
       </div>
 
       <HomeActionHub rows={rows} language={language} />
