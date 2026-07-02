@@ -107,6 +107,7 @@ function getCopy(language: SiteLanguage) {
       updated: "업데이트",
       noResults: "조건에 맞는 뉴스가 없습니다.",
       languageLabel: "언어",
+      trustedOnly: "신뢰도 높은 출처만",
     };
   }
 
@@ -123,6 +124,7 @@ function getCopy(language: SiteLanguage) {
     updated: "Updated",
     noResults: "No matching news articles.",
     languageLabel: "Language",
+    trustedOnly: "Trusted only",
   };
 }
 
@@ -145,6 +147,7 @@ export default function LiveNewsBoard() {
   const [language, setLanguage] = useState<SiteLanguage>("en");
   const [issue, setIssue] = useState("all");
   const [search, setSearch] = useState("");
+  const [trustedOnly, setTrustedOnly] = useState(false);
   const [articles, setArticles] = useState<NewsArticle[]>(fallbackArticles);
   const [generatedAt, setGeneratedAt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -196,9 +199,11 @@ export default function LiveNewsBoard() {
         article.source.toLowerCase().includes(query) ||
         article.issueLabel.toLowerCase().includes(query);
 
-      return matchesIssue && matchesSearch;
+      const matchesTrusted = !trustedOnly || article.isTrustedSource;
+
+      return matchesIssue && matchesSearch && matchesTrusted;
     });
-  }, [articles, issue, search]);
+  }, [articles, issue, search, trustedOnly]);
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-12">
@@ -225,7 +230,7 @@ export default function LiveNewsBoard() {
           </button>
         </div>
 
-        <div className="mt-7 grid gap-3 lg:grid-cols-[1fr_180px_180px]">
+        <div className="mt-7 grid gap-3 lg:grid-cols-[1fr_180px_180px_190px]">
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -253,6 +258,16 @@ export default function LiveNewsBoard() {
             <option value="en">English</option>
             <option value="ko">한국어</option>
           </select>
+
+          <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm font-bold text-slate-200">
+            <input
+              type="checkbox"
+              checked={trustedOnly}
+              onChange={(event) => setTrustedOnly(event.target.checked)}
+              className="h-4 w-4"
+            />
+            <span>{copy.trustedOnly}</span>
+          </label>
         </div>
 
         {generatedAt ? (

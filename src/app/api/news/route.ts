@@ -16,6 +16,8 @@ type GdeltResponse = {
   articles?: GdeltArticle[];
 };
 
+type SourceTier = "official" | "major" | "regional" | "general";
+
 type NewsArticle = {
   title: string;
   url: string;
@@ -28,6 +30,8 @@ type NewsArticle = {
   issueHref: string;
   language: string;
   isTrustedSource: boolean;
+  sourceTier: SourceTier;
+  sourceScore: number;
 };
 
 export const dynamic = "force-dynamic";
@@ -45,7 +49,21 @@ const sourceLanguageMap: Record<SiteLanguage, string> = {
   de: "german",
 };
 
-const trustedDomains = [
+const officialDomains = [
+  "worldbank.org",
+  "imf.org",
+  "oecd.org",
+  "wto.org",
+  "unctad.org",
+  "fao.org",
+  "iea.org",
+  "ec.europa.eu",
+  "europa.eu",
+  "commerce.gov",
+  "ustr.gov",
+];
+
+const majorNewsDomains = [
   "reuters.com",
   "apnews.com",
   "bbc.com",
@@ -58,9 +76,27 @@ const trustedDomains = [
   "dw.com",
   "france24.com",
   "theguardian.com",
+  "economist.com",
+];
+
+const regionalTrustedDomains = [
   "koreaherald.com",
   "koreatimes.co.kr",
   "yna.co.kr",
+  "japantimes.co.jp",
+  "scmp.com",
+  "straitstimes.com",
+];
+
+const blockedDomainFragments = [
+  "blogspot.",
+  "wordpress.",
+  "medium.com",
+  "substack.com",
+  "pressrelease",
+  "prnewswire",
+  "globenewswire",
+  "einnews",
 ];
 
 const issueQueries = [
@@ -122,12 +158,50 @@ function getHostname(url: string, domain?: string) {
   }
 }
 
-function isTrusted(url: string, domain?: string) {
-  const hostname = getHostname(url, domain);
-
-  return trustedDomains.some((trusted) => {
-    return hostname === trusted || hostname.endsWith(`.${trusted}`);
+function matchesDomain(hostname: string, domains: string[]) {
+  return domains.some((domain) => {
+    return hostname === domain || hostname.endsWith(`.${domain}`);
   });
+}
+
+function isBlockedDomain(hostname: string) {
+  return blockedDomainFragments.some((fragment) => hostname.includes(fragment));
+}
+
+function getSourceProfile(hostname: string): {
+  isTrustedSource: boolean;
+  sourceTier: SourceTier;
+  sourceScore: number;
+} {
+  if (matchesDomain(hostname, officialDomains)) {
+    return {
+      isTrustedSource: true,
+      sourceTier: "official",
+      sourceScore: 100,
+    };
+  }
+
+  if (matchesDomain(hostname, majorNewsDomains)) {
+    return {
+      isTrustedSource: true,
+      sourceTier: "major",
+      sourceScore: 90,
+    };
+  }
+
+  if (matchesDomain(hostname, regionalTrustedDomains)) {
+    return {
+      isTrustedSource: true,
+      sourceTier: "regional",
+      sourceScore: 80,
+    };
+  }
+
+  return {
+    isTrustedSource: false,
+    sourceTier: "general",
+    sourceScore: 40,
+  };
 }
 
 function parseGdeltDate(value?: string) {
@@ -164,7 +238,7 @@ function buildGdeltUrl(query: string, language: SiteLanguage) {
     query: `${query} sourcelang:${sourceLanguage}`,
     mode: "artlist",
     format: "json",
-    maxrecords: "20",
+    maxrecords: "30",
     sort: "datedesc",
     timespan: "1week",
   });
@@ -199,6 +273,7 @@ async function fetchIssueNews(
         .filter((article) => article.url && article.title)
         .map((article) => {
           const source = getHostname(article.url ?? "", article.domain);
+          const profile = getSourceProfile(source);
 
           return {
             title: cleanTitle(article.title ?? ""),
@@ -211,11 +286,15 @@ async function fetchIssueNews(
             issueLabel: issue.label,
             issueHref: issue.href,
             language: article.language || sourceLanguageMap[language],
-            isTrustedSource: isTrusted(article.url ?? "", article.domain),
+            ...profile,
           };
         })
         .filter((article) => {
-          return article.title.length > 12 && article.url.startsWith("http");
+          return (
+            article.title.length > 12 &&
+            article.url.startsWith("http") &&
+            !isBlockedDomain(article.source)
+          );
         });
 
       if (normalized.length > 0) {
@@ -254,15 +333,16 @@ export async function GET(request: Request) {
 
     const articles = dedupeArticles(results.flat())
       .sort((a, b) => {
-        if (a.isTrustedSource && !b.isTrustedSource) return -1;
-        if (!a.isTrustedSource && b.isTrustedSource) return 1;
+        if (b.sourceScore !== a.sourceScore) {
+          return b.sourceScore - a.sourceScore;
+        }
 
         return (
           new Date(b.publishedAt).getTime() -
           new Date(a.publishedAt).getTime()
         );
       })
-      .slice(0, 16);
+      .slice(0, 20);
 
     return NextResponse.json(
       {
