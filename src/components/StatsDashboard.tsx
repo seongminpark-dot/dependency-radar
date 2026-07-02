@@ -1206,6 +1206,9 @@ export default function StatsDashboard({
           <a href="#issue-watch" className="transition hover:text-white">
             {language === "ko" ? "이슈/뉴스" : "Issues"}
           </a>
+          <a href="/news" className="transition hover:text-white">
+            {language === "ko" ? "뉴스" : "News"}
+          </a>
           <a href="/challenge" className="transition hover:text-white">
             {language === "ko" ? "데이터 챌린지" : "Challenge"}
           </a>
