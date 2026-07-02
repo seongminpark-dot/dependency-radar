@@ -40,6 +40,148 @@ function getRarityClass(rarity: string) {
   return styles.commonCard;
 }
 
+type WikiSummary = {
+  originalimage?: {
+    source?: string;
+  };
+  thumbnail?: {
+    source?: string;
+  };
+};
+
+function LandmarkImmersiveView({ country }: { country: CountryCard }) {
+  const [imageUrl, setImageUrl] = useState("");
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1.12);
+  const dragRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    setImageUrl("");
+    setPan({ x: 0, y: 0 });
+    setZoom(1.12);
+
+    async function loadImage() {
+      try {
+        const response = await fetch(
+          "https://en.wikipedia.org/api/rest_v1/page/summary/" +
+            encodeURIComponent(country.wikiTitle)
+        );
+
+        if (!response.ok) return;
+
+        const data = (await response.json()) as WikiSummary;
+        const source = data.originalimage?.source || data.thumbnail?.source;
+
+        if (active && source) {
+          setImageUrl(source);
+        }
+      } catch {
+        // 이미지가 실패하면 컬러 배경으로 대체합니다.
+      }
+    }
+
+    loadImage();
+
+    return () => {
+      active = false;
+    };
+  }, [country.id, country.wikiTitle]);
+
+  function movePan(dx: number, dy: number) {
+    setPan((current) => ({
+      x: Math.max(-180, Math.min(180, current.x + dx)),
+      y: Math.max(-80, Math.min(80, current.y + dy)),
+    }));
+  }
+
+  return (
+    <section className={styles.locationViewPanel}>
+      <div className={styles.locationViewHeader}>
+        <div>
+          <span>Location View</span>
+          <strong>
+            {country.flag} {country.name} · {country.landmark}
+          </strong>
+        </div>
+
+        <div className={styles.locationViewBadge}>{country.region}</div>
+      </div>
+
+      <div
+        className={styles.locationStage}
+        onPointerDown={(event) => {
+          dragRef.current = {
+            x: event.clientX,
+            y: event.clientY,
+            panX: pan.x,
+            panY: pan.y,
+          };
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (!dragRef.current) return;
+
+          const dx = event.clientX - dragRef.current.x;
+          const dy = event.clientY - dragRef.current.y;
+
+          setPan({
+            x: Math.max(-180, Math.min(180, dragRef.current.panX + dx * 0.65)),
+            y: Math.max(-80, Math.min(80, dragRef.current.panY + dy * 0.42)),
+          });
+        }}
+        onPointerUp={(event) => {
+          dragRef.current = null;
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`${country.name} ${country.landmark}`}
+            className={styles.locationImage}
+            style={{
+              transform:
+                "translate(calc(-50% + " +
+                pan.x +
+                "px), calc(-50% + " +
+                pan.y +
+                "px)) scale(" +
+                zoom +
+                ")",
+            }}
+            draggable={false}
+          />
+        ) : (
+          <div
+            className={styles.locationFallback}
+            style={{ background: country.color }}
+          >
+            <span>{country.flag}</span>
+            <strong>{country.name}</strong>
+          </div>
+        )}
+
+        <div className={styles.locationShade} />
+
+        <div className={styles.locationHint}>
+          드래그해서 둘러보기 · 국가를 바꾸면 현장 이미지도 바뀝니다
+        </div>
+
+        <div className={styles.locationControls}>
+          <button type="button" onClick={() => movePan(-38, 0)}>←</button>
+          <button type="button" onClick={() => movePan(38, 0)}>→</button>
+          <button type="button" onClick={() => movePan(0, -28)}>↑</button>
+          <button type="button" onClick={() => movePan(0, 28)}>↓</button>
+          <button type="button" onClick={() => setZoom((value) => Math.min(1.45, value + 0.08))}>+</button>
+          <button type="button" onClick={() => setZoom((value) => Math.max(1.02, value - 0.08))}>-</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function latLonToVector3(lat: number, lon: number, radius: number) {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lon + 180) * (Math.PI / 180);
@@ -444,6 +586,8 @@ export default function AtlasTycoonClient() {
               </div>
             </div>
           </div>
+
+          <LandmarkImmersiveView country={selectedCountry} />
 
           <aside className={styles.controlDeck}>
             <section className={styles.deckCard}>
