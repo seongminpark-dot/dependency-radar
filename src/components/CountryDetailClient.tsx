@@ -9,6 +9,7 @@ import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
 import { getFlagEmoji } from "@/lib/flags";
 import CountryOfficialDataStack from "@/components/CountryOfficialDataStack";
+import CountryRelatedNews from "@/components/CountryRelatedNews";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -497,10 +498,10 @@ function CountryIntelligenceSnapshot({
             </a>
 
             <a
-              href="/news"
+              href={`/news/country/${row.iso3}`}
               className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white"
             >
-              {t.latestNews}
+              {language === "ko" ? "국가 뉴스" : "Country news"}
             </a>
           </div>
         </div>
@@ -731,12 +732,28 @@ export default function CountryDetailClient({
             </p>
           </div>
 
-          <button
-            onClick={downloadCountryCsv}
-            className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
-          >
-            {t.downloadCsv}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={`/news/country/${row.iso3}`}
+              className="rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300"
+            >
+              {language === "ko" ? "국가 관련 뉴스" : "Country news"}
+            </a>
+
+            <a
+              href={`/compare?a=${row.iso3}&b=${row.iso3 === "USA" ? "KOR" : "USA"}`}
+              className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white hover:bg-white/[0.14]"
+            >
+              {language === "ko" ? "국가 비교" : "Compare"}
+            </a>
+
+            <button
+              onClick={downloadCountryCsv}
+              className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+            >
+              {t.downloadCsv}
+            </button>
+          </div>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-4">
@@ -769,6 +786,13 @@ export default function CountryDetailClient({
       </section>
 
       <CountryIntelligenceSnapshot row={row} language={language} t={t} />
+
+      <CountryRelatedNews
+        iso3={row.iso3}
+        countryName={row.name}
+        displayName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
+        language={language}
+      />
 
       <LatestMonthlyTradePanel
         iso3={row.iso3}
