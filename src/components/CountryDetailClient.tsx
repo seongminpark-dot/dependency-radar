@@ -42,6 +42,20 @@ const enCopy = {
   incomeOriginal: "World Bank label",
   dataCoverage: "Data coverage",
   latestYear: "Latest data year",
+  intelligenceTitle: "Country intelligence snapshot",
+  intelligenceSubtitle:
+    "A quick issue-level reading based on official structural indicators. This is a screening summary, not a risk score.",
+  exposureHigh: "High exposure",
+  exposureModerate: "Moderate exposure",
+  exposureLower: "Lower exposure",
+  exposureNoData: "No official value",
+  oilShock: "Oil shock",
+  foodRisk: "Food import risk",
+  tariffPressure: "Tariff pressure",
+  supplyChain: "Supply chain",
+  viewIssueBrief: "View issue brief",
+  compareCountry: "Compare country",
+  latestNews: "Latest news",
   downloadCsv: "Download country CSV",
   indicators: "Indicators",
   value: "Value",
@@ -88,6 +102,20 @@ const copy: Record<Language, typeof enCopy> = {
     incomeOriginal: "World Bank 원문",
     dataCoverage: "데이터 제공 수",
     latestYear: "최신 데이터 연도",
+    intelligenceTitle: "국가 인텔리전스 요약",
+    intelligenceSubtitle:
+      "공식 구조 지표를 기반으로 이슈별 노출도를 빠르게 읽는 영역입니다. 임의의 위험 점수가 아니라 참고용 요약입니다.",
+    exposureHigh: "높은 노출",
+    exposureModerate: "중간 노출",
+    exposureLower: "낮은 노출",
+    exposureNoData: "공식값 없음",
+    oilShock: "유가 충격",
+    foodRisk: "식량 수입 리스크",
+    tariffPressure: "관세 압박",
+    supplyChain: "공급망 노출",
+    viewIssueBrief: "이슈 브리프 보기",
+    compareCountry: "국가 비교",
+    latestNews: "최신 뉴스",
     downloadCsv: "국가 CSV 다운로드",
     indicators: "지표",
     value: "값",
@@ -337,6 +365,192 @@ function getMetricRows(t: typeof enCopy) {
   ];
 }
 
+type ExposureLevel = "high" | "moderate" | "lower" | "noData";
+
+function getExposureLevel(
+  stat: StatValue,
+  thresholds: {
+    high: number;
+    moderate: number;
+  }
+): ExposureLevel {
+  if (stat.value === null || !Number.isFinite(stat.value)) {
+    return "noData";
+  }
+
+  if (stat.value >= thresholds.high) {
+    return "high";
+  }
+
+  if (stat.value >= thresholds.moderate) {
+    return "moderate";
+  }
+
+  return "lower";
+}
+
+function getExposureLabel(level: ExposureLevel, t: typeof enCopy) {
+  if (level === "high") return t.exposureHigh;
+  if (level === "moderate") return t.exposureModerate;
+  if (level === "lower") return t.exposureLower;
+  return t.exposureNoData;
+}
+
+function getExposureClass(level: ExposureLevel) {
+  if (level === "high") {
+    return "border-red-300/25 bg-red-300/10 text-red-100";
+  }
+
+  if (level === "moderate") {
+    return "border-amber-300/25 bg-amber-300/10 text-amber-100";
+  }
+
+  if (level === "lower") {
+    return "border-emerald-300/25 bg-emerald-300/10 text-emerald-100";
+  }
+
+  return "border-slate-300/15 bg-slate-300/10 text-slate-200";
+}
+
+function CountryIntelligenceSnapshot({
+  row,
+  language,
+  t,
+}: {
+  row: CountryRow;
+  language: Language;
+  t: typeof enCopy;
+}) {
+  const compareBase = row.iso3 === "USA" ? "KOR" : "USA";
+
+  const cards = [
+    {
+      title: t.oilShock,
+      metricLabel: t.fuel,
+      stat: row.fuelImportShare,
+      metricKey: "fuelImportShare" as const,
+      issueHref: "/issues/oil-shock",
+      level: getExposureLevel(row.fuelImportShare, {
+        high: 20,
+        moderate: 10,
+      }),
+    },
+    {
+      title: t.foodRisk,
+      metricLabel: t.food,
+      stat: row.foodImportShare,
+      metricKey: "foodImportShare" as const,
+      issueHref: "/issues/food-import-risk",
+      level: getExposureLevel(row.foodImportShare, {
+        high: 20,
+        moderate: 10,
+      }),
+    },
+    {
+      title: t.tariffPressure,
+      metricLabel: t.tariff,
+      stat: row.tariffRate,
+      metricKey: "tariffRate" as const,
+      issueHref: "/issues/tariff-pressure",
+      level: getExposureLevel(row.tariffRate, {
+        high: 10,
+        moderate: 5,
+      }),
+    },
+    {
+      title: t.supplyChain,
+      metricLabel: t.importsGdp,
+      stat: row.importsGdp,
+      metricKey: "importsGdp" as const,
+      issueHref: "/issues/supply-chain",
+      level: getExposureLevel(row.importsGdp, {
+        high: 60,
+        moderate: 35,
+      }),
+    },
+  ];
+
+  return (
+    <section className="mx-auto max-w-7xl px-6 pb-12">
+      <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.075] to-white/[0.025] p-6 shadow-2xl shadow-black/20">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-300">
+              Country intelligence
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.06em] text-white md:text-4xl">
+              {t.intelligenceTitle}
+            </h2>
+
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+              {t.intelligenceSubtitle}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={`/compare?a=${row.iso3}&b=${compareBase}`}
+              className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950"
+            >
+              {t.compareCountry}
+            </a>
+
+            <a
+              href="/news"
+              className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white"
+            >
+              {t.latestNews}
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {cards.map((card) => (
+            <article
+              key={card.title}
+              className="rounded-3xl border border-white/10 bg-slate-950/70 p-5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-black text-white">{card.title}</h3>
+                  <p className="mt-1 text-xs font-bold text-slate-500">
+                    {card.metricLabel}
+                  </p>
+                </div>
+
+                <span
+                  className={`rounded-full border px-3 py-1 text-[11px] font-black ${getExposureClass(
+                    card.level
+                  )}`}
+                >
+                  {getExposureLabel(card.level, t)}
+                </span>
+              </div>
+
+              <p className="mt-5 text-3xl font-black tracking-[-0.06em] text-white">
+                {formatValue(card.stat, card.metricKey, language)}
+              </p>
+
+              <p className="mt-2 text-xs font-semibold text-slate-500">
+                {card.stat.year ? `${t.year}: ${card.stat.year}` : t.noData}
+              </p>
+
+              <a
+                href={card.issueHref}
+                className="mt-5 inline-flex rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-black text-slate-100 transition hover:border-emerald-300/40 hover:bg-emerald-300/10"
+              >
+                {t.viewIssueBrief} →
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 export default function CountryDetailClient({
   row,
   rows,
@@ -478,6 +692,15 @@ export default function CountryDetailClient({
             <p className="text-xs text-slate-400">{t.subtitle}</p>
           </div>
 
+          {/* Country detail main nav */}
+          <nav className="hidden items-center gap-4 text-sm font-bold text-slate-300 lg:flex">
+            <a href="/news" className="hover:text-white">News</a>
+            <a href="/issues" className="hover:text-white">Issues</a>
+            <a href="/topics" className="hover:text-white">Topics</a>
+            <a href={`/compare?a=${row.iso3}&b=USA`} className="hover:text-white">Compare</a>
+            <a href="/sources" className="hover:text-white">Sources</a>
+          </nav>
+
           <select
             value={language}
             onChange={(event) => changeLanguage(event.target.value as Language)}
@@ -544,6 +767,9 @@ export default function CountryDetailClient({
           </div>
         </div>
       </section>
+
+      <CountryIntelligenceSnapshot row={row} language={language} t={t} />
+
       <LatestMonthlyTradePanel
         iso3={row.iso3}
         countryName={`${getFlagEmoji(row.iso2)} ${getLocalizedCountryName(row, language)}`}
