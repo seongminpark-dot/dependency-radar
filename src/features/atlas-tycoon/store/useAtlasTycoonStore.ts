@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
+  countryCards,
   getCountryById,
   getPackCost,
   getResearchCost,
@@ -18,6 +19,13 @@ import type {
 } from "../types";
 
 type MissionKey = "claimIncome" | "openPack" | "upgradeCountry";
+
+type RoadmapKey =
+  | "unlock_three"
+  | "unlock_regions"
+  | "reach_income"
+  | "research_total"
+  | "legendary_country";
 
 type DailyMission = {
   progress: number;
@@ -54,6 +62,7 @@ type AtlasTycoonState = {
   lastMissionDate: string;
   lastDailyRewardDate: string;
   streak: number;
+  roadmapClaims: Record<RoadmapKey, boolean>;
 
   unlockedRegions: RegionSlot[];
   research: Record<ResearchKey, number>;
@@ -69,6 +78,7 @@ type AtlasTycoonState = {
   upgradeCountry: (id: string) => void;
   claimDailyReward: () => void;
   claimMissionReward: (key: MissionKey) => void;
+  claimRoadmapReward: (key: RoadmapKey) => void;
   activateBoost: () => void;
   unlockRegion: (regionId: RegionSlot) => void;
   upgradeResearch: (key: ResearchKey) => void;
@@ -256,6 +266,70 @@ function createInitialPackOpens(): Record<PackTier, number> {
   };
 }
 
+function createRoadmapClaims(): Record<RoadmapKey, boolean> {
+  return {
+    unlock_three: false,
+    unlock_regions: false,
+    reach_income: false,
+    research_total: false,
+    legendary_country: false,
+  };
+}
+
+function getSafeRoadmapClaims(state: Pick<AtlasTycoonState, "roadmapClaims">) {
+  return {
+    ...createRoadmapClaims(),
+    ...(state.roadmapClaims ?? {}),
+  };
+}
+
+function getRoadmapReward(key: RoadmapKey) {
+  if (key === "unlock_three") {
+    return { coins: 2500, gems: 20, xp: 80, label: "First Atlas Set" };
+  }
+
+  if (key === "unlock_regions") {
+    return { coins: 5000, gems: 35, xp: 120, label: "Regional Expansion" };
+  }
+
+  if (key === "reach_income") {
+    return { coins: 6500, gems: 40, xp: 140, label: "Income Engine" };
+  }
+
+  if (key === "research_total") {
+    return { coins: 9000, gems: 60, xp: 180, label: "Research Network" };
+  }
+
+  return { coins: 12000, gems: 80, xp: 220, label: "Legendary Atlas" };
+}
+
+function isRoadmapComplete(state: AtlasTycoonState, key: RoadmapKey) {
+  const research = getSafeResearch(state);
+  const unlockedRegions = getSafeUnlockedRegions(state);
+
+  if (key === "unlock_three") {
+    return state.ownedCountries.length >= 3;
+  }
+
+  if (key === "unlock_regions") {
+    return unlockedRegions.length >= 3;
+  }
+
+  if (key === "reach_income") {
+    return calculateTotalIncome(state.ownedCountries, research) >= 500;
+  }
+
+  if (key === "research_total") {
+    return Object.values(research).reduce((total, level) => total + level, 0) >= 8;
+  }
+
+  if (key === "legendary_country") {
+    return state.ownedCountries.some((country) => getCountryById(country.id).rarity === "Legendary");
+  }
+
+  return false;
+}
+
 export const useAtlasTycoonStore = create<AtlasTycoonState>()(
   persist(
     (set, get) => ({
@@ -283,6 +357,7 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       lastMissionDate: getTodayKey(),
       lastDailyRewardDate: "",
       streak: 0,
+      roadmapClaims: createRoadmapClaims(),
 
       unlockedRegions: ["east-asia"],
       research: createInitialResearch(),
@@ -612,6 +687,42 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
         });
       },
 
+      claimRoadmapReward: (key) => {
+        const state = get();
+        const roadmapClaims = getSafeRoadmapClaims(state);
+
+        if (roadmapClaims[key]) {
+          set({
+            message: "이미 수령한 로드맵 보상입니다.",
+          });
+          return;
+        }
+
+        if (!isRoadmapComplete(state, key)) {
+          set({
+            roadmapClaims,
+            message: "아직 로드맵 목표가 완료되지 않았습니다.",
+          });
+          return;
+        }
+
+        const reward = getRoadmapReward(key);
+        const xpResult = applyXp(state.level, state.xp, reward.xp);
+
+        set({
+          coins: state.coins + reward.coins,
+          gems: state.gems + reward.gems,
+          level: xpResult.level,
+          xp: xpResult.xp,
+          roadmapClaims: {
+            ...roadmapClaims,
+            [key]: true,
+          },
+          message: `${reward.label} 보상 수령 · ${reward.coins.toLocaleString("ko-KR")} coins / ${reward.gems} gems`,
+          lastReward: `${reward.label} claimed`,
+        });
+      },
+
       activateBoost: () => {
         const state = get();
 
@@ -735,6 +846,7 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           lastMissionDate: getTodayKey(),
           lastDailyRewardDate: "",
           streak: 0,
+          roadmapClaims: createRoadmapClaims(),
           unlockedRegions: ["east-asia"],
           research: createInitialResearch(),
           packOpensByTier: createInitialPackOpens(),

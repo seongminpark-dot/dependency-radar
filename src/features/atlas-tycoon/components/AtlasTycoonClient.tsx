@@ -225,6 +225,56 @@ export default function AtlasTycoonClient() {
     { progress: number; target: number; claimed: boolean }
   ][];
 
+  const roadmapClaims = state.roadmapClaims ?? {
+    unlock_three: false,
+    unlock_regions: false,
+    reach_income: false,
+    research_total: false,
+    legendary_country: false,
+  };
+
+  const researchTotal = Object.values(research).reduce((total, level) => total + level, 0);
+  const legendaryUnlocked = state.ownedCountries.some((country) => getCountryById(country.id).rarity === "Legendary");
+  const worldCompletion = Math.round((state.ownedCountries.length / countryCards.length) * 100);
+
+  const roadmapItems = [
+    {
+      key: "unlock_three" as const,
+      title: "국가 3개 해금",
+      goal: `${state.ownedCountries.length}/3 countries`,
+      done: state.ownedCountries.length >= 3,
+      reward: "2,500 coins / 20 gems",
+    },
+    {
+      key: "unlock_regions" as const,
+      title: "지역 3개 해금",
+      goal: `${unlockedRegions.length}/3 regions`,
+      done: unlockedRegions.length >= 3,
+      reward: "5,000 coins / 35 gems",
+    },
+    {
+      key: "reach_income" as const,
+      title: "초당 수익 500 달성",
+      goal: `${formatNumber(currentIncome)}/500 income`,
+      done: currentIncome >= 500,
+      reward: "6,500 coins / 40 gems",
+    },
+    {
+      key: "research_total" as const,
+      title: "연구 총합 Lv.8",
+      goal: `${researchTotal}/8 research levels`,
+      done: researchTotal >= 8,
+      reward: "9,000 coins / 60 gems",
+    },
+    {
+      key: "legendary_country" as const,
+      title: "Legendary 국가 해금",
+      goal: legendaryUnlocked ? "Unlocked" : "Locked",
+      done: legendaryUnlocked,
+      reward: "12,000 coins / 80 gems",
+    },
+  ];
+
   useEffect(() => {
     const timer = window.setInterval(() => {
       useAtlasTycoonStore.getState().tickIncome();
@@ -274,8 +324,8 @@ export default function AtlasTycoonClient() {
               <strong>{formatNumber(currentIncome)} / sec</strong>
             </div>
             <div>
-              <span>Level</span>
-              <strong>{state.level}</strong>
+              <span>World</span>
+              <strong>{worldCompletion}%</strong>
             </div>
           </div>
         </section>
@@ -373,6 +423,38 @@ export default function AtlasTycoonClient() {
               </div>
 
               <div className={styles.messageBar}>{state.message}</div>
+            </section>
+
+            <section className={styles.deckCard}>
+              <h2>Atlas Roadmap</h2>
+              <p className={styles.deckDescription}>
+                코인을 쓰는 목적은 국가 해금, 지역 확장, 연구 성장, Legendary 국가 수집입니다.
+              </p>
+
+              <div className={styles.roadmapGrid}>
+                {roadmapItems.map((item) => {
+                  const claimed = roadmapClaims[item.key];
+
+                  return (
+                    <div
+                      key={item.key}
+                      className={`${styles.roadmapItem} ${item.done ? styles.roadmapItemDone : ""}`}
+                    >
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span>{item.goal} · {item.reward}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => state.claimRoadmapReward(item.key)}
+                      >
+                        {claimed ? "Done" : item.done ? "Claim" : "Goal"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
 
             <section className={styles.deckCard}>
