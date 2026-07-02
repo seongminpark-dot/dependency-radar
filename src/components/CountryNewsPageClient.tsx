@@ -83,6 +83,43 @@ function formatDate(value: string, language: SiteLanguage) {
   }).format(date);
 }
 
+function getPrettyCountryName(iso3: string, displayName: string, language: SiteLanguage) {
+  const koNames: Record<string, string> = {
+    KOR: "대한민국",
+    JPN: "일본",
+    USA: "미국",
+    CHN: "중국",
+    DEU: "독일",
+    GBR: "영국",
+    FRA: "프랑스",
+    IND: "인도",
+    CAN: "캐나다",
+    AUS: "호주",
+  };
+
+  const enNames: Record<string, string> = {
+    KOR: "South Korea",
+    JPN: "Japan",
+    USA: "United States",
+    CHN: "China",
+    DEU: "Germany",
+    GBR: "United Kingdom",
+    FRA: "France",
+    IND: "India",
+    CAN: "Canada",
+    AUS: "Australia",
+  };
+
+  if (language === "ko" && koNames[iso3]) return koNames[iso3];
+  if (enNames[iso3]) return enNames[iso3];
+
+  return displayName
+    .replace(/Korea, Rep\./gi, "South Korea")
+    .replace(/, Rep\./gi, "")
+    .replace(/, Dem\. Rep\./gi, "")
+    .trim();
+}
+
 export default function CountryNewsPageClient({
   iso3,
   iso2,
@@ -100,6 +137,7 @@ export default function CountryNewsPageClient({
   const [isLoading, setIsLoading] = useState(true);
 
   const copy = getCopy(language);
+  const prettyName = getPrettyCountryName(iso3, displayName, language);
 
   async function loadNews(nextLanguage = language) {
     setIsLoading(true);
@@ -178,7 +216,7 @@ export default function CountryNewsPageClient({
         </p>
 
         <h1 className="mt-5 max-w-5xl text-5xl font-black leading-[0.98] tracking-[-0.075em] md:text-7xl">
-          {getFlagEmoji(iso2)} {displayName} · {copy.title}
+          {getFlagEmoji(iso2)} {prettyName} · {copy.title}
         </h1>
 
         <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
