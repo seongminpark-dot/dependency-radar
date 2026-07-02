@@ -825,3 +825,127 @@
     transform: rotate(360deg);
   }
 }
+
+.landmarkPhotoLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.regionLabel {
+  position: absolute;
+  border: 1px solid rgba(103,232,249,0.16);
+  background: rgba(2,6,23,0.52);
+  color: #bae6fd;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.landmarkPhotoCard {
+  position: absolute;
+  width: 132px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(2,6,23,0.62);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.32);
+  backdrop-filter: blur(12px);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+
+.landmarkUnlocked {
+  opacity: 0.96;
+}
+
+.landmarkLocked {
+  opacity: 0.42;
+  filter: grayscale(1) brightness(0.55);
+}
+
+.landmarkSelected {
+  transform: scale(1.08);
+  border-color: rgba(52,211,153,0.62);
+  box-shadow:
+    0 0 0 1px rgba(52,211,153,0.28),
+    0 20px 60px rgba(16,185,129,0.22);
+}
+
+.landmarkPhotoImageWrap {
+  position: relative;
+  height: 70px;
+  background: rgba(15,23,42,0.8);
+  overflow: hidden;
+}
+
+.landmarkPhotoImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.landmarkPhotoImageWrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 40%, rgba(2,6,23,0.74)),
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 38%);
+}
+
+.landmarkPhotoFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+}
+
+.landmarkPhotoText {
+  padding: 8px 9px 9px;
+}
+
+.landmarkPhotoText strong {
+  display: block;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.landmarkPhotoText span {
+  display: block;
+  margin-top: 4px;
+  color: #cbd5e1;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+@media (max-width: 1320px) {
+  .landmarkPhotoCard {
+    width: 118px;
+  }
+
+  .landmarkPhotoImageWrap {
+    height: 62px;
+  }
+
+  .regionLabel {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .landmarkPhotoLayer {
+    display: none;
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import {
   countryCards,
@@ -21,6 +21,137 @@ function getRarityClass(rarity: string) {
   if (rarity === "Epic") return styles.epicCard;
   if (rarity === "Rare") return styles.rareCard;
   return styles.commonCard;
+}
+
+type WikiSummary = {
+  thumbnail?: {
+    source?: string;
+  };
+};
+
+function LandmarkPhotoCard({
+  country,
+  unlocked,
+  selected,
+  position,
+}: {
+  country: CountryCard;
+  unlocked: boolean;
+  selected: boolean;
+  position: React.CSSProperties;
+}) {
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadImage() {
+      try {
+        const response = await fetch(
+          "https://en.wikipedia.org/api/rest_v1/page/summary/" +
+            encodeURIComponent(country.wikiTitle)
+        );
+
+        if (!response.ok) return;
+
+        const data = (await response.json()) as WikiSummary;
+        const source = data.thumbnail?.source;
+
+        if (active && source) {
+          setImageUrl(source);
+        }
+      } catch {
+        // 이미지가 없으면 컬러 카드로 대체합니다.
+      }
+    }
+
+    loadImage();
+
+    return () => {
+      active = false;
+    };
+  }, [country.wikiTitle]);
+
+  return (
+    <div
+      className={`${styles.landmarkPhotoCard} ${
+        unlocked ? styles.landmarkUnlocked : styles.landmarkLocked
+      } ${selected ? styles.landmarkSelected : ""}`}
+      style={position}
+    >
+      <div className={styles.landmarkPhotoImageWrap}>
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`${country.name} landmark`}
+            className={styles.landmarkPhotoImage}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className={styles.landmarkPhotoFallback}
+            style={{ background: country.color }}
+          >
+            {country.flag}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.landmarkPhotoText}>
+        <strong>
+          {country.flag} {country.name}
+        </strong>
+        <span>{country.region}</span>
+      </div>
+    </div>
+  );
+}
+
+function LandmarkPhotoMap({
+  ownedIds,
+  selectedCountryId,
+}: {
+  ownedIds: string[];
+  selectedCountryId: string;
+}) {
+  const positions: Record<string, React.CSSProperties> = {
+    kor: { left: 18, top: 104 },
+    jpn: { left: 18, top: 224 },
+    sgp: { right: 18, top: 104 },
+    usa: { right: 18, top: 224 },
+    deu: { left: "50%", bottom: 118, transform: "translateX(-112%)" },
+    che: { left: "50%", bottom: 118, transform: "translateX(12%)" },
+    are: { left: "50%", top: 64, transform: "translateX(-50%)" },
+    bra: { left: "50%", bottom: 240, transform: "translateX(-50%)" },
+  };
+
+  const regionLabels = [
+    { label: "East Asia", style: { left: 18, top: 76 } },
+    { label: "Southeast Asia / North America", style: { right: 18, top: 76 } },
+    { label: "Europe", style: { left: "50%", bottom: 92, transform: "translateX(-50%)" } },
+    { label: "Middle East", style: { left: "50%", top: 38, transform: "translateX(-50%)" } },
+    { label: "South America", style: { left: "50%", bottom: 214, transform: "translateX(-50%)" } },
+  ];
+
+  return (
+    <div className={styles.landmarkPhotoLayer}>
+      {regionLabels.map((item) => (
+        <div key={item.label} className={styles.regionLabel} style={item.style}>
+          {item.label}
+        </div>
+      ))}
+
+      {countryCards.map((country) => (
+        <LandmarkPhotoCard
+          key={country.id}
+          country={country}
+          unlocked={ownedIds.includes(country.id)}
+          selected={selectedCountryId === country.id}
+          position={positions[country.id] ?? {}}
+        />
+      ))}
+    </div>
+  );
 }
 
 function getNodePosition(index: number, total: number, radius = 2.75) {
@@ -300,6 +431,7 @@ export default function AtlasTycoonClient() {
 
   const selectedCountry = getCountryById(state.selectedCountryId);
   const selectedOwned = state.ownedCountries.find((country) => country.id === state.selectedCountryId);
+  const ownedIds = state.ownedCountries.map((country) => country.id);
 
   const totalIncome = useMemo(() => {
     return state.ownedCountries.reduce((total, country) => {
@@ -405,6 +537,11 @@ export default function AtlasTycoonClient() {
                 Income {formatNumber(currentIncome)} / sec
               </div>
             </div>
+
+            <LandmarkPhotoMap
+              ownedIds={ownedIds}
+              selectedCountryId={state.selectedCountryId}
+            />
 
             <div className={styles.worldFooter}>
               <div className={styles.footerBox}>

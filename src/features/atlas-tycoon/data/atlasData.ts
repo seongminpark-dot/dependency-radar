@@ -11,6 +11,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Smart Port",
     bonus: "Tech Output",
     color: "#38bdf8",
+    wikiTitle: "Lotte World Tower",
+    mapSlot: "east-asia",
   },
   {
     id: "usa",
@@ -22,6 +24,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Mega Market",
     bonus: "Coin Flow",
     color: "#60a5fa",
+    wikiTitle: "Statue of Liberty",
+    mapSlot: "north-america",
   },
   {
     id: "jpn",
@@ -33,6 +37,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Precision Factory",
     bonus: "Upgrade Speed",
     color: "#f8fafc",
+    wikiTitle: "Tokyo Tower",
+    mapSlot: "east-asia",
   },
   {
     id: "sgp",
@@ -44,6 +50,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Trade Gateway",
     bonus: "Port Revenue",
     color: "#34d399",
+    wikiTitle: "Marina Bay Sands",
+    mapSlot: "southeast-asia",
   },
   {
     id: "deu",
@@ -55,6 +63,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Industrial Core",
     bonus: "Factory Income",
     color: "#facc15",
+    wikiTitle: "Brandenburg Gate",
+    mapSlot: "europe",
   },
   {
     id: "are",
@@ -66,6 +76,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Energy Hub",
     bonus: "Energy Bonus",
     color: "#fb923c",
+    wikiTitle: "Burj Khalifa",
+    mapSlot: "middle-east",
   },
   {
     id: "bra",
@@ -77,6 +89,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Resource Valley",
     bonus: "Raw Materials",
     color: "#4ade80",
+    wikiTitle: "Christ the Redeemer (statue)",
+    mapSlot: "south-america",
   },
   {
     id: "che",
@@ -88,6 +102,8 @@ export const countryCards: CountryCard[] = [
     landmark: "Finance Citadel",
     bonus: "Premium Yield",
     color: "#fb7185",
+    wikiTitle: "Matterhorn",
+    mapSlot: "europe",
   },
 ];
 
