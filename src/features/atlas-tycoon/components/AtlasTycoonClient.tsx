@@ -1,8 +1,6 @@
 "use client";
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   countryCards,
   getCountryById,
@@ -13,20 +11,18 @@ import {
   researchUpgrades,
 } from "../data/atlasData";
 import { useAtlasTycoonStore } from "../store/useAtlasTycoonStore";
-import type { CountryCard, OwnedCountry } from "../types";
+import type { CountryCard } from "../types";
 import styles from "./AtlasTycoonClient.module.css";
 
 type DailyMissionKey = "claimIncome" | "openPack" | "upgradeCountry";
 
-const countryCoordinates: Record<string, { lat: number; lon: number }> = {
-  kor: { lat: 36.5, lon: 127.8 },
-  jpn: { lat: 36.2, lon: 138.2 },
-  sgp: { lat: 1.35, lon: 103.82 },
-  usa: { lat: 39.8, lon: -98.6 },
-  deu: { lat: 51.2, lon: 10.4 },
-  are: { lat: 24.4, lon: 54.4 },
-  bra: { lat: -14.2, lon: -51.9 },
-  che: { lat: 46.8, lon: 8.2 },
+type WikiSummary = {
+  originalimage?: {
+    source?: string;
+  };
+  thumbnail?: {
+    source?: string;
+  };
 };
 
 function formatNumber(value: number) {
@@ -40,19 +36,10 @@ function getRarityClass(rarity: string) {
   return styles.commonCard;
 }
 
-type WikiSummary = {
-  originalimage?: {
-    source?: string;
-  };
-  thumbnail?: {
-    source?: string;
-  };
-};
-
 function LandmarkImmersiveView({ country }: { country: CountryCard }) {
   const [imageUrl, setImageUrl] = useState("");
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1.12);
+  const [zoom, setZoom] = useState(1.1);
   const dragRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
 
   useEffect(() => {
@@ -60,7 +47,7 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
 
     setImageUrl("");
     setPan({ x: 0, y: 0 });
-    setZoom(1.12);
+    setZoom(1.1);
 
     async function loadImage() {
       try {
@@ -78,7 +65,7 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
           setImageUrl(source);
         }
       } catch {
-        // 이미지가 실패하면 컬러 배경으로 대체합니다.
+        // 이미지가 없으면 컬러 배경으로 대체합니다.
       }
     }
 
@@ -127,13 +114,16 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
           const dy = event.clientY - dragRef.current.y;
 
           setPan({
-            x: Math.max(-180, Math.min(180, dragRef.current.panX + dx * 0.65)),
-            y: Math.max(-80, Math.min(80, dragRef.current.panY + dy * 0.42)),
+            x: Math.max(-180, Math.min(180, dragRef.current.panX + dx * 0.62)),
+            y: Math.max(-80, Math.min(80, dragRef.current.panY + dy * 0.38)),
           });
         }}
         onPointerUp={(event) => {
           dragRef.current = null;
           event.currentTarget.releasePointerCapture(event.pointerId);
+        }}
+        onPointerCancel={() => {
+          dragRef.current = null;
         }}
       >
         {imageUrl ? (
@@ -142,14 +132,7 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
             alt={`${country.name} ${country.landmark}`}
             className={styles.locationImage}
             style={{
-              transform:
-                "translate(calc(-50% + " +
-                pan.x +
-                "px), calc(-50% + " +
-                pan.y +
-                "px)) scale(" +
-                zoom +
-                ")",
+              transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${zoom})`,
             }}
             draggable={false}
           />
@@ -166,7 +149,7 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
         <div className={styles.locationShade} />
 
         <div className={styles.locationHint}>
-          드래그해서 둘러보기 · 국가를 바꾸면 현장 이미지도 바뀝니다
+          드래그해서 둘러보기 · 국가를 선택하면 현장 이미지가 바뀝니다
         </div>
 
         <div className={styles.locationControls}>
@@ -182,302 +165,45 @@ function LandmarkImmersiveView({ country }: { country: CountryCard }) {
   );
 }
 
-function latLonToVector3(lat: number, lon: number, radius: number) {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
-
-  const x = -radius * Math.sin(phi) * Math.cos(theta);
-  const z = radius * Math.sin(phi) * Math.sin(theta);
-  const y = radius * Math.cos(phi);
-
-  return new THREE.Vector3(x, y, z);
-}
-
-function StarField() {
-  const groupRef = useRef<THREE.Group>(null);
-
-  const stars = useMemo(() => {
-    return Array.from({ length: 72 }).map((_, index) => {
-      const angle = (index / 72) * Math.PI * 2;
-      const radius = 5.2 + (index % 7) * 0.36;
-
-      return {
-        x: Math.cos(angle) * radius,
-        y: -2.8 + (index % 13) * 0.46,
-        z: Math.sin(angle) * radius - 0.6,
-        size: 0.014 + (index % 3) * 0.006,
-      };
-    });
-  }, []);
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.y = clock.elapsedTime * 0.018;
-  });
-
-  return (
-    <group ref={groupRef}>
-      {stars.map((star, index) => (
-        <mesh key={index} position={[star.x, star.y, star.z]}>
-          <sphereGeometry args={[star.size, 8, 8]} />
-          <meshBasicMaterial color={index % 5 === 0 ? "#67e8f9" : "#dbeafe"} transparent opacity={0.74} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function GlobeCameraFocus({ selectedCountryId }: { selectedCountryId: string }) {
-  const { camera } = useThree();
-
-  useFrame(() => {
-    const coord = countryCoordinates[selectedCountryId] ?? countryCoordinates.kor;
-    const targetPoint = latLonToVector3(coord.lat, coord.lon, 1);
-    const targetCameraPosition = targetPoint.clone().normalize().multiplyScalar(6.1);
-    targetCameraPosition.y += 1.05;
-
-    camera.position.lerp(targetCameraPosition, 0.035);
-    camera.lookAt(0, 0, 0);
-  });
-
-  return null;
-}
-
-function GlobeCore({ selectedColor }: { selectedColor: string }) {
-  const globeRef = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!globeRef.current) return;
-    globeRef.current.rotation.y += 0.0018;
-    globeRef.current.position.y = Math.sin(clock.elapsedTime * 0.75) * 0.035;
-  });
-
-  return (
-    <group ref={globeRef}>
-      <mesh castShadow>
-        <sphereGeometry args={[2.02, 96, 96]} />
-        <meshStandardMaterial
-          color="#0ea5e9"
-          emissive="#082f49"
-          emissiveIntensity={0.24}
-          roughness={0.34}
-          metalness={0.22}
-        />
-      </mesh>
-
-      <mesh>
-        <sphereGeometry args={[2.055, 96, 96]} />
-        <meshBasicMaterial color={selectedColor} transparent opacity={0.1} />
-      </mesh>
-
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.16, 0.01, 16, 160]} />
-        <meshBasicMaterial color="#dbeafe" transparent opacity={0.18} />
-      </mesh>
-
-      <mesh rotation={[Math.PI / 1.9, 0.4, 0.2]}>
-        <torusGeometry args={[2.22, 0.01, 16, 160]} />
-        <meshBasicMaterial color={selectedColor} transparent opacity={0.18} />
-      </mesh>
-    </group>
-  );
-}
-
-function CountryMarker({
-  country,
-  owned,
-  selected,
-  onSelect,
-}: {
-  country: CountryCard;
-  owned?: OwnedCountry;
-  selected: boolean;
-  onSelect: (id: string) => void;
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-  const coord = countryCoordinates[country.id] ?? countryCoordinates.kor;
-  const position = useMemo(() => latLonToVector3(coord.lat, coord.lon, 2.16), [coord.lat, coord.lon]);
-  const unlocked = Boolean(owned);
-  const level = owned?.level ?? 0;
-  const markerSize = selected ? 0.13 : unlocked ? 0.095 : 0.055;
-  const height = selected ? 0.42 : unlocked ? 0.26 + Math.min(level, 10) * 0.015 : 0.08;
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-
-    const normal = position.clone().normalize();
-    const pulse = Math.sin(clock.elapsedTime * 2.4) * 0.04;
-    groupRef.current.position.copy(position.clone().add(normal.multiplyScalar(selected ? 0.16 + pulse : 0.06)));
-  });
-
-  return (
-    <group
-      ref={groupRef}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect(country.id);
-      }}
-    >
-      {selected || unlocked ? (
-        <pointLight
-          color={country.color}
-          intensity={selected ? 2.2 : 0.9}
-          distance={selected ? 3.5 : 2.1}
-        />
-      ) : null}
-
-      <mesh castShadow>
-        <sphereGeometry args={[markerSize, 24, 24]} />
-        <meshStandardMaterial
-          color={unlocked ? country.color : "#64748b"}
-          emissive={unlocked ? country.color : "#111827"}
-          emissiveIntensity={selected ? 0.95 : unlocked ? 0.48 : 0.12}
-          roughness={0.24}
-          metalness={0.28}
-        />
-      </mesh>
-
-      {unlocked ? (
-        <mesh position={[0, height / 2 + 0.06, 0]} castShadow>
-          <boxGeometry args={[markerSize * 0.85, height, markerSize * 0.85]} />
-          <meshStandardMaterial
-            color={country.color}
-            emissive={country.color}
-            emissiveIntensity={selected ? 0.55 : 0.3}
-            roughness={0.25}
-            metalness={0.28}
-          />
-        </mesh>
-      ) : null}
-
-      {selected ? (
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.24, 0.01, 16, 48]} />
-          <meshBasicMaterial color={country.color} transparent opacity={0.9} />
-        </mesh>
-      ) : null}
-    </group>
-  );
-}
-
-function RegionBands({ selectedColor }: { selectedColor: string }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.y = clock.elapsedTime * 0.06;
-  });
-
-  return (
-    <group ref={groupRef}>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.68, 0.008, 16, 160]} />
-        <meshBasicMaterial color={selectedColor} transparent opacity={0.44} />
-      </mesh>
-      <mesh rotation={[Math.PI / 2.35, 0, Math.PI / 6]}>
-        <torusGeometry args={[2.95, 0.008, 16, 160]} />
-        <meshBasicMaterial color="#67e8f9" transparent opacity={0.22} />
-      </mesh>
-      <mesh rotation={[Math.PI / 2.75, 0, Math.PI / 3]}>
-        <torusGeometry args={[3.25, 0.006, 16, 160]} />
-        <meshBasicMaterial color="#a7f3d0" transparent opacity={0.14} />
-      </mesh>
-    </group>
-  );
-}
-
-function IncomePulse({ selectedColor }: { selectedColor: string }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    const scale = 1 + Math.sin(clock.elapsedTime * 1.7) * 0.04;
-    groupRef.current.scale.setScalar(scale);
-  });
-
-  return (
-    <group ref={groupRef}>
-      {[0, 1, 2].map((item) => (
-        <mesh key={item} rotation={[Math.PI / 2, 0, (Math.PI / 3) * item]}>
-          <torusGeometry args={[3.48 + item * 0.18, 0.005, 12, 160]} />
-          <meshBasicMaterial color={item === 0 ? selectedColor : "#67e8f9"} transparent opacity={0.11 - item * 0.02} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function AtlasScene({
-  selectedColor,
-  ownedCountries,
-  selectedCountryId,
-  onSelectCountry,
-}: {
-  selectedColor: string;
-  ownedCountries: OwnedCountry[];
-  selectedCountryId: string;
-  onSelectCountry: (id: string) => void;
-}) {
-  const ownedMap = useMemo(() => new Map(ownedCountries.map((country) => [country.id, country])), [ownedCountries]);
-
-  return (
-    <Canvas className={styles.canvas} shadows camera={{ position: [0, 2.6, 6.2], fov: 42 }}>
-      <color attach="background" args={["#030814"]} />
-      <fog attach="fog" args={["#030814", 8, 18]} />
-
-      <ambientLight intensity={0.68} />
-      <directionalLight position={[4, 7, 5]} intensity={2.55} castShadow />
-      <pointLight position={[-3.6, 3.2, 4]} intensity={1.8} color="#38bdf8" />
-      <pointLight position={[3.4, 2.4, -3.2]} intensity={1.4} color="#34d399" />
-
-      <GlobeCameraFocus selectedCountryId={selectedCountryId} />
-      <StarField />
-      <GlobeCore selectedColor={selectedColor} />
-      <RegionBands selectedColor={selectedColor} />
-      <IncomePulse selectedColor={selectedColor} />
-
-      {countryCards.map((country) => (
-        <CountryMarker
-          key={country.id}
-          country={country}
-          owned={ownedMap.get(country.id)}
-          selected={selectedCountryId === country.id}
-          onSelect={onSelectCountry}
-        />
-      ))}
-
-      <mesh position={[0, -2.42, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[3.55, 64]} />
-        <meshBasicMaterial color="#0f172a" transparent opacity={0.7} />
-      </mesh>
-    </Canvas>
-  );
-}
-
 export default function AtlasTycoonClient() {
   const state = useAtlasTycoonStore((store) => store);
 
   const selectedCountry = getCountryById(state.selectedCountryId);
   const selectedOwned = state.ownedCountries.find((country) => country.id === state.selectedCountryId);
 
-  const totalIncome = useMemo(() => {
-    const research = state.research ?? { logistics: 0, banking: 0, market: 0, automation: 0 };
+  const research = state.research ?? {
+    logistics: 0,
+    banking: 0,
+    market: 0,
+    automation: 0,
+  };
 
+  const unlockedRegions = state.unlockedRegions ?? ["east-asia"];
+  const packOpensByTier = state.packOpensByTier ?? {
+    standard: 0,
+    premium: 0,
+    elite: 0,
+  };
+
+  const missionData = state.dailyMissions ?? {
+    claimIncome: { progress: 0, target: 1, claimed: false },
+    openPack: { progress: 0, target: 1, claimed: false },
+    upgradeCountry: { progress: 0, target: 1, claimed: false },
+  };
+
+  const totalIncome = useMemo(() => {
     return state.ownedCountries.reduce((total, country) => {
       const card = getCountryById(country.id);
       return total + Math.round((card.baseIncome * country.level + country.cards * 2) * (1 + research.logistics * 0.08));
     }, 0);
-  }, [state.ownedCountries, state.research]);
+  }, [state.ownedCountries, research.logistics]);
 
   const boostActive = state.boostUntil > Date.now();
   const currentIncome = boostActive ? totalIncome * 2 : totalIncome;
   const upgradeCost = selectedOwned ? getUpgradeCost(selectedOwned.level, selectedCountry.rarity) : 0;
-  const packOpensByTier = state.packOpensByTier ?? { standard: 0, premium: 0, elite: 0 };
   const premiumPackCost = getPackCost("premium", packOpensByTier.premium);
   const elitePackCost = getPackCost("elite", packOpensByTier.elite);
   const xpPercent = Math.min(100, (state.xp / (state.level * 100)) * 100);
-  const unlockedRegions = state.unlockedRegions ?? ["east-asia"];
-  const research = state.research ?? { logistics: 0, banking: 0, market: 0, automation: 0 };
 
   const missionCopy: Record<DailyMissionKey, { title: string; reward: string }> = {
     claimIncome: {
@@ -494,7 +220,7 @@ export default function AtlasTycoonClient() {
     },
   };
 
-  const missionEntries = Object.entries(state.dailyMissions) as [
+  const missionEntries = Object.entries(missionData) as [
     DailyMissionKey,
     { progress: number; target: number; claimed: boolean }
   ][];
@@ -531,7 +257,7 @@ export default function AtlasTycoonClient() {
         <section className={styles.topBar}>
           <div>
             <p className={styles.label}>Datlora Atlas Tycoon</p>
-            <h1 className={styles.title}>세계 지도를 키우고 국가를 해금하세요.</h1>
+            <h1 className={styles.title}>국가를 수집하고 랜드마크를 성장시키세요.</h1>
           </div>
 
           <div className={styles.compactStats}>
@@ -555,41 +281,72 @@ export default function AtlasTycoonClient() {
         </section>
 
         <section className={styles.gameLayout}>
-          <div className={styles.globePanel}>
-            <AtlasScene
-              selectedColor={selectedCountry.color}
-              ownedCountries={state.ownedCountries}
-              selectedCountryId={state.selectedCountryId}
-              onSelectCountry={state.selectCountry}
-            />
+          <div className={styles.stageColumn}>
+            <LandmarkImmersiveView country={selectedCountry} />
 
-            <div className={styles.globeOverlayTop}>
-              <div className={styles.globeChip}>
-                <strong>{selectedCountry.flag} {selectedCountry.name}</strong>
-                <span>{selectedCountry.region} · {selectedCountry.rarity}</span>
+            <section className={styles.countryDock}>
+              <div className={styles.countryDockHeader}>
+                <strong>Country Map</strong>
+                <span>국가를 선택하면 현장 화면과 업그레이드 대상이 바뀝니다</span>
               </div>
 
-              <div className={styles.globeChip}>
-                <strong>{selectedCountry.landmark}</strong>
-                <span>{selectedOwned ? `Lv.${selectedOwned.level}` : "Locked"}</span>
-              </div>
-            </div>
+              <div className={styles.countryDockGrid}>
+                {countryCards.map((country) => {
+                  const owned = state.ownedCountries.find((item) => item.id === country.id);
 
-            <div className={styles.globeOverlayBottom}>
-              <div>
-                <span>Goal</span>
-                <strong>Unlock regions → upgrade landmarks → increase global income</strong>
+                  return (
+                    <button
+                      key={country.id}
+                      type="button"
+                      className={`${styles.countryDockCard} ${state.selectedCountryId === country.id ? styles.countryDockActive : ""}`}
+                      onClick={() => state.selectCountry(country.id)}
+                    >
+                      <span>{country.flag}</span>
+                      <strong>{country.name}</strong>
+                      <small>{owned ? `Lv.${owned.level}` : "Locked"}</small>
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <span>Selected Bonus</span>
-                <strong>{selectedCountry.bonus}</strong>
-              </div>
-            </div>
+            </section>
           </div>
 
-          <LandmarkImmersiveView country={selectedCountry} />
+          <aside className={styles.actionDeck}>
+            <section className={styles.deckCard}>
+              <h2>Selected Nation</h2>
+              <p className={styles.deckDescription}>
+                {selectedCountry.flag} {selectedCountry.name} · {selectedCountry.landmark}
+              </p>
 
-          <aside className={styles.controlDeck}>
+              <div className={styles.selectedInfoGrid}>
+                <div>
+                  <span>Rarity</span>
+                  <strong>{selectedCountry.rarity}</strong>
+                </div>
+                <div>
+                  <span>Income</span>
+                  <strong>{selectedCountry.baseIncome} / sec</strong>
+                </div>
+                <div>
+                  <span>Cards</span>
+                  <strong>{selectedOwned?.cards ?? 0}</strong>
+                </div>
+                <div>
+                  <span>Level</span>
+                  <strong>{selectedOwned?.level ?? "Locked"}</strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={`${styles.button} ${styles.primaryButton}`}
+                onClick={() => state.upgradeCountry(selectedCountry.id)}
+              >
+                Landmark Upgrade
+                <small>{formatNumber(upgradeCost)} coins</small>
+              </button>
+            </section>
+
             <section className={styles.deckCard}>
               <h2>Command Center</h2>
 
@@ -619,69 +376,6 @@ export default function AtlasTycoonClient() {
             </section>
 
             <section className={styles.deckCard}>
-              <h2>Selected Nation</h2>
-              <p className={styles.deckDescription}>
-                {selectedCountry.flag} {selectedCountry.name} · {selectedCountry.landmark}
-              </p>
-
-              <div className={styles.actionGrid}>
-                <button
-                  type="button"
-                  className={`${styles.button} ${styles.primaryButton}`}
-                  onClick={() => state.upgradeCountry(selectedCountry.id)}
-                >
-                  Landmark Upgrade
-                  <small>{formatNumber(upgradeCost)} coins</small>
-                </button>
-              </div>
-            </section>
-
-            <section className={styles.deckCard}>
-              <h2>Expansion</h2>
-
-              <div className={styles.compactList}>
-                {regions.map((region) => {
-                  const unlocked = unlockedRegions.includes(region.id);
-
-                  return (
-                    <div key={region.id} className={`${styles.compactRow} ${unlocked ? styles.compactRowActive : ""}`}>
-                      <div>
-                        <strong>{region.name}</strong>
-                        <span>{unlocked ? "Unlocked" : `Lv.${region.requiredLevel} · ${formatNumber(region.unlockCost)} coins`}</span>
-                      </div>
-                      <button type="button" onClick={() => state.unlockRegion(region.id)}>
-                        {unlocked ? "Open" : "Unlock"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className={styles.deckCard}>
-              <h2>Research</h2>
-
-              <div className={styles.compactList}>
-                {researchUpgrades.map((upgrade) => {
-                  const level = research[upgrade.key] ?? 0;
-                  const cost = getResearchCost(upgrade.key, level);
-
-                  return (
-                    <div key={upgrade.key} className={styles.compactRow}>
-                      <div>
-                        <strong>{upgrade.title} Lv.{level}</strong>
-                        <span>{upgrade.description}</span>
-                      </div>
-                      <button type="button" onClick={() => state.upgradeResearch(upgrade.key)}>
-                        {formatNumber(cost)}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className={styles.deckCard}>
               <h2>Daily Missions</h2>
               <p className={styles.deckDescription}>Streak {state.streak}</p>
 
@@ -704,33 +398,74 @@ export default function AtlasTycoonClient() {
                 })}
               </div>
 
-              <div className={styles.actionGrid}>
-                <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.claimDailyReward}>
-                  일일 보상
-                  <small>Streak {state.streak}</small>
-                </button>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.secondaryButton}`}
+                onClick={state.claimDailyReward}
+              >
+                일일 보상
+                <small>Streak {state.streak}</small>
+              </button>
+            </section>
+
+            <section className={styles.deckCard}>
+              <h2>Progress</h2>
+              <p className={styles.deckDescription}>XP {state.xp}/{state.level * 100}</p>
+
+              <div className={styles.levelTrack}>
+                <div className={styles.levelBar} style={{ width: `${xpPercent}%` }} />
               </div>
             </section>
           </aside>
         </section>
 
-        <section className={styles.collectionDock}>
-          {countryCards.map((country) => {
-            const owned = state.ownedCountries.find((item) => item.id === country.id);
+        <section className={styles.systemGrid}>
+          <section className={styles.systemCard}>
+            <h2>Expansion</h2>
+            <p>지역을 해금하면 해당 지역 국가들이 카드팩에서 등장합니다.</p>
 
-            return (
-              <button
-                key={country.id}
-                type="button"
-                className={`${styles.countryDockCard} ${state.selectedCountryId === country.id ? styles.countryDockActive : ""}`}
-                onClick={() => state.selectCountry(country.id)}
-              >
-                <span>{country.flag}</span>
-                <strong>{country.name}</strong>
-                <small>{owned ? `Lv.${owned.level}` : "Locked"}</small>
-              </button>
-            );
-          })}
+            <div className={styles.compactList}>
+              {regions.map((region) => {
+                const unlocked = unlockedRegions.includes(region.id);
+
+                return (
+                  <div key={region.id} className={`${styles.compactRow} ${unlocked ? styles.compactRowActive : ""}`}>
+                    <div>
+                      <strong>{region.name}</strong>
+                      <span>{unlocked ? "Unlocked" : `Lv.${region.requiredLevel} · ${formatNumber(region.unlockCost)} coins`}</span>
+                    </div>
+                    <button type="button" onClick={() => state.unlockRegion(region.id)}>
+                      {unlocked ? "Open" : "Unlock"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className={styles.systemCard}>
+            <h2>Research</h2>
+            <p>코인을 장기 성장 시스템에 투자하세요.</p>
+
+            <div className={styles.compactList}>
+              {researchUpgrades.map((upgrade) => {
+                const level = research[upgrade.key] ?? 0;
+                const cost = getResearchCost(upgrade.key, level);
+
+                return (
+                  <div key={upgrade.key} className={styles.compactRow}>
+                    <div>
+                      <strong>{upgrade.title} Lv.{level}</strong>
+                      <span>{upgrade.description}</span>
+                    </div>
+                    <button type="button" onClick={() => state.upgradeResearch(upgrade.key)}>
+                      {formatNumber(cost)}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         </section>
       </main>
 
