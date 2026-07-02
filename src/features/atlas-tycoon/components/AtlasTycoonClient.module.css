@@ -1014,3 +1014,39 @@
   font-size: 12px;
   line-height: 1.45;
 }
+
+.economyGrid {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.economyCard {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.economyCardActive {
+  border-color: rgba(52,211,153,0.28);
+  background: rgba(16,185,129,0.08);
+}
+
+.economyCard strong {
+  display: block;
+  color: white;
+  font-size: 13px;
+}
+
+.economyCard span {
+  display: block;
+  margin-top: 5px;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
+}

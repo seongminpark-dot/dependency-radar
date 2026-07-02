@@ -1,4 +1,4 @@
-import type { CountryCard } from "../types";
+import type { CountryCard, PackTier, RegionSlot, ResearchKey } from "../types";
 
 export const countryCards: CountryCard[] = [
   {
@@ -107,18 +107,143 @@ export const countryCards: CountryCard[] = [
   },
 ];
 
+export const regions: {
+  id: RegionSlot;
+  name: string;
+  description: string;
+  unlockCost: number;
+  unlockGems: number;
+  requiredLevel: number;
+}[] = [
+  {
+    id: "east-asia",
+    name: "East Asia",
+    description: "Starter region",
+    unlockCost: 0,
+    unlockGems: 0,
+    requiredLevel: 1,
+  },
+  {
+    id: "southeast-asia",
+    name: "Southeast Asia",
+    description: "Trade gateway countries enter the card pool.",
+    unlockCost: 2500,
+    unlockGems: 6,
+    requiredLevel: 2,
+  },
+  {
+    id: "north-america",
+    name: "North America",
+    description: "High coin-flow countries enter the card pool.",
+    unlockCost: 5200,
+    unlockGems: 12,
+    requiredLevel: 3,
+  },
+  {
+    id: "europe",
+    name: "Europe",
+    description: "Epic and legendary finance/industry cards enter the pool.",
+    unlockCost: 9000,
+    unlockGems: 20,
+    requiredLevel: 4,
+  },
+  {
+    id: "middle-east",
+    name: "Middle East",
+    description: "Energy hub cards enter the card pool.",
+    unlockCost: 12500,
+    unlockGems: 26,
+    requiredLevel: 5,
+  },
+  {
+    id: "south-america",
+    name: "South America",
+    description: "Resource region cards enter the card pool.",
+    unlockCost: 15000,
+    unlockGems: 32,
+    requiredLevel: 6,
+  },
+];
+
+export const researchUpgrades: {
+  key: ResearchKey;
+  title: string;
+  description: string;
+  baseCost: number;
+  gemCost: number;
+}[] = [
+  {
+    key: "logistics",
+    title: "Global Logistics",
+    description: "전체 국가 생산량이 증가합니다.",
+    baseCost: 1800,
+    gemCost: 0,
+  },
+  {
+    key: "banking",
+    title: "Atlas Banking",
+    description: "수익 수령 시 추가 코인을 얻습니다.",
+    baseCost: 2600,
+    gemCost: 4,
+  },
+  {
+    key: "market",
+    title: "Market Engine",
+    description: "카드팩 중복 보상과 생산 효율이 증가합니다.",
+    baseCost: 4200,
+    gemCost: 8,
+  },
+  {
+    key: "automation",
+    title: "Auto Systems",
+    description: "장기 진행을 위한 자동화 효율을 높입니다.",
+    baseCost: 6200,
+    gemCost: 12,
+  },
+];
+
+export const packTiers: Record<
+  PackTier,
+  {
+    label: string;
+    description: string;
+    baseCost: number;
+    costGrowth: number;
+    gemCost: number;
+    rarityBoost: number;
+  }
+> = {
+  standard: {
+    label: "Standard Pack",
+    description: "기본 국가 카드팩입니다.",
+    baseCost: 500,
+    costGrowth: 80,
+    gemCost: 0,
+    rarityBoost: 0,
+  },
+  premium: {
+    label: "Premium Pack",
+    description: "Rare 이상 확률이 높은 카드팩입니다.",
+    baseCost: 2600,
+    costGrowth: 260,
+    gemCost: 5,
+    rarityBoost: 0.16,
+  },
+  elite: {
+    label: "Elite Pack",
+    description: "Epic / Legendary 목표용 고가 카드팩입니다.",
+    baseCost: 9200,
+    costGrowth: 920,
+    gemCost: 18,
+    rarityBoost: 0.34,
+  },
+};
+
 export const rarityOrder = {
   Common: 1,
   Rare: 2,
   Epic: 3,
   Legendary: 4,
-} as const;
-
-export const rarityLabels = {
-  Common: "Common",
-  Rare: "Rare",
-  Epic: "Epic",
-  Legendary: "Legendary",
 } as const;
 
 export function getCountryById(id: string) {
@@ -136,22 +261,49 @@ export function getUpgradeCost(level: number, rarity: CountryCard["rarity"]) {
   return Math.round((240 + level * 180) * rarityMultiplier);
 }
 
-export function pickCountryFromPack() {
+export function getPackCost(tier: PackTier, openedCount: number) {
+  const pack = packTiers[tier];
+  return pack.baseCost + openedCount * pack.costGrowth;
+}
+
+export function getResearchCost(key: ResearchKey, level: number) {
+  const found = researchUpgrades.find((upgrade) => upgrade.key === key);
+  const base = found?.baseCost ?? 2000;
+  return Math.round(base * Math.pow(1.72, level));
+}
+
+export function pickCountryFromPack(tier: PackTier, unlockedRegions: RegionSlot[]) {
+  const pack = packTiers[tier];
+  const availableCountries = countryCards.filter((country) =>
+    unlockedRegions.includes(country.mapSlot)
+  );
+
+  const poolBase = availableCountries.length > 0
+    ? availableCountries
+    : countryCards.filter((country) => country.mapSlot === "east-asia");
+
   const roll = Math.random();
+  const boost = pack.rarityBoost;
 
-  let pool = countryCards.filter((country) => country.rarity === "Common");
+  let rarity: CountryCard["rarity"] = "Common";
 
-  if (roll > 0.62) {
-    pool = countryCards.filter((country) => country.rarity === "Rare");
+  if (roll > 0.62 - boost) {
+    rarity = "Rare";
   }
 
-  if (roll > 0.86) {
-    pool = countryCards.filter((country) => country.rarity === "Epic");
+  if (roll > 0.86 - boost * 0.75) {
+    rarity = "Epic";
   }
 
-  if (roll > 0.975) {
-    pool = countryCards.filter((country) => country.rarity === "Legendary");
+  if (roll > 0.975 - boost * 0.34) {
+    rarity = "Legendary";
   }
 
-  return pool[Math.floor(Math.random() * pool.length)] ?? countryCards[0];
+  let pool = poolBase.filter((country) => country.rarity === rarity);
+
+  if (pool.length === 0) {
+    pool = poolBase;
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)] ?? poolBase[0];
 }

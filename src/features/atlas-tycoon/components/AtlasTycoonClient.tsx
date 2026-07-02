@@ -6,7 +6,12 @@ import * as THREE from "three";
 import {
   countryCards,
   getCountryById,
+  getPackCost,
+  getResearchCost,
   getUpgradeCost,
+  packTiers,
+  regions,
+  researchUpgrades,
 } from "../data/atlasData";
 import { useAtlasTycoonStore } from "../store/useAtlasTycoonStore";
 import type { CountryCard, OwnedCountry } from "../types";
@@ -445,8 +450,12 @@ export default function AtlasTycoonClient() {
   const boostActive = state.boostUntil > Date.now();
   const currentIncome = boostActive ? totalIncome * 2 : totalIncome;
   const upgradeCost = selectedOwned ? getUpgradeCost(selectedOwned.level, selectedCountry.rarity) : 0;
-  const packCost = 500 + state.packsOpened * 80;
+  const packOpensByTier = state.packOpensByTier ?? { standard: 0, premium: 0, elite: 0 };
+  const premiumPackCost = getPackCost("premium", packOpensByTier.premium);
+  const elitePackCost = getPackCost("elite", packOpensByTier.elite);
   const xpPercent = Math.min(100, (state.xp / (state.level * 100)) * 100);
+  const unlockedRegions = state.unlockedRegions ?? ["east-asia"];
+  const research = state.research ?? { logistics: 0, banking: 0, market: 0, automation: 0 };
 
   const missionCopy: Record<DailyMissionKey, { title: string; reward: string }> = {
     claimIncome: {
@@ -590,8 +599,11 @@ export default function AtlasTycoonClient() {
                 <button type="button" className={`${styles.button} ${styles.primaryButton}`} onClick={state.claimIncome}>
                   수익 받기
                 </button>
-                <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.openPack}>
-                  카드팩 열기 · {formatNumber(packCost)}
+                <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.openPremiumPack}>
+                  Premium Pack · {formatNumber(premiumPackCost)}
+                </button>
+                <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.openElitePack}>
+                  Elite Pack · {formatNumber(elitePackCost)}
                 </button>
                 <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.claimDailyReward}>
                   일일 보상
@@ -665,6 +677,65 @@ export default function AtlasTycoonClient() {
 
               <div className={styles.levelTrack}>
                 <div className={styles.levelBar} style={{ width: `${xpPercent}%` }} />
+              </div>
+            </section>
+
+            <section className={styles.panel}>
+              <h2>Region Expansion</h2>
+              <p className={styles.panelDescription}>
+                지역을 해금하면 해당 지역 국가들이 카드팩에서 등장합니다.
+              </p>
+
+              <div className={styles.economyGrid}>
+                {regions.map((region) => {
+                  const unlocked = unlockedRegions.includes(region.id);
+
+                  return (
+                    <div key={region.id} className={`${styles.economyCard} ${unlocked ? styles.economyCardActive : ""}`}>
+                      <div>
+                        <strong>{region.name}</strong>
+                        <span>{unlocked ? "Unlocked" : `Lv.${region.requiredLevel} · ${formatNumber(region.unlockCost)} coins / ${region.unlockGems} gems`}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.button} ${unlocked ? styles.secondaryButton : styles.primaryButton}`}
+                        onClick={() => state.unlockRegion(region.id)}
+                      >
+                        {unlocked ? "Open" : "Unlock"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className={styles.panel}>
+              <h2>Research Lab</h2>
+              <p className={styles.panelDescription}>
+                코인을 장기 성장 시스템에 투자하세요.
+              </p>
+
+              <div className={styles.economyGrid}>
+                {researchUpgrades.map((upgrade) => {
+                  const level = research[upgrade.key] ?? 0;
+                  const cost = getResearchCost(upgrade.key, level);
+
+                  return (
+                    <div key={upgrade.key} className={styles.economyCard}>
+                      <div>
+                        <strong>{upgrade.title} Lv.{level}</strong>
+                        <span>{upgrade.description} · {formatNumber(cost)} coins</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.button} ${styles.secondaryButton}`}
+                        onClick={() => state.upgradeResearch(upgrade.key)}
+                      >
+                        Research
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 

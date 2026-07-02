@@ -8,6 +8,14 @@ export type RegionSlot =
   | "middle-east"
   | "south-america";
 
+export type ResearchKey =
+  | "logistics"
+  | "banking"
+  | "market"
+  | "automation";
+
+export type PackTier = "standard" | "premium" | "elite";
+
 export type CountryCard = {
   id: string;
   flag: string;

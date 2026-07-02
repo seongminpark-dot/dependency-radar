@@ -2,10 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   getCountryById,
+  getPackCost,
+  getResearchCost,
   getUpgradeCost,
+  packTiers,
   pickCountryFromPack,
+  regions,
 } from "../data/atlasData";
-import type { CountryRarity, OwnedCountry } from "../types";
+import type {
+  CountryRarity,
+  OwnedCountry,
+  PackTier,
+  RegionSlot,
+  ResearchKey,
+} from "../types";
 
 type MissionKey = "claimIncome" | "openPack" | "upgradeCountry";
 
@@ -45,15 +55,23 @@ type AtlasTycoonState = {
   lastDailyRewardDate: string;
   streak: number;
 
+  unlockedRegions: RegionSlot[];
+  research: Record<ResearchKey, number>;
+  packOpensByTier: Record<PackTier, number>;
+
   tickIncome: () => void;
   claimIncome: () => void;
   openPack: () => void;
+  openPremiumPack: () => void;
+  openElitePack: () => void;
   clearPackResult: () => void;
   selectCountry: (id: string) => void;
   upgradeCountry: (id: string) => void;
   claimDailyReward: () => void;
   claimMissionReward: (key: MissionKey) => void;
   activateBoost: () => void;
+  unlockRegion: (regionId: RegionSlot) => void;
+  upgradeResearch: (key: ResearchKey) => void;
   resetTycoon: () => void;
 };
 
@@ -115,13 +133,45 @@ function getOwnedCountry(ownedCountries: OwnedCountry[], id: string) {
   return ownedCountries.find((country) => country.id === id);
 }
 
+function getSafeUnlockedRegions(state: Pick<AtlasTycoonState, "unlockedRegions">) {
+  if (!state.unlockedRegions || state.unlockedRegions.length === 0) {
+    return ["east-asia"] as RegionSlot[];
+  }
+
+  return state.unlockedRegions;
+}
+
+function getSafeResearch(state: Pick<AtlasTycoonState, "research">) {
+  return {
+    logistics: state.research?.logistics ?? 0,
+    banking: state.research?.banking ?? 0,
+    market: state.research?.market ?? 0,
+    automation: state.research?.automation ?? 0,
+  };
+}
+
+function getSafePackOpens(state: Pick<AtlasTycoonState, "packOpensByTier">) {
+  return {
+    standard: state.packOpensByTier?.standard ?? 0,
+    premium: state.packOpensByTier?.premium ?? 0,
+    elite: state.packOpensByTier?.elite ?? 0,
+  };
+}
+
 function calculateCountryIncome(country: OwnedCountry) {
   const card = getCountryById(country.id);
   return card.baseIncome * country.level + country.cards * 2;
 }
 
-function calculateTotalIncome(ownedCountries: OwnedCountry[]) {
-  return ownedCountries.reduce((total, country) => total + calculateCountryIncome(country), 0);
+function calculateTotalIncome(ownedCountries: OwnedCountry[], research: Record<ResearchKey, number>) {
+  const baseIncome = ownedCountries.reduce((total, country) => total + calculateCountryIncome(country), 0);
+  const multiplier =
+    1 +
+    research.logistics * 0.08 +
+    research.market * 0.05 +
+    research.automation * 0.03;
+
+  return Math.round(baseIncome * multiplier);
 }
 
 function applyXp(level: number, xp: number, gain: number) {
@@ -149,11 +199,17 @@ function getRarityGemReward(rarity: CountryRarity) {
   return 1;
 }
 
-function getRarityCoinReward(rarity: CountryRarity) {
-  if (rarity === "Legendary") return 2400;
-  if (rarity === "Epic") return 1100;
-  if (rarity === "Rare") return 520;
-  return 180;
+function getRarityCoinReward(rarity: CountryRarity, research: Record<ResearchKey, number>) {
+  const base =
+    rarity === "Legendary"
+      ? 2400
+      : rarity === "Epic"
+        ? 1100
+        : rarity === "Rare"
+          ? 520
+          : 180;
+
+  return Math.round(base * (1 + research.market * 0.08));
 }
 
 function getMissionReward(key: MissionKey) {
@@ -180,6 +236,23 @@ function getMissionReward(key: MissionKey) {
     gems: 6,
     xp: 50,
     label: "Upgrade Mission",
+  };
+}
+
+function createInitialResearch(): Record<ResearchKey, number> {
+  return {
+    logistics: 0,
+    banking: 0,
+    market: 0,
+    automation: 0,
+  };
+}
+
+function createInitialPackOpens(): Record<PackTier, number> {
+  return {
+    standard: 0,
+    premium: 0,
+    elite: 0,
   };
 }
 
@@ -211,11 +284,16 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       lastDailyRewardDate: "",
       streak: 0,
 
+      unlockedRegions: ["east-asia"],
+      research: createInitialResearch(),
+      packOpensByTier: createInitialPackOpens(),
+
       tickIncome: () => {
         const state = get();
         const now = Date.now();
+        const research = getSafeResearch(state);
         const boost = state.boostUntil > now ? 2 : 1;
-        const incomePerTick = calculateTotalIncome(state.ownedCountries) * boost;
+        const incomePerTick = calculateTotalIncome(state.ownedCountries, research) * boost;
 
         set({
           incomeBank: state.incomeBank + incomePerTick,
@@ -224,6 +302,7 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
 
       claimIncome: () => {
         const state = get();
+        const research = getSafeResearch(state);
         const claimAmount = Math.floor(state.incomeBank);
         const freshMissions = getFreshMissions(state);
 
@@ -236,68 +315,148 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           return;
         }
 
-        const xpResult = applyXp(state.level, state.xp, Math.max(5, Math.floor(claimAmount / 80)));
+        const bankingBonus = Math.round(claimAmount * research.banking * 0.05);
+        const totalClaim = claimAmount + bankingBonus;
+        const xpResult = applyXp(state.level, state.xp, Math.max(5, Math.floor(totalClaim / 80)));
 
         set({
-          coins: state.coins + claimAmount,
+          coins: state.coins + totalClaim,
           incomeBank: 0,
           level: xpResult.level,
           xp: xpResult.xp,
           dailyMissions: advanceMission(freshMissions, "claimIncome"),
           lastMissionDate: getTodayKey(),
-          message: `수익 ${claimAmount.toLocaleString("ko-KR")} coins 수령`,
-          lastReward: `+${claimAmount.toLocaleString("ko-KR")} coins`,
+          message: `수익 ${totalClaim.toLocaleString("ko-KR")} coins 수령`,
+          lastReward: `+${totalClaim.toLocaleString("ko-KR")} coins`,
         });
       },
 
       openPack: () => {
-        const state = get();
-        const packCost = 500 + state.packsOpened * 80;
-        const freshMissions = getFreshMissions(state);
+        get().openPremiumPack();
+      },
 
-        if (state.coins < packCost) {
+      openPremiumPack: () => {
+        const state = get();
+        const tier: PackTier = "premium";
+        const packOpens = getSafePackOpens(state);
+        const research = getSafeResearch(state);
+        const unlockedRegions = getSafeUnlockedRegions(state);
+        const packCost = getPackCost(tier, packOpens[tier]);
+        const gemCost = packTiers[tier].gemCost;
+
+        if (state.coins < packCost || state.gems < gemCost) {
           set({
-            dailyMissions: freshMissions,
-            lastMissionDate: getTodayKey(),
-            message: `카드팩을 열려면 ${packCost.toLocaleString("ko-KR")} coins가 필요합니다.`,
+            message: `${packTiers[tier].label}에는 ${packCost.toLocaleString("ko-KR")} coins / ${gemCost} gems가 필요합니다.`,
           });
           return;
         }
 
-        const pulled = pickCountryFromPack();
+        const freshMissions = getFreshMissions(state);
+        const pulled = pickCountryFromPack(tier, unlockedRegions);
         const existing = getOwnedCountry(state.ownedCountries, pulled.id);
-        const xpResult = applyXp(state.level, state.xp, 35);
+        const xpResult = applyXp(state.level, state.xp, 45);
         const gemReward = getRarityGemReward(pulled.rarity);
-        const coinReward = existing ? getRarityCoinReward(pulled.rarity) : 0;
+        const coinReward = existing ? getRarityCoinReward(pulled.rarity, research) : 0;
 
-        let nextOwnedCountries: OwnedCountry[];
-
-        if (existing) {
-          nextOwnedCountries = state.ownedCountries.map((country) =>
-            country.id === pulled.id
-              ? {
-                  ...country,
-                  cards: country.cards + 1,
-                }
-              : country
-          );
-        } else {
-          nextOwnedCountries = [
-            ...state.ownedCountries,
-            {
-              id: pulled.id,
-              level: 1,
-              cards: 1,
-            },
-          ];
-        }
+        const nextOwnedCountries = existing
+          ? state.ownedCountries.map((country) =>
+              country.id === pulled.id
+                ? {
+                    ...country,
+                    cards: country.cards + 1,
+                  }
+                : country
+            )
+          : [
+              ...state.ownedCountries,
+              {
+                id: pulled.id,
+                level: 1,
+                cards: 1,
+              },
+            ];
 
         set({
           coins: state.coins - packCost + coinReward,
-          gems: state.gems + gemReward,
+          gems: state.gems - gemCost + gemReward,
           ownedCountries: nextOwnedCountries,
           selectedCountryId: pulled.id,
           packsOpened: state.packsOpened + 1,
+          packOpensByTier: {
+            ...packOpens,
+            [tier]: packOpens[tier] + 1,
+          },
+          level: xpResult.level,
+          xp: xpResult.xp,
+          dailyMissions: advanceMission(freshMissions, "openPack"),
+          lastMissionDate: getTodayKey(),
+          message: existing
+            ? `${pulled.flag} ${pulled.name} 중복 카드 · 보상 ${coinReward.toLocaleString("ko-KR")} coins`
+            : `${pulled.flag} ${pulled.name} 국가 해금`,
+          lastReward: `${pulled.rarity} · ${pulled.name}`,
+          lastPackResult: {
+            countryId: pulled.id,
+            flag: pulled.flag,
+            name: pulled.name,
+            rarity: pulled.rarity,
+            isNew: !existing,
+            coinReward,
+            gemReward,
+          },
+        });
+      },
+
+      openElitePack: () => {
+        const state = get();
+        const tier: PackTier = "elite";
+        const packOpens = getSafePackOpens(state);
+        const research = getSafeResearch(state);
+        const unlockedRegions = getSafeUnlockedRegions(state);
+        const packCost = getPackCost(tier, packOpens[tier]);
+        const gemCost = packTiers[tier].gemCost;
+
+        if (state.coins < packCost || state.gems < gemCost) {
+          set({
+            message: `${packTiers[tier].label}에는 ${packCost.toLocaleString("ko-KR")} coins / ${gemCost} gems가 필요합니다.`,
+          });
+          return;
+        }
+
+        const freshMissions = getFreshMissions(state);
+        const pulled = pickCountryFromPack(tier, unlockedRegions);
+        const existing = getOwnedCountry(state.ownedCountries, pulled.id);
+        const xpResult = applyXp(state.level, state.xp, 80);
+        const gemReward = getRarityGemReward(pulled.rarity) + 4;
+        const coinReward = existing ? getRarityCoinReward(pulled.rarity, research) : 0;
+
+        const nextOwnedCountries = existing
+          ? state.ownedCountries.map((country) =>
+              country.id === pulled.id
+                ? {
+                    ...country,
+                    cards: country.cards + 1,
+                  }
+                : country
+            )
+          : [
+              ...state.ownedCountries,
+              {
+                id: pulled.id,
+                level: 1,
+                cards: 1,
+              },
+            ];
+
+        set({
+          coins: state.coins - packCost + coinReward,
+          gems: state.gems - gemCost + gemReward,
+          ownedCountries: nextOwnedCountries,
+          selectedCountryId: pulled.id,
+          packsOpened: state.packsOpened + 1,
+          packOpensByTier: {
+            ...packOpens,
+            [tier]: packOpens[tier] + 1,
+          },
           level: xpResult.level,
           xp: xpResult.xp,
           dailyMissions: advanceMission(freshMissions, "openPack"),
@@ -471,6 +630,86 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
         });
       },
 
+      unlockRegion: (regionId) => {
+        const state = get();
+        const unlockedRegions = getSafeUnlockedRegions(state);
+
+        if (unlockedRegions.includes(regionId)) {
+          set({
+            message: "이미 해금된 지역입니다.",
+          });
+          return;
+        }
+
+        const region = regions.find((item) => item.id === regionId);
+
+        if (!region) {
+          set({
+            message: "지역을 찾을 수 없습니다.",
+          });
+          return;
+        }
+
+        if (state.level < region.requiredLevel) {
+          set({
+            message: `Lv.${region.requiredLevel}부터 해금할 수 있습니다.`,
+          });
+          return;
+        }
+
+        if (state.coins < region.unlockCost || state.gems < region.unlockGems) {
+          set({
+            message: `${region.name} 해금에는 ${region.unlockCost.toLocaleString("ko-KR")} coins / ${region.unlockGems} gems가 필요합니다.`,
+          });
+          return;
+        }
+
+        set({
+          coins: state.coins - region.unlockCost,
+          gems: state.gems - region.unlockGems,
+          unlockedRegions: [...unlockedRegions, regionId],
+          message: `${region.name} 지역 해금 완료`,
+          lastReward: `${region.name} unlocked`,
+        });
+      },
+
+      upgradeResearch: (key) => {
+        const state = get();
+        const research = getSafeResearch(state);
+        const level = research[key];
+        const cost = getResearchCost(key, level);
+        const gemCost =
+          key === "logistics"
+            ? 0
+            : key === "banking"
+              ? 4 + level * 2
+              : key === "market"
+                ? 8 + level * 3
+                : 12 + level * 4;
+
+        if (state.coins < cost || state.gems < gemCost) {
+          set({
+            message: `연구에는 ${cost.toLocaleString("ko-KR")} coins / ${gemCost} gems가 필요합니다.`,
+          });
+          return;
+        }
+
+        const xpResult = applyXp(state.level, state.xp, 60 + level * 15);
+
+        set({
+          coins: state.coins - cost,
+          gems: state.gems - gemCost,
+          research: {
+            ...research,
+            [key]: level + 1,
+          },
+          level: xpResult.level,
+          xp: xpResult.xp,
+          message: `연구 업그레이드 완료 · Lv.${level + 1}`,
+          lastReward: `Research ${key} Lv.${level + 1}`,
+        });
+      },
+
       resetTycoon: () => {
         set({
           coins: 850,
@@ -496,6 +735,9 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           lastMissionDate: getTodayKey(),
           lastDailyRewardDate: "",
           streak: 0,
+          unlockedRegions: ["east-asia"],
+          research: createInitialResearch(),
+          packOpensByTier: createInitialPackOpens(),
         });
       },
     }),
