@@ -1,6 +1,6 @@
 export type VoyageMode = "normal" | "storm" | "expert";
 
-export type GamePhase = "lobby" | "voyage" | "port" | "shop";
+export type GamePhase = "lobby" | "voyage" | "port" | "shop" | "result";
 
 export type UpgradeKey = "engine" | "hull" | "cargo" | "navigation";
 
