@@ -3,3 +3,4 @@ UTC: 2026-07-01T22:38:22.809050+00:00
 Risk Lab enabled: yes
 World Voyage 3D enabled: yes
 Atlas Tycoon enabled: yes
+Issues hub enabled: yes

@@ -14,6 +14,7 @@ import WorldBankTableOverview from "@/components/WorldBankTableOverview";
 import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerControlsPanel";
 import HomeActionHub from "@/components/HomeActionHub";
 import HomeDataJumpBar from "@/components/HomeDataJumpBar";
+import HomeIssueWatch from "@/components/HomeIssueWatch";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1780,6 +1781,8 @@ export default function StatsDashboard({
           </p>
         </div>
       </section>
+
+            <HomeIssueWatch />
 
       <footer
         id="contact"
