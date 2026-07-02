@@ -9,7 +9,7 @@ import {
   type MutableRefObject,
 } from "react";
 import * as THREE from "three";
-import { contracts, getUpgradePrice, modeProfiles, ports, upgrades } from "../data/gameData";
+import { contracts, getUpgradePrice, modeProfiles, ports, shipSkins, upgrades } from "../data/gameData";
 import { useVoyageProStore } from "../store/useVoyageProStore";
 import type { UpgradeKey, VoyageMode } from "../types";
 import styles from "./VoyageProClient.module.css";
@@ -626,6 +626,14 @@ export default function VoyageProClient() {
             <span>Distance</span>
             <strong>{formatNumber(state.distance)} km</strong>
           </div>
+          <div className={styles.resourceCard}>
+            <span>Captain Lv.</span>
+            <strong>{state.level}</strong>
+          </div>
+          <div className={styles.resourceCard}>
+            <span>Chests</span>
+            <strong>{state.chests}</strong>
+          </div>
         </section>
 
         <section className={styles.layout}>
@@ -743,6 +751,43 @@ export default function VoyageProClient() {
               </div>
 
               <div className={styles.messageBar}>{state.message}</div>
+            </section>
+
+            <section className={styles.panel}>
+              <h2>Captain Progress</h2>
+              <p className={styles.panelDescription}>
+                최고 거리 {formatNumber(state.bestDistance)} km · XP {state.xp}/{state.level * 100}
+              </p>
+
+              <div className={styles.levelTrack}>
+                <div className={styles.levelBar} style={{ width: `${Math.min(100, (state.xp / (state.level * 100)) * 100)}%` }} />
+              </div>
+
+              <div className={styles.buttonRow}>
+                <button type="button" className={`${styles.button} ${styles.primaryButton}`} onClick={state.openRewardChest}>
+                  보상 상자 열기 · {state.chests}
+                </button>
+              </div>
+
+              <div className={styles.skinGrid}>
+                {shipSkins.map((skin) => {
+                  const unlocked = state.unlockedSkins.includes(skin.id);
+                  const active = state.currentSkinId === skin.id;
+
+                  return (
+                    <button
+                      key={skin.id}
+                      type="button"
+                      className={`${styles.skinCard} ${active ? styles.skinCardActive : ""}`}
+                      onClick={() => state.equipSkin(skin.id)}
+                    >
+                      <span className={styles.skinSwatch} style={{ background: skin.color }} />
+                      <strong>{skin.name}</strong>
+                      <small>{unlocked ? (active ? "장착 중" : "해금됨") : "잠김"}</small>
+                    </button>
+                  );
+                })}
+              </div>
             </section>
 
             <section className={styles.panel}>

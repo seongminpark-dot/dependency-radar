@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { contracts, modeProfiles } from "../data/gameData";
+import { contracts, modeProfiles, shipSkins } from "../data/gameData";
 import type { GamePhase, UpgradeKey, VoyageMode } from "../types";
 
 type VoyageProState = {
@@ -12,11 +12,17 @@ type VoyageProState = {
   food: number;
   hull: number;
   distance: number;
+  bestDistance: number;
   visitedPorts: number;
   reputation: number;
+  level: number;
+  xp: number;
+  chests: number;
   dailyRewardClaimed: boolean;
   message: string;
   combo: number;
+  unlockedSkins: string[];
+  currentSkinId: string;
   upgrades: Record<UpgradeKey, number>;
 
   setMode: (mode: VoyageMode) => void;
@@ -30,6 +36,8 @@ type VoyageProState = {
   closeShop: () => void;
   buyUpgrade: (key: UpgradeKey, price: number) => void;
   claimDailyReward: () => void;
+  openRewardChest: () => void;
+  equipSkin: (skinId: string) => void;
   resetRun: () => void;
 };
 
@@ -62,6 +70,36 @@ function getFailureState(partial: Partial<VoyageProState>) {
   return "";
 }
 
+function applyXp(level: number, xp: number, gain: number) {
+  let nextLevel = level;
+  let nextXp = xp + gain;
+  let leveledUp = false;
+
+  while (nextXp >= nextLevel * 100) {
+    nextXp -= nextLevel * 100;
+    nextLevel += 1;
+    leveledUp = true;
+  }
+
+  return {
+    level: nextLevel,
+    xp: nextXp,
+    leveledUp,
+  };
+}
+
+function randomInt(min: number, max: number) {
+  return Math.floor(min + Math.random() * (max - min + 1));
+}
+
+function pickRandomSkin(unlockedSkins: string[]) {
+  const lockedSkins = shipSkins.filter((skin) => !unlockedSkins.includes(skin.id));
+
+  if (lockedSkins.length === 0) return null;
+
+  return lockedSkins[Math.floor(Math.random() * lockedSkins.length)];
+}
+
 export const useVoyageProStore = create<VoyageProState>((set, get) => ({
   phase: "lobby",
   mode: "normal",
@@ -72,11 +110,17 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
   food: 100,
   hull: 100,
   distance: 0,
+  bestDistance: 0,
   visitedPorts: 0,
   reputation: 0,
+  level: 1,
+  xp: 0,
+  chests: 1,
   dailyRewardClaimed: false,
   message: "계약을 선택하고 출항하세요.",
   combo: 0,
+  unlockedSkins: ["azure-runner"],
+  currentSkinId: "azure-runner",
   upgrades: defaultUpgrades,
 
   setMode: (mode) => {
@@ -128,12 +172,16 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
     const rewardGems = Math.round(contract.rewardGems * profile.rewardMultiplier);
     const riskCost = Math.round(contract.risk * profile.riskMultiplier * 4.5);
     const dockingCost = 120 + current.visitedPorts * 35;
+    const xpGain = 80 + contract.risk + current.visitedPorts * 8;
+    const xpResult = applyXp(current.level, current.xp, xpGain);
+    const chestGain = current.visitedPorts > 0 && (current.visitedPorts + 1) % 3 === 0 ? 1 : 0;
 
     const nextCoins = current.coins + rewardCoins - riskCost - dockingCost;
     const nextGems = current.gems + rewardGems;
     const nextFuel = clamp(current.fuel + 30, 0, 130);
     const nextFood = clamp(current.food + 26, 0, 130);
     const nextHull = clamp(current.hull + 12, 0, 130);
+    const nextDistance = current.distance + distanceGain;
 
     set({
       phase: "port",
@@ -142,11 +190,18 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
       fuel: nextFuel,
       food: nextFood,
       hull: nextHull,
-      distance: current.distance + distanceGain,
+      distance: nextDistance,
+      bestDistance: Math.max(current.bestDistance, nextDistance),
       visitedPorts: current.visitedPorts + 1,
       reputation: current.reputation + 1,
+      level: xpResult.level,
+      xp: xpResult.xp,
+      chests: current.chests + chestGain,
       combo: 0,
-      message: `항구 도착 · ${rewardCoins} coins / ${rewardGems} gems 획득`,
+      message:
+        `항구 도착 · ${rewardCoins} coins / ${rewardGems} gems / ${xpGain} XP 획득` +
+        (xpResult.leveledUp ? " · 레벨 상승" : "") +
+        (chestGain > 0 ? " · 보상 상자 +1" : ""),
     });
   },
 
@@ -158,7 +213,8 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
     let nextFuel = current.fuel;
     let nextFood = current.food;
     let nextHull = current.hull;
-    let nextCombo = current.combo + 1;
+    const nextCombo = current.combo + 1;
+    const xpResult = applyXp(current.level, current.xp, 5);
     let message = "보상 획득";
 
     if (type === "coin") {
@@ -200,7 +256,9 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
       food: nextFood,
       hull: nextHull,
       combo: nextCombo,
-      message,
+      level: xpResult.level,
+      xp: xpResult.xp,
+      message: xpResult.leveledUp ? `${message} · 레벨 상승` : message,
     });
   },
 
@@ -323,11 +381,61 @@ export const useVoyageProStore = create<VoyageProState>((set, get) => ({
       return;
     }
 
+    const xpResult = applyXp(current.level, current.xp, 60);
+
     set({
       coins: current.coins + 600,
       gems: current.gems + 12,
+      chests: current.chests + 1,
+      level: xpResult.level,
+      xp: xpResult.xp,
       dailyRewardClaimed: true,
-      message: "일일 보상 획득 · 600 coins / 12 gems",
+      message: "일일 보상 획득 · 600 coins / 12 gems / 보상 상자 +1",
+    });
+  },
+
+  openRewardChest: () => {
+    const current = get();
+
+    if (current.chests <= 0) {
+      set({ message: "열 수 있는 보상 상자가 없습니다." });
+      return;
+    }
+
+    const coinReward = randomInt(260, 720);
+    const gemReward = randomInt(4, 18);
+    const skinRoll = Math.random() < 0.28;
+    const newSkin = skinRoll ? pickRandomSkin(current.unlockedSkins) : null;
+    const xpResult = applyXp(current.level, current.xp, 45);
+
+    set({
+      chests: current.chests - 1,
+      coins: current.coins + coinReward,
+      gems: current.gems + gemReward,
+      level: xpResult.level,
+      xp: xpResult.xp,
+      unlockedSkins: newSkin
+        ? [...current.unlockedSkins, newSkin.id]
+        : current.unlockedSkins,
+      message: newSkin
+        ? `상자 개봉 · ${coinReward} coins / ${gemReward} gems / ${newSkin.name} 스킨 해금`
+        : `상자 개봉 · ${coinReward} coins / ${gemReward} gems 획득`,
+    });
+  },
+
+  equipSkin: (skinId) => {
+    const current = get();
+
+    if (!current.unlockedSkins.includes(skinId)) {
+      set({ message: "아직 해금되지 않은 스킨입니다." });
+      return;
+    }
+
+    const skin = shipSkins.find((item) => item.id === skinId);
+
+    set({
+      currentSkinId: skinId,
+      message: `${skin?.name ?? "선박"} 스킨 장착`,
     });
   },
 

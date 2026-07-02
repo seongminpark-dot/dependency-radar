@@ -130,3 +130,35 @@ export function getUpgradePrice(key: UpgradeKey, level: number) {
 
   return base + level * 260;
 }
+
+
+export const shipSkins = [
+  {
+    id: "azure-runner",
+    name: "Azure Runner",
+    rarity: "Common",
+    color: "#38bdf8",
+    description: "균형 잡힌 기본 항해선입니다.",
+  },
+  {
+    id: "storm-hawk",
+    name: "Storm Hawk",
+    rarity: "Rare",
+    color: "#facc15",
+    description: "폭풍 항로에 어울리는 고속 선박 스킨입니다.",
+  },
+  {
+    id: "crimson-tide",
+    name: "Crimson Tide",
+    rarity: "Epic",
+    color: "#fb7185",
+    description: "위험 항로 보상 상자에서 얻을 수 있는 고급 스킨입니다.",
+  },
+  {
+    id: "emerald-freighter",
+    name: "Emerald Freighter",
+    rarity: "Rare",
+    color: "#34d399",
+    description: "화물 계약에 특화된 무역선 스킨입니다.",
+  },
+] as const;
