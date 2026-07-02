@@ -202,8 +202,8 @@ export default function VoyageProClient() {
       <main className={styles.main}>
         <section className={styles.hero}>
           <div>
-            <p className={styles.heroLabel}>Voyage Pro Prototype</p>
-            <h1 className={styles.title}>Datlora를 게임처럼 다시 설계합니다.</h1>
+            <p className={styles.heroLabel}>Voyage Pro</p>
+            <h1 className={styles.title}>세계 항로를 지배하는 프리미엄 항해 게임.</h1>
             <p className={styles.subtitle}>
               이 버전은 단순 미니게임이 아니라, 3D 항해 장면, 계약, 코인, 젬, 상점, 업그레이드, 재접속 보상으로
               확장하기 위한 고급 게임 구조의 첫 번째 빌드입니다.
@@ -211,9 +211,9 @@ export default function VoyageProClient() {
           </div>
 
           <aside className={styles.premiumCard}>
-            <h2>Live Service Loop</h2>
+            <h2>Voyage Loop</h2>
             <p>
-              계약 선택 → 출항 → 보상 획득 → 항구 도착 → 업그레이드 → 더 어려운 항로 도전 구조로 확장합니다.
+              계약 선택 → 출항 → 보상 획득 → 항구 도착 → 업그레이드 → 더 어려운 항로에 도전하세요.
             </p>
           </aside>
         </section>
@@ -265,7 +265,7 @@ export default function VoyageProClient() {
           <aside className={styles.sideStack}>
             <section className={styles.panel}>
               <h2>항해 모드</h2>
-              <p className={styles.panelDescription}>보상과 위험도를 조절합니다. 실제 과금은 없지만, 프리미엄 게임처럼 성장 루프를 설계합니다.</p>
+              <p className={styles.panelDescription}>보상과 위험도를 조절합니다. 높은 난이도일수록 더 큰 보상을 얻을 수 있습니다.</p>
 
               <div className={styles.modeGrid}>
                 {Object.entries(modeProfiles).map(([modeKey, profile]) => (
@@ -284,7 +284,7 @@ export default function VoyageProClient() {
 
             <section className={styles.panel}>
               <h2>계약 선택</h2>
-              <p className={styles.panelDescription}>보상이 높을수록 위험도도 높습니다. 이 구조가 나중에 재접속/업그레이드 동기가 됩니다.</p>
+              <p className={styles.panelDescription}>보상이 높을수록 위험도도 높습니다. 계약을 신중하게 선택하세요.</p>
 
               <div className={styles.modeGrid}>
                 {contracts.map((contract) => (
@@ -312,7 +312,7 @@ export default function VoyageProClient() {
             <section className={styles.panel}>
               <h2>Command Deck</h2>
               <p className={styles.panelDescription}>
-                현재 계약: {selectedContract.icon} {selectedContract.title}
+                선택한 계약: {selectedContract.icon} {selectedContract.title}
               </p>
 
               <div className={styles.buttonRow}>
@@ -320,7 +320,7 @@ export default function VoyageProClient() {
                   출항
                 </button>
                 <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.simulateArrival}>
-                  항구 도착 시뮬레이션
+                  항구 도착
                 </button>
                 <button type="button" className={`${styles.button} ${styles.secondaryButton}`} onClick={state.openShop}>
                   상점
@@ -335,7 +335,7 @@ export default function VoyageProClient() {
 
             <section className={styles.panel}>
               <h2>Ship Upgrade Shop</h2>
-              <p className={styles.panelDescription}>실제 결제는 없지만, 결제형 게임처럼 성장 욕구가 보이도록 코인/젬/업그레이드 구조를 먼저 만듭니다.</p>
+              <p className={styles.panelDescription}>코인과 젬을 모아 선박 성능을 강화하고 더 높은 보상의 항로에 도전하세요.</p>
 
               <div className={styles.shopGrid}>
                 {upgrades.map((upgrade) => {
