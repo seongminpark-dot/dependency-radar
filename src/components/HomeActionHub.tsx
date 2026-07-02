@@ -7,17 +7,17 @@ import { getFlagEmoji } from "@/lib/flags";
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 type AnyRow = CountryRow & Record<string, unknown>;
 
-const quickCountryCodes = ["KOR", "USA", "JPN", "CHN", "DEU", "GBR", "FRA", "IND"];
+const quickCountryCodes = ["KOR", "USA", "JPN", "CHN", "DEU", "IND", "GBR", "FRA"];
 
 const topicLinks = [
   {
     href: "/topics/fuel-import-dependency",
-    ko: "연료 수입 의존도",
+    ko: "연료 수입",
     en: "Fuel imports",
   },
   {
     href: "/topics/food-import-dependency",
-    ko: "식량 수입 의존도",
+    ko: "식량 수입",
     en: "Food imports",
   },
   {
@@ -32,71 +32,59 @@ const topicLinks = [
   },
   {
     href: "/topics/energy-statistics",
-    ko: "에너지 통계",
+    ko: "에너지",
     en: "Energy",
-  },
-];
-
-const compareLinks = [
-  {
-    href: "/compare?a=KOR&b=USA",
-    ko: "한국 vs 미국",
-    en: "Korea vs USA",
-  },
-  {
-    href: "/compare?a=KOR&b=JPN",
-    ko: "한국 vs 일본",
-    en: "Korea vs Japan",
-  },
-  {
-    href: "/compare?a=USA&b=CHN",
-    ko: "미국 vs 중국",
-    en: "USA vs China",
   },
 ];
 
 const copy = {
   ko: {
-    label: "Start here",
-    title: "국가를 검색하거나, 주제별 통계를 바로 확인하세요.",
+    label: "Country Data Search",
+    title: "국가를 검색하고 공식 지표를 바로 확인하세요.",
     subtitle:
-      "무역, 에너지, 관세, 수입 의존도 지표를 공식 데이터 기준으로 빠르게 탐색할 수 있습니다.",
-    searchPlaceholder: "예: 대한민국, Korea, KOR, United States, USA",
-    popularCountries: "인기 국가",
+      "국가별 무역, 에너지, 식량, 관세, 물류, 수입 의존도 데이터를 빠르게 열람할 수 있습니다.",
+    searchPlaceholder: "국가명 또는 ISO 코드 입력: Korea, KOR, United States, USA",
+    searchHint: "Enter를 누르면 첫 번째 검색 결과로 이동합니다.",
+    popularCountries: "빠른 국가 링크",
     searchResults: "검색 결과",
-    noResults: "검색 결과가 없습니다.",
-    openCountry: "국가 상세 보기",
-    topicsTitle: "주제별 통계",
-    topicsDesc: "관심 있는 지표부터 바로 확인합니다.",
-    compareTitle: "국가 간 비교",
-    compareDesc: "두 국가를 선택해 핵심 지표를 한 화면에서 비교합니다.",
-    sourcesTitle: "공식 출처와 방법론",
-    sourcesDesc: "데이터 출처와 최신성 기준을 확인합니다.",
-    allTopics: "모든 주제 보기",
-    compareNow: "국가 비교하기",
-    sources: "출처 보기",
-    methodology: "방법론 보기",
+    noResults: "검색 결과가 없습니다. 영문명 또는 ISO 코드를 입력해 보세요.",
+    openCountry: "국가 페이지 열기",
+    newsTitle: "Latest News",
+    newsDesc: "최신 글로벌 뉴스와 관련 이슈를 확인합니다.",
+    issuesTitle: "Issue Briefs",
+    issuesDesc: "Oil, Food, Tariff, Supply Chain 이슈를 공식 지표로 봅니다.",
+    compareTitle: "Compare",
+    compareDesc: "두 국가의 핵심 지표를 한 화면에서 비교합니다.",
+    topicsTitle: "Topics",
+    topicsDesc: "관심 있는 지표부터 바로 탐색합니다.",
+    openNews: "뉴스 보기",
+    openIssues: "이슈 보기",
+    openCompare: "비교하기",
+    openTopics: "주제 보기",
   },
   en: {
-    label: "Start here",
-    title: "Search a country or explore statistics by topic.",
+    label: "Country Data Search",
+    title: "Search countries and open official indicators instantly.",
     subtitle:
-      "Quickly check official trade, energy, tariff, logistics, and dependency indicators.",
-    searchPlaceholder: "Example: Korea, KOR, United States, USA, Japan",
-    popularCountries: "Popular countries",
+      "Explore trade, energy, food, tariff, logistics, and import-dependency indicators by country.",
+    searchPlaceholder: "Type a country or ISO code: Korea, KOR, United States, USA",
+    searchHint: "Press Enter to open the first matching country.",
+    popularCountries: "Quick country links",
     searchResults: "Search results",
-    noResults: "No matching countries found.",
+    noResults: "No matching countries. Try an English name or ISO code.",
     openCountry: "Open country page",
-    topicsTitle: "Explore by topic",
-    topicsDesc: "Start from the indicator you care about.",
-    compareTitle: "Compare countries",
+    newsTitle: "Latest News",
+    newsDesc: "Open current global news linked to Datlora issue briefs.",
+    issuesTitle: "Issue Briefs",
+    issuesDesc: "Read oil, food, tariff, and supply-chain briefs with official data.",
+    compareTitle: "Compare",
     compareDesc: "Compare key indicators between two countries.",
-    sourcesTitle: "Sources and methodology",
-    sourcesDesc: "Check data sources and freshness rules.",
-    allTopics: "View all topics",
-    compareNow: "Compare now",
-    sources: "Sources",
-    methodology: "Methodology",
+    topicsTitle: "Topics",
+    topicsDesc: "Start from the indicator you care about.",
+    openNews: "View news",
+    openIssues: "View issues",
+    openCompare: "Compare",
+    openTopics: "View topics",
   },
 };
 
@@ -123,7 +111,11 @@ function getRegion(row: AnyRow) {
   return String(row.region ?? row.regionName ?? row.incomeLevel ?? "");
 }
 
-function CountryLink({ row }: { row: AnyRow }) {
+function getIncomeLevel(row: AnyRow) {
+  return String(row.incomeLevel ?? "");
+}
+
+function CountryCard({ row, label }: { row: AnyRow; label?: string }) {
   const iso3 = getIso3(row);
   const iso2 = getIso2(row);
   const name = getName(row);
@@ -132,12 +124,19 @@ function CountryLink({ row }: { row: AnyRow }) {
   return (
     <a
       href={`/country/${iso3}`}
-      className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 transition hover:bg-white/[0.07]"
+      className="group rounded-2xl border border-white/10 bg-slate-950/70 p-4 transition hover:-translate-y-0.5 hover:border-emerald-300/40 hover:bg-white/[0.06]"
     >
-      <p className="truncate text-base font-bold text-white">
+      {label ? (
+        <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-300">
+          {label}
+        </p>
+      ) : null}
+
+      <p className="truncate text-base font-black text-white">
         {getFlagEmoji(iso2)} {name}
       </p>
-      <p className="mt-1 truncate text-xs text-slate-500">
+
+      <p className="mt-1 truncate text-xs font-semibold text-slate-500">
         {iso3}
         {region ? ` · ${region}` : ""}
       </p>
@@ -145,19 +144,40 @@ function CountryLink({ row }: { row: AnyRow }) {
   );
 }
 
-function SmallLink({
+function ActionCard({
   href,
-  children,
+  title,
+  description,
+  cta,
+  tone,
 }: {
   href: string;
-  children: React.ReactNode;
+  title: string;
+  description: string;
+  cta: string;
+  tone: "emerald" | "cyan" | "blue" | "violet";
 }) {
+  const toneClass =
+    tone === "emerald"
+      ? "border-emerald-300/20 bg-emerald-300/10 hover:border-emerald-300/45"
+      : tone === "cyan"
+        ? "border-cyan-300/20 bg-cyan-300/10 hover:border-cyan-300/45"
+        : tone === "blue"
+          ? "border-blue-300/20 bg-blue-300/10 hover:border-blue-300/45"
+          : "border-violet-300/20 bg-violet-300/10 hover:border-violet-300/45";
+
   return (
     <a
       href={href}
-      className="rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/[0.07]"
+      className={`rounded-3xl border p-5 transition hover:-translate-y-0.5 ${toneClass}`}
     >
-      {children}
+      <strong className="block text-lg font-black text-white">{title}</strong>
+      <span className="mt-2 block text-sm leading-6 text-slate-300">
+        {description}
+      </span>
+      <span className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-xs font-black text-slate-950">
+        {cta} →
+      </span>
     </a>
   );
 }
@@ -192,7 +212,7 @@ export default function HomeActionHub({
           getIso3(row),
           getIso2(row),
           getRegion(row),
-          String(row.incomeLevel ?? ""),
+          getIncomeLevel(row),
         ]
           .join(" ")
           .toLowerCase();
@@ -202,16 +222,24 @@ export default function HomeActionHub({
       .slice(0, 8);
   }, [query, data]);
 
+  function openFirstResult() {
+    const first = searchResults[0];
+
+    if (!first) return;
+
+    window.location.href = `/country/${getIso3(first)}`;
+  }
+
   return (
     <section id="country-search" className="mx-auto max-w-7xl px-6 pb-14">
       <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.075] to-white/[0.025] p-6 shadow-2xl shadow-black/20 lg:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">
-          {t.label}
-        </p>
-
-        <div className="mt-4 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <div>
-            <h2 className="max-w-4xl text-4xl font-bold leading-tight text-white">
+            <p className="text-xs font-black uppercase tracking-[0.26em] text-emerald-300">
+              {t.label}
+            </p>
+
+            <h2 className="mt-4 max-w-4xl text-4xl font-black leading-tight tracking-[-0.06em] text-white md:text-5xl">
               {t.title}
             </h2>
 
@@ -219,36 +247,60 @@ export default function HomeActionHub({
               {t.subtitle}
             </p>
 
-            <div className="mt-6">
+            <div className="mt-6 rounded-[1.5rem] border border-emerald-300/20 bg-slate-950/80 p-3 shadow-xl shadow-black/20">
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    openFirstResult();
+                  }
+                }}
                 placeholder={t.searchPlaceholder}
-                className="w-full rounded-2xl border border-white/10 bg-[#0b0f1c] px-5 py-4 text-base font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-300/70 focus:ring-4 focus:ring-emerald-400/10"
+                className="w-full rounded-2xl border border-white/10 bg-[#0b0f1c] px-5 py-4 text-base font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-300/70 focus:ring-4 focus:ring-emerald-400/10"
               />
+
+              <p className="mt-3 px-2 text-xs font-semibold text-slate-500">
+                {t.searchHint}
+              </p>
             </div>
 
-            <div className="mt-5">
-              <p className="mb-3 text-sm font-semibold text-slate-300">
-                {query ? t.searchResults : t.popularCountries}
-              </p>
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-sm font-black text-slate-200">
+                  {query ? t.searchResults : t.popularCountries}
+                </p>
+
+                {query && searchResults[0] ? (
+                  <a
+                    href={`/country/${getIso3(searchResults[0])}`}
+                    className="text-xs font-black text-emerald-300 hover:text-emerald-200"
+                  >
+                    {t.openCountry} →
+                  </a>
+                ) : null}
+              </div>
 
               {query ? (
                 searchResults.length > 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {searchResults.map((row) => (
-                      <CountryLink key={getIso3(row)} row={row} />
+                    {searchResults.map((row, index) => (
+                      <CountryCard
+                        key={getIso3(row)}
+                        row={row}
+                        label={index === 0 ? "Best match" : undefined}
+                      />
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-4 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-white/10 bg-[#0b0f1c] p-5 text-sm font-semibold text-slate-400">
                     {t.noResults}
                   </div>
                 )
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {quickCountries.map((row) => (
-                    <CountryLink key={getIso3(row)} row={row} />
+                    <CountryCard key={getIso3(row)} row={row} />
                   ))}
                 </div>
               )}
@@ -256,68 +308,57 @@ export default function HomeActionHub({
           </div>
 
           <div className="grid gap-4">
-            <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5">
-              <p className="text-lg font-bold text-white">{t.topicsTitle}</p>
-              <p className="mt-2 text-sm leading-6 text-cyan-50/75">
+            <ActionCard
+              href="/news"
+              title={t.newsTitle}
+              description={t.newsDesc}
+              cta={t.openNews}
+              tone="emerald"
+            />
+
+            <ActionCard
+              href="/issues"
+              title={t.issuesTitle}
+              description={t.issuesDesc}
+              cta={t.openIssues}
+              tone="cyan"
+            />
+
+            <ActionCard
+              href="/compare?a=KOR&b=USA"
+              title={t.compareTitle}
+              description={t.compareDesc}
+              cta={t.openCompare}
+              tone="blue"
+            />
+
+            <div className="rounded-3xl border border-violet-300/20 bg-violet-300/10 p-5">
+              <strong className="block text-lg font-black text-white">
+                {t.topicsTitle}
+              </strong>
+
+              <span className="mt-2 block text-sm leading-6 text-slate-300">
                 {t.topicsDesc}
-              </p>
+              </span>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {topicLinks.map((topic) => (
-                  <SmallLink key={topic.href} href={topic.href}>
+                  <a
+                    key={topic.href}
+                    href={topic.href}
+                    className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-black text-slate-100 transition hover:border-violet-300/40 hover:bg-white/[0.07]"
+                  >
                     {isKo ? topic.ko : topic.en}
-                  </SmallLink>
+                  </a>
                 ))}
               </div>
 
               <a
                 href="/topics"
-                className="mt-4 inline-flex rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-bold text-[#06131a]"
+                className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-xs font-black text-slate-950"
               >
-                {t.allTopics} →
+                {t.openTopics} →
               </a>
-            </div>
-
-            <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-5">
-              <p className="text-lg font-bold text-white">{t.compareTitle}</p>
-              <p className="mt-2 text-sm leading-6 text-emerald-50/75">
-                {t.compareDesc}
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {compareLinks.map((item) => (
-                  <SmallLink key={item.href} href={item.href}>
-                    {isKo ? item.ko : item.en}
-                  </SmallLink>
-                ))}
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <a
-                  href="/compare?a=KOR&b=USA"
-                  className="inline-flex rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-bold text-[#06130d]"
-                >
-                  {t.compareNow} →
-                </a>
-                <a
-                  href="/challenge"
-                  className="inline-flex rounded-2xl border border-white/10 bg-[#0b0f1c] px-4 py-3 text-sm font-semibold text-white hover:bg-white/[0.07]"
-                >
-                  {isKo ? "데이터 챌린지" : "Data Challenge"} →
-                </a>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-indigo-400/20 bg-indigo-400/10 p-5">
-              <p className="text-lg font-bold text-white">{t.sourcesTitle}</p>
-              <p className="mt-2 text-sm leading-6 text-indigo-50/75">
-                {t.sourcesDesc}
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <SmallLink href="/sources">{t.sources}</SmallLink>
-                <SmallLink href="/methodology">{t.methodology}</SmallLink>
-              </div>
             </div>
           </div>
         </div>
