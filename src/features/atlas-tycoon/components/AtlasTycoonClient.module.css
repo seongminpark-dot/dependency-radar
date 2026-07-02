@@ -949,3 +949,68 @@
     display: none;
   }
 }
+
+.streakBox {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(52,211,153,0.18);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(52,211,153,0.14), transparent 34%),
+    rgba(6,95,70,0.16);
+  border-radius: 18px;
+  padding: 13px;
+}
+
+.streakBox span {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.streakBox strong {
+  display: block;
+  margin-top: 5px;
+  color: #d1fae5;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+}
+
+.missionGrid {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.missionCard {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.missionComplete {
+  border-color: rgba(52,211,153,0.28);
+  background: rgba(16,185,129,0.08);
+}
+
+.missionCard strong {
+  display: block;
+  color: white;
+  font-size: 13px;
+}
+
+.missionCard span {
+  display: block;
+  margin-top: 5px;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
+}

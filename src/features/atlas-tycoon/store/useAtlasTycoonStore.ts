@@ -1,12 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-  countryCards,
   getCountryById,
   getUpgradeCost,
   pickCountryFromPack,
 } from "../data/atlasData";
 import type { CountryRarity, OwnedCountry } from "../types";
+
+type MissionKey = "claimIncome" | "openPack" | "upgradeCountry";
+
+type DailyMission = {
+  progress: number;
+  target: number;
+  claimed: boolean;
+};
 
 type PackResult = {
   countryId: string;
@@ -33,6 +40,11 @@ type AtlasTycoonState = {
   lastReward: string;
   lastPackResult: PackResult | null;
 
+  dailyMissions: Record<MissionKey, DailyMission>;
+  lastMissionDate: string;
+  lastDailyRewardDate: string;
+  streak: number;
+
   tickIncome: () => void;
   claimIncome: () => void;
   openPack: () => void;
@@ -40,9 +52,64 @@ type AtlasTycoonState = {
   selectCountry: (id: string) => void;
   upgradeCountry: (id: string) => void;
   claimDailyReward: () => void;
+  claimMissionReward: (key: MissionKey) => void;
   activateBoost: () => void;
   resetTycoon: () => void;
 };
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getYesterdayKey() {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function createDailyMissions(): Record<MissionKey, DailyMission> {
+  return {
+    claimIncome: {
+      progress: 0,
+      target: 1,
+      claimed: false,
+    },
+    openPack: {
+      progress: 0,
+      target: 1,
+      claimed: false,
+    },
+    upgradeCountry: {
+      progress: 0,
+      target: 1,
+      claimed: false,
+    },
+  };
+}
+
+function getFreshMissions(state: Pick<AtlasTycoonState, "dailyMissions" | "lastMissionDate">) {
+  const today = getTodayKey();
+
+  if (state.lastMissionDate !== today || !state.dailyMissions) {
+    return createDailyMissions();
+  }
+
+  return state.dailyMissions;
+}
+
+function advanceMission(
+  missions: Record<MissionKey, DailyMission>,
+  key: MissionKey,
+  amount = 1
+) {
+  return {
+    ...missions,
+    [key]: {
+      ...missions[key],
+      progress: Math.min(missions[key].target, missions[key].progress + amount),
+    },
+  };
+}
 
 function getOwnedCountry(ownedCountries: OwnedCountry[], id: string) {
   return ownedCountries.find((country) => country.id === id);
@@ -89,6 +156,33 @@ function getRarityCoinReward(rarity: CountryRarity) {
   return 180;
 }
 
+function getMissionReward(key: MissionKey) {
+  if (key === "claimIncome") {
+    return {
+      coins: 350,
+      gems: 4,
+      xp: 30,
+      label: "Income Mission",
+    };
+  }
+
+  if (key === "openPack") {
+    return {
+      coins: 500,
+      gems: 8,
+      xp: 45,
+      label: "Pack Mission",
+    };
+  }
+
+  return {
+    coins: 650,
+    gems: 6,
+    xp: 50,
+    label: "Upgrade Mission",
+  };
+}
+
 export const useAtlasTycoonStore = create<AtlasTycoonState>()(
   persist(
     (set, get) => ({
@@ -112,6 +206,11 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       lastReward: "Starter Atlas unlocked",
       lastPackResult: null,
 
+      dailyMissions: createDailyMissions(),
+      lastMissionDate: getTodayKey(),
+      lastDailyRewardDate: "",
+      streak: 0,
+
       tickIncome: () => {
         const state = get();
         const now = Date.now();
@@ -126,9 +225,12 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       claimIncome: () => {
         const state = get();
         const claimAmount = Math.floor(state.incomeBank);
+        const freshMissions = getFreshMissions(state);
 
         if (claimAmount <= 0) {
           set({
+            dailyMissions: freshMissions,
+            lastMissionDate: getTodayKey(),
             message: "수령할 코인이 아직 없습니다.",
           });
           return;
@@ -141,6 +243,8 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           incomeBank: 0,
           level: xpResult.level,
           xp: xpResult.xp,
+          dailyMissions: advanceMission(freshMissions, "claimIncome"),
+          lastMissionDate: getTodayKey(),
           message: `수익 ${claimAmount.toLocaleString("ko-KR")} coins 수령`,
           lastReward: `+${claimAmount.toLocaleString("ko-KR")} coins`,
         });
@@ -149,9 +253,12 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       openPack: () => {
         const state = get();
         const packCost = 500 + state.packsOpened * 80;
+        const freshMissions = getFreshMissions(state);
 
         if (state.coins < packCost) {
           set({
+            dailyMissions: freshMissions,
+            lastMissionDate: getTodayKey(),
             message: `카드팩을 열려면 ${packCost.toLocaleString("ko-KR")} coins가 필요합니다.`,
           });
           return;
@@ -193,6 +300,8 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           packsOpened: state.packsOpened + 1,
           level: xpResult.level,
           xp: xpResult.xp,
+          dailyMissions: advanceMission(freshMissions, "openPack"),
+          lastMissionDate: getTodayKey(),
           message: existing
             ? `${pulled.flag} ${pulled.name} 중복 카드 · 보상 ${coinReward.toLocaleString("ko-KR")} coins`
             : `${pulled.flag} ${pulled.name} 국가 해금`,
@@ -223,10 +332,13 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
 
       upgradeCountry: (id) => {
         const state = get();
+        const freshMissions = getFreshMissions(state);
         const owned = getOwnedCountry(state.ownedCountries, id);
 
         if (!owned) {
           set({
+            dailyMissions: freshMissions,
+            lastMissionDate: getTodayKey(),
             message: "먼저 국가를 해금해야 합니다.",
           });
           return;
@@ -237,6 +349,8 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
 
         if (state.coins < cost) {
           set({
+            dailyMissions: freshMissions,
+            lastMissionDate: getTodayKey(),
             message: `업그레이드 비용 ${cost.toLocaleString("ko-KR")} coins가 필요합니다.`,
           });
           return;
@@ -256,6 +370,8 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           ),
           level: xpResult.level,
           xp: xpResult.xp,
+          dailyMissions: advanceMission(freshMissions, "upgradeCountry"),
+          lastMissionDate: getTodayKey(),
           message: `${card.flag} ${card.landmark} Lv.${owned.level + 1} 업그레이드`,
           lastReward: `${card.name} income up`,
         });
@@ -263,20 +379,77 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
 
       claimDailyReward: () => {
         const state = get();
+        const today = getTodayKey();
 
-        if (state.dailyClaimed) {
+        if (state.lastDailyRewardDate === today) {
           set({
+            dailyClaimed: true,
             message: "오늘의 보상은 이미 받았습니다.",
           });
           return;
         }
 
+        const yesterday = getYesterdayKey();
+        const nextStreak = state.lastDailyRewardDate === yesterday ? state.streak + 1 : 1;
+        const streakBonus = Math.min(7, nextStreak) * 120;
+
         set({
-          coins: state.coins + 1200,
+          coins: state.coins + 1200 + streakBonus,
           gems: state.gems + 25,
           dailyClaimed: true,
-          message: "일일 보상 1,200 coins / 25 gems 획득",
-          lastReward: "Daily reward claimed",
+          lastDailyRewardDate: today,
+          streak: nextStreak,
+          message: `일일 보상 획득 · ${1200 + streakBonus} coins / 25 gems · Streak ${nextStreak}`,
+          lastReward: `Daily reward · Streak ${nextStreak}`,
+        });
+      },
+
+      claimMissionReward: (key) => {
+        const state = get();
+        const freshMissions = getFreshMissions(state);
+        const mission = freshMissions[key];
+
+        if (!mission) {
+          set({
+            message: "미션을 찾을 수 없습니다.",
+          });
+          return;
+        }
+
+        if (mission.claimed) {
+          set({
+            message: "이미 수령한 미션 보상입니다.",
+          });
+          return;
+        }
+
+        if (mission.progress < mission.target) {
+          set({
+            dailyMissions: freshMissions,
+            lastMissionDate: getTodayKey(),
+            message: "아직 미션이 완료되지 않았습니다.",
+          });
+          return;
+        }
+
+        const reward = getMissionReward(key);
+        const xpResult = applyXp(state.level, state.xp, reward.xp);
+
+        set({
+          coins: state.coins + reward.coins,
+          gems: state.gems + reward.gems,
+          level: xpResult.level,
+          xp: xpResult.xp,
+          dailyMissions: {
+            ...freshMissions,
+            [key]: {
+              ...mission,
+              claimed: true,
+            },
+          },
+          lastMissionDate: getTodayKey(),
+          message: `${reward.label} 보상 수령 · ${reward.coins} coins / ${reward.gems} gems`,
+          lastReward: `${reward.label} claimed`,
         });
       },
 
@@ -319,6 +492,10 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           message: "Atlas Tycoon이 초기화되었습니다.",
           lastReward: "Reset complete",
           lastPackResult: null,
+          dailyMissions: createDailyMissions(),
+          lastMissionDate: getTodayKey(),
+          lastDailyRewardDate: "",
+          streak: 0,
         });
       },
     }),

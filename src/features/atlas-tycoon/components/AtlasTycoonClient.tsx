@@ -12,6 +12,8 @@ import { useAtlasTycoonStore } from "../store/useAtlasTycoonStore";
 import type { CountryCard, OwnedCountry } from "../types";
 import styles from "./AtlasTycoonClient.module.css";
 
+type DailyMissionKey = "claimIncome" | "openPack" | "upgradeCountry";
+
 function formatNumber(value: number) {
   return Math.floor(value).toLocaleString("ko-KR");
 }
@@ -446,6 +448,26 @@ export default function AtlasTycoonClient() {
   const packCost = 500 + state.packsOpened * 80;
   const xpPercent = Math.min(100, (state.xp / (state.level * 100)) * 100);
 
+  const missionCopy: Record<DailyMissionKey, { title: string; reward: string }> = {
+    claimIncome: {
+      title: "수익 1회 수령",
+      reward: "350 coins / 4 gems",
+    },
+    openPack: {
+      title: "카드팩 1회 열기",
+      reward: "500 coins / 8 gems",
+    },
+    upgradeCountry: {
+      title: "랜드마크 1회 업그레이드",
+      reward: "650 coins / 6 gems",
+    },
+  };
+
+  const missionEntries = Object.entries(state.dailyMissions) as [
+    DailyMissionKey,
+    { progress: number; target: number; claimed: boolean }
+  ][];
+
   useEffect(() => {
     const timer = window.setInterval(() => {
       useAtlasTycoonStore.getState().tickIncome();
@@ -584,6 +606,56 @@ export default function AtlasTycoonClient() {
               <div className={styles.packReveal}>
                 <strong>Latest Reward</strong>
                 <span>{state.lastReward}</span>
+              </div>
+            </section>
+
+            <section className={styles.panel}>
+              <h2>Daily Missions</h2>
+              <p className={styles.panelDescription}>
+                Streak {state.streak} · 오늘의 미션을 완료하고 추가 보상을 받으세요.
+              </p>
+
+              <div className={styles.streakBox}>
+                <div>
+                  <span>Daily Streak</span>
+                  <strong>{state.streak} days</strong>
+                </div>
+                <button
+                  type="button"
+                  className={`${styles.button} ${styles.primaryButton}`}
+                  onClick={state.claimDailyReward}
+                >
+                  일일 보상
+                </button>
+              </div>
+
+              <div className={styles.missionGrid}>
+                {missionEntries.map(([key, mission]) => {
+                  const completed = mission.progress >= mission.target;
+                  const claimed = mission.claimed;
+
+                  return (
+                    <div
+                      key={key}
+                      className={`${styles.missionCard} ${completed ? styles.missionComplete : ""}`}
+                    >
+                      <div>
+                        <strong>{missionCopy[key].title}</strong>
+                        <span>
+                          {mission.progress}/{mission.target} · {missionCopy[key].reward}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`${styles.button} ${claimed ? styles.secondaryButton : styles.primaryButton}`}
+                        onClick={() => state.claimMissionReward(key)}
+                      >
+                        {claimed ? "완료" : completed ? "Claim" : "진행중"}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
