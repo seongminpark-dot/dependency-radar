@@ -1211,8 +1211,8 @@ export default function StatsDashboard({
           <a href="/world-voyage" className="transition hover:text-white">
             World Voyage 3D
           </a>
-          <a href="/voyage-pro" className="transition hover:text-white">
-            Voyage Pro
+          <a href="/atlas-tycoon" className="transition hover:text-white">
+            Atlas Tycoon
           </a>
           <a href="/sources" className="transition hover:text-white">
             {language === "ko" ? "출처" : "Sources"}
