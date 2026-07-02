@@ -37,8 +37,6 @@ type CountryNewsArticle = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const supportedLanguages: SiteLanguage[] = ["ko", "en", "ja", "zh", "es", "fr", "de"];
-
 const sourceLanguageMap: Record<SiteLanguage, string> = {
   ko: "korean",
   en: "english",
@@ -49,21 +47,27 @@ const sourceLanguageMap: Record<SiteLanguage, string> = {
   de: "german",
 };
 
-const officialDomains = [
-  "worldbank.org",
-  "imf.org",
-  "oecd.org",
-  "wto.org",
-  "unctad.org",
-  "fao.org",
-  "iea.org",
-  "ec.europa.eu",
-  "europa.eu",
-  "commerce.gov",
-  "ustr.gov",
-];
+const fallbackImage =
+  "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1200&q=80";
 
-const majorNewsDomains = [
+const countryAliasMap: Record<string, string> = {
+  KOR: "South Korea",
+  USA: "United States",
+  JPN: "Japan",
+  CHN: "China",
+  DEU: "Germany",
+  GBR: "United Kingdom",
+  FRA: "France",
+  IND: "India",
+  CAN: "Canada",
+  AUS: "Australia",
+  BRA: "Brazil",
+  MEX: "Mexico",
+  ITA: "Italy",
+  ESP: "Spain",
+};
+
+const trustedDomains = [
   "reuters.com",
   "apnews.com",
   "bbc.com",
@@ -76,19 +80,13 @@ const majorNewsDomains = [
   "dw.com",
   "france24.com",
   "theguardian.com",
-  "economist.com",
+  "worldbank.org",
+  "imf.org",
+  "oecd.org",
+  "wto.org",
 ];
 
-const regionalTrustedDomains = [
-  "koreaherald.com",
-  "koreatimes.co.kr",
-  "yna.co.kr",
-  "japantimes.co.jp",
-  "scmp.com",
-  "straitstimes.com",
-];
-
-const blockedDomainFragments = [
+const blockedFragments = [
   "blogspot.",
   "wordpress.",
   "medium.com",
@@ -99,21 +97,36 @@ const blockedDomainFragments = [
   "einnews",
 ];
 
-const fallbackImage =
-  "https://images.unsplash.com/photo-1494412519320-aa613dfb7738?auto=format&fit=crop&w=1200&q=80";
-
 function normalizeLanguage(value: string | null): SiteLanguage {
-  if (value && supportedLanguages.includes(value as SiteLanguage)) {
-    return value as SiteLanguage;
-  }
+  const allowed: SiteLanguage[] = ["ko", "en", "ja", "zh", "es", "fr", "de"];
+  return allowed.includes(value as SiteLanguage) ? (value as SiteLanguage) : "en";
+}
 
-  return "en";
+function normalizeCountryName(iso3: string, countryName: string) {
+  const code = iso3.toUpperCase();
+  return (
+    countryAliasMap[code] ??
+    countryName
+      .replace(/, Rep\./gi, "")
+      .replace(/, Dem\. Rep\./gi, "")
+      .replace(/Korea, Rep\./gi, "South Korea")
+      .trim()
+  );
+}
+
+function getCountryAliases(iso3: string, countryName: string) {
+  const normalized = normalizeCountryName(iso3, countryName);
+  const aliases = [normalized];
+
+  if (iso3 === "KOR") aliases.push("Korea", "South Korean");
+  if (iso3 === "USA") aliases.push("US", "U.S.", "America");
+  if (iso3 === "GBR") aliases.push("UK", "Britain");
+
+  return Array.from(new Set(aliases.filter(Boolean)));
 }
 
 function getHostname(url: string, domain?: string) {
-  if (domain) {
-    return domain.replace(/^www\./, "").toLowerCase();
-  }
+  if (domain) return domain.replace(/^www\./, "").toLowerCase();
 
   try {
     return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
@@ -122,12 +135,12 @@ function getHostname(url: string, domain?: string) {
   }
 }
 
-function matchesDomain(hostname: string, domains: string[]) {
-  return domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+function isTrustedSource(hostname: string) {
+  return trustedDomains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
 }
 
-function isBlockedDomain(hostname: string) {
-  return blockedDomainFragments.some((fragment) => hostname.includes(fragment));
+function isBlocked(hostname: string) {
+  return blockedFragments.some((fragment) => hostname.includes(fragment));
 }
 
 function getSourceProfile(hostname: string): {
@@ -135,173 +148,58 @@ function getSourceProfile(hostname: string): {
   sourceTier: SourceTier;
   sourceScore: number;
 } {
-  if (matchesDomain(hostname, officialDomains)) {
-    return {
-      isTrustedSource: true,
-      sourceTier: "official",
-      sourceScore: 100,
-    };
+  if (["worldbank.org", "imf.org", "oecd.org", "wto.org"].some((d) => hostname === d || hostname.endsWith(`.${d}`))) {
+    return { isTrustedSource: true, sourceTier: "official", sourceScore: 100 };
   }
 
-  if (matchesDomain(hostname, majorNewsDomains)) {
-    return {
-      isTrustedSource: true,
-      sourceTier: "major",
-      sourceScore: 90,
-    };
+  if (isTrustedSource(hostname)) {
+    return { isTrustedSource: true, sourceTier: "major", sourceScore: 90 };
   }
 
-  if (matchesDomain(hostname, regionalTrustedDomains)) {
-    return {
-      isTrustedSource: true,
-      sourceTier: "regional",
-      sourceScore: 80,
-    };
-  }
-
-  return {
-    isTrustedSource: false,
-    sourceTier: "general",
-    sourceScore: 40,
-  };
+  return { isTrustedSource: false, sourceTier: "general", sourceScore: 40 };
 }
 
 function parseGdeltDate(value?: string) {
   if (!value) return new Date().toISOString();
 
   if (/^\d{14}$/.test(value)) {
-    const year = value.slice(0, 4);
-    const month = value.slice(4, 6);
-    const day = value.slice(6, 8);
-    const hour = value.slice(8, 10);
-    const minute = value.slice(10, 12);
-    const second = value.slice(12, 14);
-
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+    return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}T${value.slice(8, 10)}:${value.slice(10, 12)}:${value.slice(12, 14)}Z`;
   }
 
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return new Date().toISOString();
-  }
-
-  return date.toISOString();
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
 }
 
 function cleanTitle(title: string) {
   return title.replace(/\s+/g, " ").trim();
 }
 
-function normalizeCountryName(iso3: string, countryName: string) {
-  const code = iso3.toUpperCase();
+function classifyIssue(title: string) {
+  const lower = title.toLowerCase();
 
-  const map: Record<string, string> = {
-    KOR: "South Korea",
-    USA: "United States",
-    JPN: "Japan",
-    CHN: "China",
-    DEU: "Germany",
-    GBR: "United Kingdom",
-    FRA: "France",
-    IND: "India",
-    CAN: "Canada",
-    AUS: "Australia",
-    BRA: "Brazil",
-    MEX: "Mexico",
-    ITA: "Italy",
-    ESP: "Spain",
-  };
+  if (lower.includes("oil") || lower.includes("crude") || lower.includes("fuel") || lower.includes("energy") || lower.includes("gas")) {
+    return { issueSlug: "oil-shock", issueLabel: "Oil Shock", issueHref: "/issues/oil-shock" };
+  }
 
-  return map[code] ?? countryName.replace(/, Rep\./gi, "").replace(/, Dem\. Rep\./gi, "").trim();
-}
+  if (lower.includes("food") || lower.includes("grain") || lower.includes("wheat") || lower.includes("rice") || lower.includes("crop")) {
+    return { issueSlug: "food-import-risk", issueLabel: "Food Import Risk", issueHref: "/issues/food-import-risk" };
+  }
 
-function getCountryAliases(iso3: string, countryName: string) {
-  const normalized = normalizeCountryName(iso3, countryName);
+  if (lower.includes("tariff") || lower.includes("customs") || lower.includes("trade war") || lower.includes("duty")) {
+    return { issueSlug: "tariff-pressure", issueLabel: "Tariff Pressure", issueHref: "/issues/tariff-pressure" };
+  }
 
-  const aliases = [normalized];
-
-  if (iso3.toUpperCase() === "KOR") aliases.push("Korea", "South Korean");
-  if (iso3.toUpperCase() === "USA") aliases.push("US", "U.S.", "America");
-  if (iso3.toUpperCase() === "GBR") aliases.push("UK", "Britain");
-
-  return Array.from(new Set(aliases.filter(Boolean)));
+  return { issueSlug: "supply-chain", issueLabel: "Trade / Supply Chain", issueHref: "/issues/supply-chain" };
 }
 
 function quote(value: string) {
   return `"${value.replace(/"/g, "")}"`;
 }
 
-function classifyIssue(title: string) {
-  const lower = title.toLowerCase();
-
-  if (
-    lower.includes("oil") ||
-    lower.includes("crude") ||
-    lower.includes("fuel") ||
-    lower.includes("energy") ||
-    lower.includes("gas")
-  ) {
-    return {
-      issueSlug: "oil-shock",
-      issueLabel: "Oil Shock",
-      issueHref: "/issues/oil-shock",
-    };
-  }
-
-  if (
-    lower.includes("food") ||
-    lower.includes("grain") ||
-    lower.includes("wheat") ||
-    lower.includes("rice") ||
-    lower.includes("crop")
-  ) {
-    return {
-      issueSlug: "food-import-risk",
-      issueLabel: "Food Import Risk",
-      issueHref: "/issues/food-import-risk",
-    };
-  }
-
-  if (
-    lower.includes("tariff") ||
-    lower.includes("customs") ||
-    lower.includes("trade war") ||
-    lower.includes("duty")
-  ) {
-    return {
-      issueSlug: "tariff-pressure",
-      issueLabel: "Tariff Pressure",
-      issueHref: "/issues/tariff-pressure",
-    };
-  }
-
-  if (
-    lower.includes("supply chain") ||
-    lower.includes("shipping") ||
-    lower.includes("logistics") ||
-    lower.includes("freight") ||
-    lower.includes("port")
-  ) {
-    return {
-      issueSlug: "supply-chain",
-      issueLabel: "Supply Chain",
-      issueHref: "/issues/supply-chain",
-    };
-  }
-
-  return {
-    issueSlug: "supply-chain",
-    issueLabel: "Trade / Supply Chain",
-    issueHref: "/issues/supply-chain",
-  };
-}
-
 function buildGdeltUrl(iso3: string, countryName: string, language: SiteLanguage) {
   const sourceLanguage = sourceLanguageMap[language] ?? "english";
   const aliases = getCountryAliases(iso3, countryName);
   const countryQuery = aliases.map(quote).join(" OR ");
-
   const topicQuery =
     '(trade OR imports OR exports OR tariff OR energy OR oil OR food OR "supply chain" OR logistics OR shipping OR port OR freight)';
 
@@ -309,7 +207,7 @@ function buildGdeltUrl(iso3: string, countryName: string, language: SiteLanguage
     query: `(${countryQuery}) ${topicQuery} sourcelang:${sourceLanguage}`,
     mode: "artlist",
     format: "json",
-    maxrecords: "24",
+    maxrecords: "20",
     sort: "datedesc",
     timespan: "1week",
   });
@@ -317,31 +215,92 @@ function buildGdeltUrl(iso3: string, countryName: string, language: SiteLanguage
   return `https://api.gdeltproject.org/api/v2/doc/doc?${params.toString()}`;
 }
 
-async function fetchCountryNews(
-  iso3: string,
-  countryName: string,
-  language: SiteLanguage
-): Promise<CountryNewsArticle[]> {
+async function fetchWithTimeout(url: string, timeoutMs: number) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function fallbackArticles(iso3: string, countryName: string, language: SiteLanguage): CountryNewsArticle[] {
+  const normalized = normalizeCountryName(iso3, countryName);
+  const encoded = encodeURIComponent(`${normalized} trade energy tariff supply chain`);
+
+  const titlePrefix =
+    language === "ko" ? `${normalized} 관련 공식 뉴스` : `${normalized} trade and supply-chain news`;
+
+  return [
+    {
+      title: `${titlePrefix} · Reuters search`,
+      url: `https://www.reuters.com/search/news?blob=${encoded}`,
+      image: fallbackImage,
+      source: "reuters.com",
+      sourceCountry: "",
+      publishedAt: new Date().toISOString(),
+      issueSlug: "supply-chain",
+      issueLabel: "Trade / Supply Chain",
+      issueHref: "/issues/supply-chain",
+      language: sourceLanguageMap[language],
+      isTrustedSource: true,
+      sourceTier: "major",
+      sourceScore: 90,
+    },
+    {
+      title: `${titlePrefix} · AP News search`,
+      url: `https://apnews.com/search?q=${encoded}`,
+      image: fallbackImage,
+      source: "apnews.com",
+      sourceCountry: "",
+      publishedAt: new Date().toISOString(),
+      issueSlug: "supply-chain",
+      issueLabel: "Trade / Supply Chain",
+      issueHref: "/issues/supply-chain",
+      language: sourceLanguageMap[language],
+      isTrustedSource: true,
+      sourceTier: "major",
+      sourceScore: 90,
+    },
+    {
+      title: `${titlePrefix} · Google News`,
+      url: `https://news.google.com/search?q=${encoded}`,
+      image: fallbackImage,
+      source: "news.google.com",
+      sourceCountry: "",
+      publishedAt: new Date().toISOString(),
+      issueSlug: "supply-chain",
+      issueLabel: "Trade / Supply Chain",
+      issueHref: "/issues/supply-chain",
+      language: sourceLanguageMap[language],
+      isTrustedSource: true,
+      sourceTier: "major",
+      sourceScore: 85,
+    },
+  ];
+}
+
+async function fetchCountryNews(iso3: string, countryName: string, language: SiteLanguage) {
   const urls =
     language === "en"
       ? [buildGdeltUrl(iso3, countryName, "en")]
       : [buildGdeltUrl(iso3, countryName, language), buildGdeltUrl(iso3, countryName, "en")];
 
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-        },
-      });
+  const responses = await Promise.allSettled(
+    urls.map(async (url) => {
+      const response = await fetchWithTimeout(url, 6000);
 
-      if (!response.ok) continue;
+      if (!response.ok) return [];
 
       const data = (await response.json()) as GdeltResponse;
-      const articles = data.articles ?? [];
 
-      const normalized = articles
+      return (data.articles ?? [])
         .filter((article) => article.url && article.title)
         .map((article) => {
           const source = getHostname(article.url ?? "", article.domain);
@@ -364,19 +323,13 @@ async function fetchCountryNews(
           return (
             article.title.length > 12 &&
             article.url.startsWith("http") &&
-            !isBlockedDomain(article.source)
+            !isBlocked(article.source)
           );
         });
+    })
+  );
 
-      if (normalized.length > 0) {
-        return normalized;
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  return [];
+  return responses.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 }
 
 function dedupeArticles(articles: CountryNewsArticle[]) {
@@ -385,7 +338,6 @@ function dedupeArticles(articles: CountryNewsArticle[]) {
 
   for (const article of articles) {
     if (seen.has(article.url)) continue;
-
     seen.add(article.url);
     result.push(article);
   }
@@ -399,33 +351,16 @@ export async function GET(request: Request) {
   const iso3 = (searchParams.get("iso3") ?? "").toUpperCase();
   const countryName = searchParams.get("countryName") ?? iso3;
 
-  if (!iso3 && !countryName) {
-    return NextResponse.json(
-      {
-        ok: false,
-        language,
-        generatedAt: new Date().toISOString(),
-        articles: [],
-      },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
-    );
-  }
-
   try {
-    const articles = dedupeArticles(await fetchCountryNews(iso3, countryName, language))
+    const liveArticles = dedupeArticles(await fetchCountryNews(iso3, countryName, language))
       .sort((a, b) => {
-        if (b.sourceScore !== a.sourceScore) {
-          return b.sourceScore - a.sourceScore;
-        }
-
+        if (b.sourceScore !== a.sourceScore) return b.sourceScore - a.sourceScore;
         return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
       })
       .slice(0, 8);
+
+    const articles =
+      liveArticles.length > 0 ? liveArticles : fallbackArticles(iso3, countryName, language);
 
     return NextResponse.json(
       {
@@ -434,26 +369,17 @@ export async function GET(request: Request) {
         generatedAt: new Date().toISOString(),
         articles,
       },
-      {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
+      { headers: { "Cache-Control": "no-store" } }
     );
   } catch {
     return NextResponse.json(
       {
-        ok: false,
+        ok: true,
         language,
         generatedAt: new Date().toISOString(),
-        articles: [],
+        articles: fallbackArticles(iso3, countryName, language),
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      }
+      { headers: { "Cache-Control": "no-store" } }
     );
   }
 }

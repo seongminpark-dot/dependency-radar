@@ -111,9 +111,15 @@ export default function CountryNewsPageClient({
         lang: nextLanguage,
       });
 
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 12000);
+
       const response = await fetch(`/api/country-news?${params.toString()}`, {
         cache: "no-store",
+        signal: controller.signal,
       });
+
+      window.clearTimeout(timer);
 
       if (!response.ok) return;
 
