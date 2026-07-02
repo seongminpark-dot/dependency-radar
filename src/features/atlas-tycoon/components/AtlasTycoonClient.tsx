@@ -9,6 +9,7 @@ import {
   getUpgradeCost,
 } from "../data/atlasData";
 import { useAtlasTycoonStore } from "../store/useAtlasTycoonStore";
+import type { CountryCard, OwnedCountry } from "../types";
 import styles from "./AtlasTycoonClient.module.css";
 
 function formatNumber(value: number) {
@@ -22,31 +23,83 @@ function getRarityClass(rarity: string) {
   return styles.commonCard;
 }
 
+function getNodePosition(index: number, total: number, radius = 2.75) {
+  const angle = (index / total) * Math.PI * 2;
+  const x = Math.cos(angle) * radius;
+  const z = Math.sin(angle) * radius;
+  const y = Math.sin(angle * 1.8) * 0.58;
+
+  return new THREE.Vector3(x, y, z);
+}
+
+function StarField() {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const stars = useMemo(() => {
+    return Array.from({ length: 34 }).map((_, index) => {
+      const angle = (index / 34) * Math.PI * 2;
+      const radius = 4.2 + (index % 5) * 0.42;
+      return {
+        x: Math.cos(angle) * radius,
+        y: -1.7 + (index % 9) * 0.42,
+        z: Math.sin(angle) * radius - 1.2,
+        size: 0.018 + (index % 3) * 0.008,
+      };
+    });
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    groupRef.current.rotation.y = clock.elapsedTime * 0.025;
+  });
+
+  return (
+    <group ref={groupRef}>
+      {stars.map((star, index) => (
+        <mesh key={index} position={[star.x, star.y, star.z]}>
+          <sphereGeometry args={[star.size, 8, 8]} />
+          <meshBasicMaterial color={index % 4 === 0 ? "#67e8f9" : "#dbeafe"} transparent opacity={0.72} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function WorldGlobe({ selectedColor }: { selectedColor: string }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
-    groupRef.current.rotation.y = clock.elapsedTime * 0.18;
-    groupRef.current.position.y = Math.sin(clock.elapsedTime * 0.8) * 0.08;
+    groupRef.current.rotation.y = clock.elapsedTime * 0.16;
+    groupRef.current.position.y = Math.sin(clock.elapsedTime * 0.8) * 0.06;
   });
 
   return (
-    <group ref={groupRef} position={[0, -0.16, 0]} scale={1.18}>
+    <group ref={groupRef} position={[0, -0.1, 0]} scale={1.12}>
       <mesh castShadow>
-        <sphereGeometry args={[1.78, 64, 64]} />
+        <sphereGeometry args={[1.72, 64, 64]} />
         <meshStandardMaterial
           color="#0ea5e9"
           emissive="#082f49"
           emissiveIntensity={0.28}
-          roughness={0.35}
+          roughness={0.34}
           metalness={0.18}
         />
       </mesh>
 
       <mesh>
-        <sphereGeometry args={[1.84, 64, 64]} />
+        <sphereGeometry args={[1.78, 64, 64]} />
         <meshBasicMaterial color={selectedColor} transparent opacity={0.12} />
+      </mesh>
+
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.92, 0.01, 16, 128]} />
+        <meshBasicMaterial color="#dbeafe" transparent opacity={0.18} />
+      </mesh>
+
+      <mesh rotation={[Math.PI / 1.9, 0.4, 0.2]}>
+        <torusGeometry args={[1.98, 0.01, 16, 128]} />
+        <meshBasicMaterial color={selectedColor} transparent opacity={0.2} />
       </mesh>
 
       {[
@@ -55,10 +108,16 @@ function WorldGlobe({ selectedColor }: { selectedColor: string }) {
         [-0.2, -0.54, 1.55],
         [1.15, -0.18, 0.95],
         [-1.2, -0.2, 1.0],
+        [0.2, 0.96, -1.2],
+        [-0.7, -0.78, -1.1],
       ].map(([x, y, z], index) => (
         <mesh key={index} position={[x, y, z]} castShadow>
-          <boxGeometry args={[0.34, 0.16, 0.18]} />
-          <meshStandardMaterial color={index % 2 === 0 ? "#34d399" : "#facc15"} emissive="#052e16" emissiveIntensity={0.24} />
+          <boxGeometry args={[0.28, 0.12, 0.16]} />
+          <meshStandardMaterial
+            color={index % 2 === 0 ? "#34d399" : "#facc15"}
+            emissive="#052e16"
+            emissiveIntensity={0.26}
+          />
         </mesh>
       ))}
     </group>
@@ -70,86 +129,167 @@ function OrbitRings({ selectedColor }: { selectedColor: string }) {
 
   useFrame(({ clock }) => {
     if (!ringRef.current) return;
-    ringRef.current.rotation.z = clock.elapsedTime * 0.16;
-    ringRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.2) * 0.08;
+    ringRef.current.rotation.z = clock.elapsedTime * 0.13;
+    ringRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.2) * 0.06;
   });
 
   return (
     <group ref={ringRef}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.35, 0.012, 16, 128]} />
-        <meshBasicMaterial color={selectedColor} transparent opacity={0.55} />
+        <torusGeometry args={[2.52, 0.012, 16, 128]} />
+        <meshBasicMaterial color={selectedColor} transparent opacity={0.5} />
       </mesh>
 
       <mesh rotation={[Math.PI / 2.25, 0, Math.PI / 5]}>
-        <torusGeometry args={[2.7, 0.01, 16, 128]} />
-        <meshBasicMaterial color="#67e8f9" transparent opacity={0.26} />
+        <torusGeometry args={[2.94, 0.01, 16, 128]} />
+        <meshBasicMaterial color="#67e8f9" transparent opacity={0.22} />
+      </mesh>
+
+      <mesh rotation={[Math.PI / 2.8, 0, Math.PI / 3]}>
+        <torusGeometry args={[3.28, 0.008, 16, 128]} />
+        <meshBasicMaterial color="#a7f3d0" transparent opacity={0.14} />
       </mesh>
     </group>
   );
 }
 
-function CountryNodes({ ownedIds }: { ownedIds: string[] }) {
+function LandmarkNode({
+  country,
+  owned,
+  index,
+  total,
+  selected,
+}: {
+  country: CountryCard;
+  owned?: OwnedCountry;
+  index: number;
+  total: number;
+  selected: boolean;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const position = useMemo(() => getNodePosition(index, total, selected ? 2.88 : 2.72), [index, total, selected]);
+  const unlocked = Boolean(owned);
+  const level = owned?.level ?? 0;
+  const height = unlocked ? 0.34 + Math.min(level, 8) * 0.055 : 0.14;
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    groupRef.current.position.y = position.y + Math.sin(clock.elapsedTime * 1.4 + index) * 0.035;
+    groupRef.current.rotation.y = clock.elapsedTime * 0.45 + index;
+  });
+
+  if (!unlocked) {
+    return (
+      <group ref={groupRef} position={[position.x, position.y, position.z]}>
+        <mesh castShadow>
+          <sphereGeometry args={[0.065, 16, 16]} />
+          <meshStandardMaterial color="#475569" emissive="#111827" emissiveIntensity={0.12} />
+        </mesh>
+      </group>
+    );
+  }
+
+  return (
+    <group ref={groupRef} position={[position.x, position.y, position.z]}>
+      <pointLight color={country.color} intensity={selected ? 1.5 : 0.7} distance={selected ? 3.6 : 2.2} />
+
+      <mesh position={[0, -0.08, 0]} castShadow>
+        <cylinderGeometry args={[selected ? 0.18 : 0.13, selected ? 0.2 : 0.15, 0.08, 24]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.2} roughness={0.3} />
+      </mesh>
+
+      <mesh position={[0, height / 2, 0]} castShadow>
+        <boxGeometry args={[selected ? 0.18 : 0.14, height, selected ? 0.18 : 0.14]} />
+        <meshStandardMaterial
+          color={country.color}
+          emissive={country.color}
+          emissiveIntensity={selected ? 0.56 : 0.34}
+          metalness={0.24}
+          roughness={0.26}
+        />
+      </mesh>
+
+      <mesh position={[0, height + 0.08, 0]} castShadow>
+        <coneGeometry args={[selected ? 0.16 : 0.12, selected ? 0.28 : 0.2, 4]} />
+        <meshStandardMaterial
+          color={selected ? "#f8fafc" : country.color}
+          emissive={country.color}
+          emissiveIntensity={selected ? 0.42 : 0.22}
+        />
+      </mesh>
+
+      {selected ? (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.34, 0.012, 16, 64]} />
+          <meshBasicMaterial color={country.color} transparent opacity={0.75} />
+        </mesh>
+      ) : null}
+    </group>
+  );
+}
+
+function IncomePulse({ selectedColor }: { selectedColor: string }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
-    groupRef.current.children.forEach((child, index) => {
-      child.position.y += Math.sin(clock.elapsedTime * 1.6 + index) * 0.0009;
-    });
+    const scale = 1 + Math.sin(clock.elapsedTime * 1.8) * 0.06;
+    groupRef.current.scale.setScalar(scale);
+    groupRef.current.rotation.y = clock.elapsedTime * 0.22;
   });
 
   return (
     <group ref={groupRef}>
-      {countryCards.map((country, index) => {
-        const angle = (index / countryCards.length) * Math.PI * 2;
-        const unlocked = ownedIds.includes(country.id);
-        const radius = 2.65;
-        const x = Math.cos(angle) * radius;
-        const z = Math.sin(angle) * radius;
-        const y = Math.sin(angle * 1.7) * 0.65;
-
-        return (
-          <mesh key={country.id} position={[x, y, z]} castShadow>
-            <sphereGeometry args={[unlocked ? 0.11 : 0.065, 18, 18]} />
-            <meshStandardMaterial
-              color={unlocked ? country.color : "#475569"}
-              emissive={unlocked ? country.color : "#111827"}
-              emissiveIntensity={unlocked ? 0.75 : 0.1}
-              roughness={0.25}
-              metalness={0.22}
-            />
-          </mesh>
-        );
-      })}
+      {[0, 1, 2].map((item) => (
+        <mesh key={item} rotation={[Math.PI / 2, 0, (Math.PI / 3) * item]}>
+          <torusGeometry args={[3.55 + item * 0.18, 0.006, 12, 128]} />
+          <meshBasicMaterial color={item === 0 ? selectedColor : "#67e8f9"} transparent opacity={0.14 - item * 0.025} />
+        </mesh>
+      ))}
     </group>
   );
 }
 
 function AtlasScene({
   selectedColor,
-  ownedIds,
+  ownedCountries,
+  selectedCountryId,
 }: {
   selectedColor: string;
-  ownedIds: string[];
+  ownedCountries: OwnedCountry[];
+  selectedCountryId: string;
 }) {
+  const ownedMap = useMemo(() => new Map(ownedCountries.map((country) => [country.id, country])), [ownedCountries]);
+
   return (
     <Canvas className={styles.canvas} shadows camera={{ position: [0, 2.35, 6.3], fov: 40 }}>
       <color attach="background" args={["#040b16"]} />
       <fog attach="fog" args={["#040b16", 8, 18]} />
 
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[4, 7, 5]} intensity={2.4} castShadow />
-      <pointLight position={[-3, 3, 4]} intensity={1.6} color="#38bdf8" />
-      <pointLight position={[3, 2, -3]} intensity={1.3} color="#34d399" />
+      <ambientLight intensity={0.72} />
+      <directionalLight position={[4, 7, 5]} intensity={2.5} castShadow />
+      <pointLight position={[-3, 3, 4]} intensity={1.7} color="#38bdf8" />
+      <pointLight position={[3, 2, -3]} intensity={1.4} color="#34d399" />
 
+      <StarField />
       <WorldGlobe selectedColor={selectedColor} />
       <OrbitRings selectedColor={selectedColor} />
-      <CountryNodes ownedIds={ownedIds} />
+      <IncomePulse selectedColor={selectedColor} />
 
-      <mesh position={[0, -2.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[3.1, 64]} />
-        <meshBasicMaterial color="#0f172a" transparent opacity={0.72} />
+      {countryCards.map((country, index) => (
+        <LandmarkNode
+          key={country.id}
+          country={country}
+          owned={ownedMap.get(country.id)}
+          index={index}
+          total={countryCards.length}
+          selected={selectedCountryId === country.id}
+        />
+      ))}
+
+      <mesh position={[0, -2.08, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <circleGeometry args={[3.45, 64]} />
+        <meshBasicMaterial color="#0f172a" transparent opacity={0.76} />
       </mesh>
     </Canvas>
   );
@@ -160,7 +300,6 @@ export default function AtlasTycoonClient() {
 
   const selectedCountry = getCountryById(state.selectedCountryId);
   const selectedOwned = state.ownedCountries.find((country) => country.id === state.selectedCountryId);
-  const ownedIds = state.ownedCountries.map((country) => country.id);
 
   const totalIncome = useMemo(() => {
     return state.ownedCountries.reduce((total, country) => {
@@ -173,6 +312,7 @@ export default function AtlasTycoonClient() {
   const currentIncome = boostActive ? totalIncome * 2 : totalIncome;
   const upgradeCost = selectedOwned ? getUpgradeCost(selectedOwned.level, selectedCountry.rarity) : 0;
   const packCost = 500 + state.packsOpened * 80;
+  const xpPercent = Math.min(100, (state.xp / (state.level * 100)) * 100);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -183,8 +323,6 @@ export default function AtlasTycoonClient() {
       window.clearInterval(timer);
     };
   }, []);
-
-  const xpPercent = Math.min(100, (state.xp / (state.level * 100)) * 100);
 
   return (
     <div className={styles.page}>
@@ -250,7 +388,11 @@ export default function AtlasTycoonClient() {
 
         <section className={styles.layout}>
           <div className={styles.worldPanel}>
-            <AtlasScene selectedColor={selectedCountry.color} ownedIds={ownedIds} />
+            <AtlasScene
+              selectedColor={selectedCountry.color}
+              ownedCountries={state.ownedCountries}
+              selectedCountryId={state.selectedCountryId}
+            />
 
             <div className={styles.worldOverlay}>
               <div className={styles.chip}>
