@@ -1193,38 +1193,29 @@ export default function StatsDashboard({
             <p className="text-xs text-slate-400">{t.subtitle}</p>
           </div>
 
-          <nav className="hidden gap-6 text-sm font-semibold text-slate-300 md:flex">
-          <a href="#country-search" className="transition hover:text-white">
-            {language === "ko" ? "국가 검색" : "Country search"}
-          </a>
-          <a href="/topics" className="transition hover:text-white">
-            {language === "ko" ? "주제별 통계" : "Topics"}
-          </a>
-          <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
-            {language === "ko" ? "국가 비교" : "Compare"}
-          </a>
-          <a href="#issue-watch" className="transition hover:text-white">
-            {language === "ko" ? "이슈/뉴스" : "Issues"}
-          </a>
-          <a href="/news" className="transition hover:text-white">
-            {language === "ko" ? "뉴스" : "News"}
-          </a>
-          <a href="/challenge" className="transition hover:text-white">
-            {language === "ko" ? "데이터 챌린지" : "Challenge"}
-          </a>
-          <a href="/risk-lab" className="transition hover:text-white">
-            Risk Lab
-          </a>
-          <a href="/world-voyage" className="transition hover:text-white">
-            World Voyage 3D
-          </a>
-          <a href="/atlas-tycoon" className="transition hover:text-white">
-            Atlas Tycoon
-          </a>
-          <a href="/sources" className="transition hover:text-white">
-            {language === "ko" ? "출처" : "Sources"}
-          </a>
-        </nav>
+                    <nav className="hidden gap-6 text-sm font-semibold text-slate-300 md:flex">
+            <a href="#country-search" className="transition hover:text-white">
+              {language === "ko" ? "국가 검색" : "Country search"}
+            </a>
+            <a href="/news" className="transition hover:text-white">
+              {language === "ko" ? "뉴스" : "News"}
+            </a>
+            <a href="#issue-watch" className="transition hover:text-white">
+              {language === "ko" ? "이슈" : "Issues"}
+            </a>
+            <a href="/topics" className="transition hover:text-white">
+              {language === "ko" ? "주제별 통계" : "Topics"}
+            </a>
+            <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
+              {language === "ko" ? "국가 비교" : "Compare"}
+            </a>
+            <a href="/labs" className="transition hover:text-white">
+              Labs
+            </a>
+            <a href="/sources" className="transition hover:text-white">
+              {language === "ko" ? "출처" : "Sources"}
+            </a>
+          </nav>
 
           <select
             value={language}
