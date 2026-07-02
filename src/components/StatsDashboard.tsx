@@ -1203,6 +1203,9 @@ export default function StatsDashboard({
           <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
             {language === "ko" ? "국가 비교" : "Compare"}
           </a>
+          <a href="#issue-watch" className="transition hover:text-white">
+            {language === "ko" ? "이슈/뉴스" : "Issues"}
+          </a>
           <a href="/challenge" className="transition hover:text-white">
             {language === "ko" ? "데이터 챌린지" : "Challenge"}
           </a>
@@ -1241,6 +1244,10 @@ export default function StatsDashboard({
         countryCount={rows.length}
         indicatorCount={7}
       />
+
+      <div id="issue-watch" className="scroll-mt-28">
+        <HomeIssueWatch />
+      </div>
 
       <HomeActionHub rows={rows} language={language} />
 
@@ -1781,9 +1788,6 @@ export default function StatsDashboard({
           </p>
         </div>
       </section>
-
-            <HomeIssueWatch />
-
       <footer
         id="contact"
         className="mx-auto max-w-7xl border-t border-white/10 px-6 py-10"

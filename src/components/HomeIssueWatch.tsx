@@ -47,7 +47,7 @@ export default function HomeIssueWatch() {
   }, []);
 
   return (
-    <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6">
+    <section className="mx-auto mt-8 max-w-7xl px-4 sm:px-6">
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-[2rem] border border-white/10 bg-slate-950 p-6 text-white shadow-2xl shadow-black/20">
           <p className="text-xs font-black uppercase tracking-[0.26em] text-cyan-300">
