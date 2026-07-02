@@ -15,6 +15,13 @@ function formatNumber(value: number) {
   return Math.floor(value).toLocaleString("ko-KR");
 }
 
+function getRarityClass(rarity: string) {
+  if (rarity === "Legendary") return styles.legendaryCard;
+  if (rarity === "Epic") return styles.epicCard;
+  if (rarity === "Rare") return styles.rareCard;
+  return styles.commonCard;
+}
+
 function WorldGlobe({ selectedColor }: { selectedColor: string }) {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -358,6 +365,41 @@ export default function AtlasTycoonClient() {
           </aside>
         </section>
       </main>
+
+      {state.lastPackResult ? (
+        <div className={styles.packOverlay} role="dialog" aria-modal="true">
+          <div className={`${styles.packModal} ${getRarityClass(state.lastPackResult.rarity)}`}>
+            <p className={styles.packKicker}>
+              {state.lastPackResult.isNew ? "New Country Unlocked" : "Duplicate Card Reward"}
+            </p>
+
+            <div className={styles.bigFlag}>{state.lastPackResult.flag}</div>
+
+            <h2>{state.lastPackResult.name}</h2>
+
+            <div className={styles.rarityPill}>{state.lastPackResult.rarity}</div>
+
+            <div className={styles.packRewardGrid}>
+              <div>
+                <span>Gems</span>
+                <strong>+{state.lastPackResult.gemReward}</strong>
+              </div>
+              <div>
+                <span>Coins</span>
+                <strong>+{state.lastPackResult.coinReward}</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className={`${styles.button} ${styles.primaryButton}`}
+              onClick={state.clearPackResult}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

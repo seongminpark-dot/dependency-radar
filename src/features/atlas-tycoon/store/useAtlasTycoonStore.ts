@@ -6,7 +6,17 @@ import {
   getUpgradeCost,
   pickCountryFromPack,
 } from "../data/atlasData";
-import type { OwnedCountry } from "../types";
+import type { CountryRarity, OwnedCountry } from "../types";
+
+type PackResult = {
+  countryId: string;
+  flag: string;
+  name: string;
+  rarity: CountryRarity;
+  isNew: boolean;
+  coinReward: number;
+  gemReward: number;
+};
 
 type AtlasTycoonState = {
   coins: number;
@@ -21,10 +31,12 @@ type AtlasTycoonState = {
   boostUntil: number;
   message: string;
   lastReward: string;
+  lastPackResult: PackResult | null;
 
   tickIncome: () => void;
   claimIncome: () => void;
   openPack: () => void;
+  clearPackResult: () => void;
   selectCountry: (id: string) => void;
   upgradeCountry: (id: string) => void;
   claimDailyReward: () => void;
@@ -63,6 +75,20 @@ function applyXp(level: number, xp: number, gain: number) {
   };
 }
 
+function getRarityGemReward(rarity: CountryRarity) {
+  if (rarity === "Legendary") return 18;
+  if (rarity === "Epic") return 9;
+  if (rarity === "Rare") return 4;
+  return 1;
+}
+
+function getRarityCoinReward(rarity: CountryRarity) {
+  if (rarity === "Legendary") return 2400;
+  if (rarity === "Epic") return 1100;
+  if (rarity === "Rare") return 520;
+  return 180;
+}
+
 export const useAtlasTycoonStore = create<AtlasTycoonState>()(
   persist(
     (set, get) => ({
@@ -84,6 +110,7 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
       boostUntil: 0,
       message: "국가 카드팩을 열고 세계 지도를 성장시키세요.",
       lastReward: "Starter Atlas unlocked",
+      lastPackResult: null,
 
       tickIncome: () => {
         const state = get();
@@ -133,6 +160,8 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
         const pulled = pickCountryFromPack();
         const existing = getOwnedCountry(state.ownedCountries, pulled.id);
         const xpResult = applyXp(state.level, state.xp, 35);
+        const gemReward = getRarityGemReward(pulled.rarity);
+        const coinReward = existing ? getRarityCoinReward(pulled.rarity) : 0;
 
         let nextOwnedCountries: OwnedCountry[];
 
@@ -157,17 +186,32 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
         }
 
         set({
-          coins: state.coins - packCost,
-          gems: state.gems + (pulled.rarity === "Legendary" ? 8 : pulled.rarity === "Epic" ? 4 : 1),
+          coins: state.coins - packCost + coinReward,
+          gems: state.gems + gemReward,
           ownedCountries: nextOwnedCountries,
           selectedCountryId: pulled.id,
           packsOpened: state.packsOpened + 1,
           level: xpResult.level,
           xp: xpResult.xp,
           message: existing
-            ? `${pulled.flag} ${pulled.name} 중복 카드 획득 · 카드 +1`
+            ? `${pulled.flag} ${pulled.name} 중복 카드 · 보상 ${coinReward.toLocaleString("ko-KR")} coins`
             : `${pulled.flag} ${pulled.name} 국가 해금`,
           lastReward: `${pulled.rarity} · ${pulled.name}`,
+          lastPackResult: {
+            countryId: pulled.id,
+            flag: pulled.flag,
+            name: pulled.name,
+            rarity: pulled.rarity,
+            isNew: !existing,
+            coinReward,
+            gemReward,
+          },
+        });
+      },
+
+      clearPackResult: () => {
+        set({
+          lastPackResult: null,
         });
       },
 
@@ -274,6 +318,7 @@ export const useAtlasTycoonStore = create<AtlasTycoonState>()(
           boostUntil: 0,
           message: "Atlas Tycoon이 초기화되었습니다.",
           lastReward: "Reset complete",
+          lastPackResult: null,
         });
       },
     }),
