@@ -5,7 +5,6 @@ import type { CountryRow, StatValue } from "@/lib/worldBank";
 import WorldMap from "@/components/WorldMap";
 import ProfessionalDashboardHero from "@/components/ProfessionalDashboardHero";
 import OfficialSourceOverview from "@/components/OfficialSourceOverview";
-import HomeBottomLinks from "@/components/HomeBottomLinks";
 import LatestMonthlyTradePanel from "@/components/LatestMonthlyTradePanel";
 import OfficialTariffPanel from "@/components/OfficialTariffPanel";
 import OfficialEnergyPanel from "@/components/OfficialEnergyPanel";
@@ -1765,46 +1764,8 @@ export default function StatsDashboard({
       </section>
 
       </HomeFullDataToggle>
-
-      <footer
-        id="contact"
-        className="mx-auto max-w-7xl border-t border-white/10 px-6 py-10"
-      >
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-xl font-bold">{t.contactTitle}</h2>
-            <p className="mt-2 text-sm text-slate-400">{t.contactText}</p>
-
-            <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-              <a href="/sources" className="hover:text-white">
-                Data Sources
-              </a>
-              <a href="/privacy" className="hover:text-white">
-                Privacy Policy
-              </a>
-              <a href="/terms" className="hover:text-white">
-                Terms of Use
-              </a>
-              <a href="/disclaimer" className="hover:text-white">
-                Disclaimer
-              </a>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4">
-            <p className="text-xs text-slate-500">{t.emailLabel}</p>
-            <a
-              href="mailto:kevinsmp123@gmail.com"
-              className="text-lg font-semibold text-indigo-200 hover:text-white"
-            >
-              kevinsmp123@gmail.com
-            </a>
-          </div>
-        </div>
-      </footer>
       <OfficialSourceOverview language={language} />
 
-      <HomeBottomLinks language={language} />
 </main>
   );
 }

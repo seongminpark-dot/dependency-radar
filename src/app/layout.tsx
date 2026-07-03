@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site";
 import VisitorCountryRail from "@/components/VisitorCountryRail";
+import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
 import { Analytics } from "@vercel/analytics/next";
@@ -64,6 +65,7 @@ export default function RootLayout({
         <VisitorCountryRail />
         <StructuredData />
         {children}
+        <SiteFooter />
               <Analytics />
       </body>
     </html>
