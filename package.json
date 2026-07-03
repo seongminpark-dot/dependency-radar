@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "quality:content": "node scripts/content-quality-check.mjs"
+    "quality:content": "node scripts/content-quality-check.mjs",
+    "quality:links": "node scripts/live-url-check.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
