@@ -50,7 +50,7 @@ const copy = {
     heroBadge: "Global Country Trade & Energy Statistics",
     heroTitle: "국가별 무역·에너지 의존도을 실제 통계로 비교합니다.",
     heroText:
-      "Datlora는 임의의 위험도 점수 대신, World Bank 공개 지표를 기반으로 국가별 에너지, 연료, 식량, 수입, 관세, 물류 데이터를 비교하는 전문 통계 플랫폼입니다.",
+      "Datlora는 원자료 기반 지표 대신, World Bank 공개 지표를 기반으로 국가별 에너지, 연료, 식량, 수입, 관세, 물류 데이터를 비교하는 전문 통계 플랫폼입니다.",
     currentCountry: "현재 접속 국가",
     countries: "국가/경제권",
     indicators: "정확 지표",
@@ -109,7 +109,7 @@ const copy = {
     heroTitle:
       "Compare national dependency and supply-chain exposure with real statistics.",
     heroText:
-      "Datlora is a professional statistics platform that compares energy, fuel, food, import, tariff, and logistics indicators from public World Bank data instead of using arbitrary 100-point risk scores.",
+      "Datlora is a professional statistics platform that compares energy, fuel, food, import, tariff, and logistics indicators from public World Bank data instead of using the original public indicator values.",
     currentCountry: "Current country",
     countries: "Countries/Economies",
     indicators: "Exact indicators",

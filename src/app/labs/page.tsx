@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Datlora Labs | Data Games and Experiments",
   description:
-    "Datlora Labs collects experimental data games, risk tools, and interactive prototypes connected to global trade and country statistics.",
+    "Datlora Labs collects experimental data games, risk tools, and interactive interactive labs connected to global trade and country statistics.",
   alternates: {
     canonical: "https://datlora.com/labs",
   },
@@ -34,9 +34,9 @@ const labCards = [
   {
     title: "Atlas Tycoon",
     description:
-      "A prototype country-collection game that tests how trade and country data can become interactive.",
+      "A interactive lab country-collection game that tests how trade and country data can become interactive.",
     href: "/atlas-tycoon",
-    label: "Prototype",
+    label: "Interactive lab",
   },
 ];
 
