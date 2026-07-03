@@ -217,8 +217,8 @@ export default function CountryRelatedNews({
 
                 <a
                   href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                 
+                 
                   className="mt-4 block line-clamp-3 text-lg font-black leading-tight tracking-[-0.04em] text-white hover:text-emerald-200"
                 >
                   {article.title}
@@ -234,8 +234,8 @@ export default function CountryRelatedNews({
                 <div className="mt-5 flex flex-wrap gap-2">
                   <a
                     href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                   
+                   
                     className="rounded-full bg-emerald-400 px-3 py-2 text-xs font-black text-slate-950"
                   >
                     {copy.openArticle}

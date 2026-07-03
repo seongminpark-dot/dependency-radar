@@ -177,6 +177,7 @@ export default function CountryNewsPageClient({
   }, [language]);
 
   const compareBase = iso3 === "USA" ? "KOR" : "USA";
+  const externalSearchUrl = `https://news.google.com/search?q=${encodeURIComponent(`${countryName} trade energy tariff supply chain`)}`;
 
   return (
     <main className="min-h-screen bg-[#050816] text-white">
@@ -244,6 +245,13 @@ export default function CountryNewsPageClient({
           >
             {copy.allNews}
           </a>
+
+          <a
+            href={externalSearchUrl}
+            className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-100"
+          >
+            Google News
+          </a>
         </div>
 
         {generatedAt ? (
@@ -267,7 +275,7 @@ export default function CountryNewsPageClient({
                 key={`${article.url}-${index}`}
                 className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/20"
               >
-                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                <a href={article.url}>
                   <img
                     src={article.image}
                     alt={article.title}
@@ -296,8 +304,8 @@ export default function CountryNewsPageClient({
 
                   <a
                     href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                   
+                   
                     className="mt-4 block text-2xl font-black leading-tight tracking-[-0.05em] hover:text-emerald-200"
                   >
                     {article.title}
@@ -314,8 +322,8 @@ export default function CountryNewsPageClient({
                   <div className="mt-5 flex flex-wrap gap-2">
                     <a
                       href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                     
+                     
                       className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950"
                     >
                       {copy.openArticle}

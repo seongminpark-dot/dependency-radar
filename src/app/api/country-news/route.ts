@@ -404,7 +404,7 @@ function fallbackArticles(iso3: string, countryName: string, language: SiteLangu
   return [
     {
       title: `${titlePrefix} · Reuters search`,
-      url: `https://www.reuters.com/search/news?blob=${encoded}`,
+      url: `https://www.reuters.com/site-search/?query=${encoded}`,
       image: fallbackImage,
       source: "reuters.com",
       sourceCountry: "",
