@@ -34,9 +34,9 @@ const copy = {
           "이슈 페이지는 유가 충격, 식량 수입 리스크, 관세 압박, 공급망 노출 같은 주제를 관련 공식 지표와 묶어서 보여줍니다.",
       },
       {
-        title: "임의의 위험 점수를 만들지 않습니다",
+        title: "출처 연도와 지표값을 함께 표시합니다",
         description:
-          "Datlora는 지표를 숨겨진 100점 만점 위험 점수로 바꾸지 않습니다. 실제 값, 출처 연도, 관련 지표를 직접 보여줍니다.",
+          "국가별 지표는 제공 연도가 서로 다를 수 있으므로, Datlora는 값과 함께 출처 연도를 표시합니다.",
       },
     ],
     workflowTitle: "Datlora가 정보를 연결하는 방식",
@@ -78,9 +78,9 @@ const copy = {
           "Issue pages group relevant official indicators around topics such as oil shock, food import risk, tariff pressure, and supply-chain exposure.",
       },
       {
-        title: "No arbitrary risk score",
+        title: "Source years are shown with values",
         description:
-          "Datlora does not convert indicators into a hidden 100-point risk score. Values, source years, and related indicators are shown directly.",
+          "Country indicators may have different latest available years, so Datlora shows the value together with the source year.",
       },
     ],
     workflowTitle: "How Datlora connects information",

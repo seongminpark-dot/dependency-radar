@@ -76,7 +76,7 @@ const copy = {
     loading: "데이터를 준비하는 중입니다.",
     methodTitle: "분석 기준",
     methodText:
-      "이 화면은 100점 만점의 임의 위험도 점수를 만들지 않고, 각 국가의 실제 원자료 지표를 그대로 표시합니다. 일부 국가는 특정 지표가 최신 연도에 제공되지 않을 수 있으므로, 각 값 아래의 연도를 함께 확인해야 합니다.",
+      "이 화면은 각 국가의 실제 원자료 지표를 그대로 표시합니다. 일부 국가는 특정 지표가 최신 연도에 제공되지 않을 수 있으므로, 각 값 아래의 연도를 함께 확인해야 합니다.",
     contactTitle: "문의",
     contactText: "서비스 제안, 데이터 오류, 협업 문의는 아래 이메일로 연락해 주세요.",
     emailLabel: "문의 이메일",
@@ -135,7 +135,7 @@ const copy = {
     loading: "Preparing data.",
     methodTitle: "Methodology",
     methodText:
-      "This page does not convert indicators into an arbitrary 100-point risk score. It displays the original statistical values directly. Some indicators may not be available for every country in the latest year, so the year shown under each value should be checked.",
+      "This page displays the original statistical values directly. Some indicators may not be available for every country in the latest year, so the year shown under each value should be checked.",
     contactTitle: "Contact",
     contactText:
       "For service inquiries, data corrections, or collaboration proposals, please contact the email below.",

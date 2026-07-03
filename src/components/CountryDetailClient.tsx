@@ -45,7 +45,7 @@ const enCopy = {
   latestYear: "Latest data year",
   intelligenceTitle: "Country intelligence snapshot",
   intelligenceSubtitle:
-    "A quick issue-level reading based on official structural indicators. This is a screening summary, not a risk score.",
+    "A quick issue-level reading based on official structural indicators and source years.",
   exposureHigh: "High exposure",
   exposureModerate: "Moderate exposure",
   exposureLower: "Lower exposure",
@@ -105,7 +105,7 @@ const copy: Record<Language, typeof enCopy> = {
     latestYear: "최신 데이터 연도",
     intelligenceTitle: "국가 인텔리전스 요약",
     intelligenceSubtitle:
-      "공식 구조 지표를 기반으로 이슈별 노출도를 빠르게 읽는 영역입니다. 임의의 위험 점수가 아니라 참고용 요약입니다.",
+      "공식 구조 지표를 기반으로 이슈별 노출도를 빠르게 읽는 참고용 요약입니다.",
     exposureHigh: "높은 노출",
     exposureModerate: "중간 노출",
     exposureLower: "낮은 노출",

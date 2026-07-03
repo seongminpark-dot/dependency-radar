@@ -392,7 +392,7 @@ export default function CompareClient({
           </div>
 
           <p className="mt-4 text-xs leading-6 text-slate-500">
-            This comparison displays official indicator values directly. It does not convert them into an arbitrary risk score.
+            This comparison displays official indicator values directly. Source years may differ by country and indicator.
           </p>
         </section>
       </section>

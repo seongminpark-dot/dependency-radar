@@ -58,7 +58,7 @@ const copy = {
     notDo: [
       "Datlora는 특정 뉴스가 통계 지표의 직접 원인이라고 단정하지 않습니다.",
       "Datlora는 공식 관세, 법률, 무역, 정책, 투자 조언을 대체하지 않습니다.",
-      "Datlora는 방법론을 숨긴 임의의 위험 점수를 만들지 않습니다.",
+      "Datlora는 뉴스 링크와 공식 통계 수치를 같은 출처로 취급하지 않습니다.",
     ],
   },
   en: {
@@ -114,7 +114,7 @@ const copy = {
     notDo: [
       "Datlora does not claim that a news article directly causes a statistical indicator.",
       "Datlora does not replace official customs, legal, trade, policy, or investment advice.",
-      "Datlora does not hide methodology behind a private risk score.",
+      "Datlora does not treat external news links and official statistics as the same source layer.",
     ],
   },
 };
