@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { CountryRow, StatValue } from "@/lib/worldBank";
 import { getFlagEmoji } from "@/lib/flags";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type MetricKey =
   | "energyImportPercent"
   | "fuelImportShare"
@@ -214,15 +215,8 @@ export default function CompareClient({
           <a href="/" className="text-base font-black tracking-tight text-white">
             Datlora
           </a>
+          <UnifiedTopNav />
 
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-bold text-slate-300">
-            <a href="/" className="hover:text-white">Home</a>
-            <a href="/news" className="hover:text-white">News</a>
-            <a href="/issues" className="hover:text-white">Issues</a>
-            <a href="/topics" className="hover:text-white">Topics</a>
-            <a href="/compare" className="text-emerald-300">Compare</a>
-            <a href="/sources" className="hover:text-white">Sources</a>
-          </nav>
         </div>
       </header>
 

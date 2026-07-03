@@ -11,6 +11,7 @@ import { getFlagEmoji } from "@/lib/flags";
 import CountryOfficialDataStack from "@/components/CountryOfficialDataStack";
 import CountryRelatedNews from "@/components/CountryRelatedNews";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
 type MetricKey =
@@ -694,13 +695,8 @@ export default function CountryDetailClient({
           </div>
 
           {/* Country detail main nav */}
-          <nav className="hidden items-center gap-4 text-sm font-bold text-slate-300 lg:flex">
-            <a href="/news" className="hover:text-white">News</a>
-            <a href="/issues" className="hover:text-white">Issues</a>
-            <a href="/topics" className="hover:text-white">Topics</a>
-            <a href={`/compare?a=${row.iso3}&b=USA`} className="hover:text-white">Compare</a>
-            <a href="/sources" className="hover:text-white">Sources</a>
-          </nav>
+          <UnifiedTopNav language={language} />
+
 
           <select
             value={language}

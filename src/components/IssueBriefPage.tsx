@@ -6,6 +6,7 @@ import {
   getIssueMetricConfig,
 } from "@/lib/issueExposure";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 export default async function IssueBriefPage({ slug }: { slug: string }) {
   const issue = getIssueBrief(slug);
   const config = getIssueMetricConfig(slug);
@@ -32,14 +33,8 @@ export default async function IssueBriefPage({ slug }: { slug: string }) {
           <a href="/" className="text-base font-black tracking-tight text-white">
             Datlora
           </a>
+          <UnifiedTopNav />
 
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-bold text-slate-300">
-            <a href="/" className="hover:text-white">Home</a>
-            <a href="/topics" className="hover:text-white">Topics</a>
-            <a href="/compare?a=KOR&b=USA" className="hover:text-white">Compare</a>
-            <a href="/issues" className="text-cyan-300">Issues</a>
-            <a href="/sources" className="hover:text-white">Sources</a>
-          </nav>
         </div>
       </header>
 

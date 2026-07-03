@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getFlagEmoji } from "@/lib/flags";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type SiteLanguage = "ko" | "en";
 
 type CountryNewsArticle = {
@@ -189,19 +190,8 @@ export default function CountryNewsPageClient({
           <a href="/" className="text-base font-black tracking-tight text-white">
             Datlora
           </a>
+          <UnifiedTopNav language={language} />
 
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-bold text-slate-300">
-            <a href="/" className="hover:text-white">{copy.backHome}</a>
-            <a href="/news" className="hover:text-white">{copy.allNews}</a>
-            <a href="/issues" className="hover:text-white">Issues</a>
-            <a href="/topics" className="hover:text-white">Topics</a>
-            <a href={`/compare?a=${iso3}&b=${compareBase}`} className="hover:text-white">
-              Compare
-            </a>
-            <a href={`/country/${iso3}`} className="text-emerald-300">
-              {copy.backCountry}
-            </a>
-          </nav>
 
           <select
             value={language}

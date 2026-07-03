@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type Language = "ko" | "en";
 
 const copy = {
@@ -146,15 +147,8 @@ export default function MethodologyPageClient() {
           <a href="/" className="text-base font-black tracking-tight text-white">
             Datlora
           </a>
+          <UnifiedTopNav language={language} />
 
-          <nav className="hidden flex-wrap items-center gap-4 text-sm font-bold text-slate-300 md:flex">
-            <a href="/" className="hover:text-white">{t.navHome}</a>
-            <a href="/news" className="hover:text-white">{t.navNews}</a>
-            <a href="/issues" className="hover:text-white">{t.navIssues}</a>
-            <a href="/topics" className="hover:text-white">{t.navTopics}</a>
-            <a href="/compare?a=KOR&b=USA" className="hover:text-white">{t.navCompare}</a>
-            <a href="/sources" className="hover:text-white">{t.navSources}</a>
-          </nav>
 
           <select
             value={language}

@@ -5,6 +5,7 @@ import type { CountryRow } from "@/lib/worldBank";
 import { getFlagEmoji } from "@/lib/flags";
 import TrustMethodologyLinks from "@/components/TrustMethodologyLinks";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type Language = "ko" | "en";
 
 type SortKey = "name" | "dataCompleteness" | "importsGdp" | "tariffRate";
@@ -214,15 +215,8 @@ export default function CountriesPageClient({ rows }: { rows: CountryRow[] }) {
           <a href="/" className="text-base font-black tracking-tight text-white">
             Datlora
           </a>
+          <UnifiedTopNav language={language} />
 
-          <nav className="hidden flex-wrap items-center gap-4 text-sm font-bold text-slate-300 md:flex">
-            <a href="/" className="hover:text-white">{t.home}</a>
-            <a href="/news" className="hover:text-white">{t.news}</a>
-            <a href="/issues" className="hover:text-white">{t.issues}</a>
-            <a href="/topics" className="hover:text-white">{t.topics}</a>
-            <a href="/compare?a=KOR&b=USA" className="hover:text-white">{t.compare}</a>
-            <a href="/sources" className="hover:text-white">{t.sources}</a>
-          </nav>
 
           <select
             value={language}

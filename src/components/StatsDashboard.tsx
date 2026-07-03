@@ -17,6 +17,7 @@ import HomeDataJumpBar from "@/components/HomeDataJumpBar";
 import HomeIssueWatch from "@/components/HomeIssueWatch";
 import HomeFullDataToggle from "@/components/HomeFullDataToggle";
 
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
 type SortKey =
@@ -1193,33 +1194,8 @@ export default function StatsDashboard({
             <p className="text-lg font-bold">{t.siteName}</p>
             <p className="text-xs text-slate-400">{t.subtitle}</p>
           </div>
+          <UnifiedTopNav language={language} />
 
-                    <nav className="hidden gap-6 text-sm font-semibold text-slate-300 md:flex">
-            <a href="#country-search" className="transition hover:text-white">
-              {language === "ko" ? "국가 검색" : "Country search"}
-            </a>
-            <a href="/countries" className="transition hover:text-white">
-              {language === "ko" ? "국가 목록" : "Countries"}
-            </a>
-            <a href="/news" className="transition hover:text-white">
-              {language === "ko" ? "뉴스" : "News"}
-            </a>
-            <a href="#issue-watch" className="transition hover:text-white">
-              {language === "ko" ? "이슈" : "Issues"}
-            </a>
-            <a href="/topics" className="transition hover:text-white">
-              {language === "ko" ? "주제별 통계" : "Topics"}
-            </a>
-            <a href="/compare?a=KOR&b=USA" className="transition hover:text-white">
-              {language === "ko" ? "국가 비교" : "Compare"}
-            </a>
-            <a href="/labs" className="transition hover:text-white">
-              Labs
-            </a>
-            <a href="/sources" className="transition hover:text-white">
-              {language === "ko" ? "출처" : "Sources"}
-            </a>
-          </nav>
 
           <select
             value={language}
