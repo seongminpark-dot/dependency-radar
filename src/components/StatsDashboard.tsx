@@ -1198,6 +1198,9 @@ export default function StatsDashboard({
             <a href="#country-search" className="transition hover:text-white">
               {language === "ko" ? "국가 검색" : "Country search"}
             </a>
+            <a href="/countries" className="transition hover:text-white">
+              {language === "ko" ? "국가 목록" : "Countries"}
+            </a>
             <a href="/news" className="transition hover:text-white">
               {language === "ko" ? "뉴스" : "News"}
             </a>
