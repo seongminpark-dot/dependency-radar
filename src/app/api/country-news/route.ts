@@ -33,6 +33,7 @@ type CountryNewsArticle = {
   sourceTier: SourceTier;
   sourceScore: number;
   relevanceScore: number;
+  isFallbackSearch: boolean;
 };
 
 type CountryProfile = {
@@ -279,15 +280,37 @@ function containsAny(text: string, terms: string[]) {
 function classifyIssue(title: string) {
   const lower = title.toLowerCase();
 
-  if (lower.includes("oil") || lower.includes("crude") || lower.includes("fuel") || lower.includes("energy") || lower.includes("gas") || lower.includes("석유") || lower.includes("에너지")) {
+  if (
+    lower.includes("oil") ||
+    lower.includes("crude") ||
+    lower.includes("fuel") ||
+    lower.includes("energy") ||
+    lower.includes("gas") ||
+    lower.includes("석유") ||
+    lower.includes("에너지")
+  ) {
     return { issueSlug: "oil-shock", issueLabel: "Oil Shock", issueHref: "/issues/oil-shock" };
   }
 
-  if (lower.includes("food") || lower.includes("grain") || lower.includes("wheat") || lower.includes("rice") || lower.includes("crop") || lower.includes("식량") || lower.includes("곡물")) {
+  if (
+    lower.includes("food") ||
+    lower.includes("grain") ||
+    lower.includes("wheat") ||
+    lower.includes("rice") ||
+    lower.includes("crop") ||
+    lower.includes("식량") ||
+    lower.includes("곡물")
+  ) {
     return { issueSlug: "food-import-risk", issueLabel: "Food Import Risk", issueHref: "/issues/food-import-risk" };
   }
 
-  if (lower.includes("tariff") || lower.includes("customs") || lower.includes("trade war") || lower.includes("duty") || lower.includes("관세")) {
+  if (
+    lower.includes("tariff") ||
+    lower.includes("customs") ||
+    lower.includes("trade war") ||
+    lower.includes("duty") ||
+    lower.includes("관세")
+  ) {
     return { issueSlug: "tariff-pressure", issueLabel: "Tariff Pressure", issueHref: "/issues/tariff-pressure" };
   }
 
@@ -343,12 +366,15 @@ async function fetchWithTimeout(url: string, timeoutMs: number) {
   }
 }
 
-function calculateRelevanceScore(article: {
-  title: string;
-  url: string;
-  sourceScore: number;
-  publishedAt: string;
-}, profile: CountryProfile) {
+function calculateRelevanceScore(
+  article: {
+    title: string;
+    url: string;
+    sourceScore: number;
+    publishedAt: string;
+  },
+  profile: CountryProfile
+) {
   const title = article.title.toLowerCase();
   const url = article.url.toLowerCase();
 
@@ -392,64 +418,92 @@ function calculateRelevanceScore(article: {
   );
 }
 
+function createSearchCard({
+  title,
+  url,
+  source,
+  score,
+}: {
+  title: string;
+  url: string;
+  source: string;
+  score: number;
+}): CountryNewsArticle {
+  return {
+    title,
+    url,
+    image: fallbackImage,
+    source,
+    sourceCountry: "",
+    publishedAt: new Date().toISOString(),
+    issueSlug: "news-search",
+    issueLabel: "News Search",
+    issueHref: "/news",
+    language: "search",
+    isTrustedSource: true,
+    sourceTier: "major",
+    sourceScore: score,
+    relevanceScore: score,
+    isFallbackSearch: true,
+  };
+}
+
 function fallbackArticles(iso3: string, countryName: string, language: SiteLanguage): CountryNewsArticle[] {
   const profile = getCountryProfile(iso3, countryName);
-  const encoded = encodeURIComponent(`${profile.displayName} trade energy tariff supply chain`);
+  const display = profile.displayName;
 
-  const titlePrefix =
+  const broadCountry = encodeURIComponent(display);
+  const tradeQuery = encodeURIComponent(`${display} trade energy food tariff supply chain`);
+  const economyQuery = encodeURIComponent(`${display} economy imports exports`);
+
+  const prefix =
     language === "ko"
-      ? `${profile.displayName} 관련 공식 뉴스`
-      : `${profile.displayName} trade and supply-chain news`;
+      ? `${display} 관련 뉴스 검색`
+      : `${display} news search`;
 
   return [
-    {
-      title: `${titlePrefix} · Reuters search`,
-      url: `https://www.reuters.com/site-search/?query=${encoded}`,
-      image: fallbackImage,
-      source: "reuters.com",
-      sourceCountry: "",
-      publishedAt: new Date().toISOString(),
-      issueSlug: "supply-chain",
-      issueLabel: "Trade / Supply Chain",
-      issueHref: "/issues/supply-chain",
-      language: sourceLanguageMap[language],
-      isTrustedSource: true,
-      sourceTier: "major",
-      sourceScore: 90,
-      relevanceScore: 90,
-    },
-    {
-      title: `${titlePrefix} · AP News search`,
-      url: `https://apnews.com/search?q=${encoded}`,
-      image: fallbackImage,
-      source: "apnews.com",
-      sourceCountry: "",
-      publishedAt: new Date().toISOString(),
-      issueSlug: "supply-chain",
-      issueLabel: "Trade / Supply Chain",
-      issueHref: "/issues/supply-chain",
-      language: sourceLanguageMap[language],
-      isTrustedSource: true,
-      sourceTier: "major",
-      sourceScore: 90,
-      relevanceScore: 90,
-    },
-    {
-      title: `${titlePrefix} · Google News`,
-      url: `https://news.google.com/search?q=${encoded}`,
-      image: fallbackImage,
+    createSearchCard({
+      title: `${prefix} · Google News`,
+      url: `https://news.google.com/search?q=${tradeQuery}`,
       source: "news.google.com",
-      sourceCountry: "",
-      publishedAt: new Date().toISOString(),
-      issueSlug: "supply-chain",
-      issueLabel: "Trade / Supply Chain",
-      issueHref: "/issues/supply-chain",
-      language: sourceLanguageMap[language],
-      isTrustedSource: true,
-      sourceTier: "major",
-      sourceScore: 85,
-      relevanceScore: 85,
-    },
+      score: 96,
+    }),
+    createSearchCard({
+      title: `${prefix} · Bing News`,
+      url: `https://www.bing.com/news/search?q=${tradeQuery}`,
+      source: "bing.com/news",
+      score: 94,
+    }),
+    createSearchCard({
+      title: `${prefix} · Google News general`,
+      url: `https://news.google.com/search?q=${broadCountry}`,
+      source: "news.google.com",
+      score: 92,
+    }),
+    createSearchCard({
+      title: `${prefix} · AP News`,
+      url: `https://apnews.com/search?q=${broadCountry}`,
+      source: "apnews.com",
+      score: 90,
+    }),
+    createSearchCard({
+      title: `${prefix} · BBC`,
+      url: `https://www.bbc.co.uk/search?q=${economyQuery}`,
+      source: "bbc.co.uk",
+      score: 88,
+    }),
+    createSearchCard({
+      title: `${prefix} · Reuters`,
+      url: `https://www.reuters.com/site-search/?query=${broadCountry}`,
+      source: "reuters.com",
+      score: 86,
+    }),
+    createSearchCard({
+      title: `${prefix} · The Guardian`,
+      url: `https://www.theguardian.com/search?q=${broadCountry}`,
+      source: "theguardian.com",
+      score: 84,
+    }),
   ];
 }
 
@@ -487,6 +541,7 @@ async function fetchCountryNews(iso3: string, countryName: string, language: Sit
             ...issue,
             ...sourceProfile,
             relevanceScore: 0,
+            isFallbackSearch: false,
           };
 
           return {
@@ -506,7 +561,7 @@ async function fetchCountryNews(iso3: string, countryName: string, language: Sit
             article.url.startsWith("http") &&
             !isBlocked(article.source) &&
             !containsAny(combinedText, profile.exclude) &&
-            (hasCountryMention || article.isTrustedSource)
+            hasCountryMention
           );
         });
     })
@@ -541,10 +596,10 @@ export async function GET(request: Request) {
         if (b.sourceScore !== a.sourceScore) return b.sourceScore - a.sourceScore;
         return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
       })
-      .slice(0, 8);
+      .slice(0, 5);
 
-    const articles =
-      liveArticles.length > 0 ? liveArticles : fallbackArticles(iso3, countryName, language);
+    const searchFallbacks = fallbackArticles(iso3, countryName, language);
+    const articles = dedupeArticles([...liveArticles, ...searchFallbacks]).slice(0, 8);
 
     return NextResponse.json(
       {

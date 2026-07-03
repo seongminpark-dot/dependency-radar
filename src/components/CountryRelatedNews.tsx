@@ -18,6 +18,7 @@ type CountryNewsArticle = {
   isTrustedSource: boolean;
   sourceTier: "official" | "major" | "regional" | "general";
   sourceScore: number;
+  isFallbackSearch?: boolean;
 };
 
 type CountryNewsResponse = {
@@ -38,6 +39,7 @@ function getCopy(language: SiteLanguage) {
       noNews:
         "현재 표시할 국가별 뉴스가 충분하지 않습니다. 전체 뉴스 페이지에서 글로벌 이슈를 확인할 수 있습니다.",
       openArticle: "원문",
+      openSearch: "검색",
       viewIssue: "이슈",
       trusted: "신뢰 출처",
       updated: "업데이트",
@@ -54,6 +56,7 @@ function getCopy(language: SiteLanguage) {
     noNews:
       "There are not enough country-specific articles right now. Open the full news desk for broader issue coverage.",
     openArticle: "Article",
+    openSearch: "Search",
     viewIssue: "Issue",
     trusted: "Trusted",
     updated: "Updated",
@@ -238,14 +241,14 @@ export default function CountryRelatedNews({
                    
                     className="rounded-full bg-emerald-400 px-3 py-2 text-xs font-black text-slate-950"
                   >
-                    {copy.openArticle}
+                    {article.isFallbackSearch ? copy.openSearch : copy.openArticle}
                   </a>
 
                   <a
                     href={article.issueHref}
                     className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-black text-white"
                   >
-                    {copy.viewIssue}
+                    {article.isFallbackSearch ? copy.viewAll : copy.viewIssue}
                   </a>
                 </div>
               </article>
