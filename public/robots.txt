@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /site-health
 
 Sitemap: https://datlora.com/sitemap.xml
-Sitemap: https://datlora.com/sitemap.txt
