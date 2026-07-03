@@ -25,3 +25,6 @@ https://datlora.com/news/country/JPN
 https://datlora.com/news/country/CHN
 https://datlora.com/news/country/DEU
 https://datlora.com/news/country/IND
+https://datlora.com/privacy
+https://datlora.com/terms
+https://datlora.com/disclaimer

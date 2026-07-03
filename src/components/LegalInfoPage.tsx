@@ -1,293 +1,320 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import UnifiedTopNav from "@/components/UnifiedTopNav";
 
-type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
-type PageType = "sources" | "privacy" | "terms" | "disclaimer";
+type Language = "ko" | "en";
+type PageType = "privacy" | "terms" | "disclaimer";
 
 const languageLabels: Record<Language, string> = {
   ko: "한국어",
   en: "English",
-  ja: "日本語",
-  zh: "中文",
-  es: "Español",
-  fr: "Français",
-  de: "Deutsch",
 };
 
 const common = {
   ko: {
-    back: "← 메인 대시보드로 돌아가기",
+    lastUpdated: "마지막 업데이트",
     contact: "문의",
-    emailText: "데이터 오류, 협업, 서비스 문의는 아래 이메일로 연락해 주세요.",
+    contactText:
+      "데이터 오류, 협업, 서비스 관련 문의는 아래 이메일로 연락해 주세요.",
+    email: "kevinsmp123@gmail.com",
+    related: "관련 페이지",
+    sources: "데이터 출처",
+    methodology: "방법론",
+    home: "홈으로 이동",
+    language: "언어",
   },
   en: {
-    back: "← Back to main dashboard",
+    lastUpdated: "Last updated",
     contact: "Contact",
-    emailText: "For data corrections, collaboration, or service inquiries, contact the email below.",
-  },
-  ja: {
-    back: "← メインダッシュボードに戻る",
-    contact: "お問い合わせ",
-    emailText: "データ修正、協業、サービスのお問い合わせは下記メールまでご連絡ください。",
-  },
-  zh: {
-    back: "← 返回主仪表板",
-    contact: "联系",
-    emailText: "如需数据更正、合作或服务咨询，请通过以下邮箱联系。",
-  },
-  es: {
-    back: "← Volver al panel principal",
-    contact: "Contacto",
-    emailText: "Para correcciones de datos, colaboración o consultas del servicio, contacte al correo siguiente.",
-  },
-  fr: {
-    back: "← Retour au tableau de bord",
-    contact: "Contact",
-    emailText: "Pour toute correction de données, collaboration ou demande de service, contactez l’e-mail ci-dessous.",
-  },
-  de: {
-    back: "← Zurück zum Hauptdashboard",
-    contact: "Kontakt",
-    emailText: "Für Datenkorrekturen, Zusammenarbeit oder Serviceanfragen kontaktieren Sie bitte die folgende E-Mail.",
+    contactText:
+      "For data corrections, collaboration, or service inquiries, contact the email below.",
+    email: "kevinsmp123@gmail.com",
+    related: "Related pages",
+    sources: "Data sources",
+    methodology: "Methodology",
+    home: "Go home",
+    language: "Language",
   },
 };
 
 const pages = {
-  sources: {
-    ko: {
-      title: "데이터 출처",
-      intro: "Datlora는 World Bank 공개 지표와 Natural Earth 지도 경계 데이터를 사용합니다. 일부 값은 가독성을 위해 재구성, 번역, 정렬, 필터링 또는 시각화될 수 있습니다.",
-      sections: [
-        {
-          title: "World Bank Open Data",
-          body: "국가별 에너지, 연료, 식량, 수입, 관세, 물류 지표는 World Bank API에서 가져옵니다. 각 값에는 가능한 경우 최신 제공 연도가 함께 표시됩니다.",
-        },
-        {
-          title: "지도 데이터",
-          body: "세계 지도 시각화는 Natural Earth 지도 경계 데이터를 world-atlas 패키지를 통해 사용합니다. Natural Earth 데이터는 public domain으로 제공됩니다.",
-        },
-        {
-          title: "승인 관계 없음",
-          body: "Datlora는 The World Bank, Natural Earth, OpenStreetMap, Vercel, Upstash와 제휴, 후원, 승인 관계가 없습니다.",
-        },
-      ],
-    },
-    en: {
-      title: "Data Sources",
-      intro: "Datlora uses public World Bank indicators and Natural Earth map boundary data. Some values may be reformatted, translated, sorted, filtered, or visualized for readability.",
-      sections: [
-        {
-          title: "World Bank Open Data",
-          body: "Country-level energy, fuel, food, import, tariff, and logistics indicators are retrieved from the World Bank API. Each value includes the latest available year when possible.",
-        },
-        {
-          title: "Map boundary data",
-          body: "The world map visualization uses Natural Earth boundary data through the world-atlas package. Natural Earth data is public domain.",
-        },
-        {
-          title: "No endorsement",
-          body: "Datlora is not affiliated with, sponsored by, or endorsed by The World Bank, Natural Earth, OpenStreetMap, Vercel, or Upstash.",
-        },
-      ],
-    },
-    ja: {
-      title: "データ出典",
-      intro: "DatloraはWorld Bankの公開指標とNatural Earthの地図境界データを使用します。",
-      sections: [
-        { title: "World Bank Open Data", body: "エネルギー、燃料、食料、輸入、関税、物流指標はWorld Bank APIから取得されます。" },
-        { title: "地図データ", body: "世界地図はNatural Earthの境界データをworld-atlas経由で使用します。" },
-        { title: "承認関係なし", body: "Datloraは各データ提供者から後援、承認、提携を受けていません。" },
-      ],
-    },
-    zh: {
-      title: "数据来源",
-      intro: "Datlora 使用 World Bank 公共指标和 Natural Earth 地图边界数据。",
-      sections: [
-        { title: "World Bank Open Data", body: "能源、燃料、食品、进口、关税和物流指标来自 World Bank API。" },
-        { title: "地图边界数据", body: "世界地图使用 Natural Earth 边界数据，并通过 world-atlas 包加载。" },
-        { title: "无背书关系", body: "Datlora 未获得数据提供方的赞助、认可或官方背书。" },
-      ],
-    },
-    es: {
-      title: "Fuentes de datos",
-      intro: "Datlora utiliza indicadores públicos del World Bank y datos de límites cartográficos de Natural Earth.",
-      sections: [
-        { title: "World Bank Open Data", body: "Los indicadores de energía, combustibles, alimentos, importaciones, aranceles y logística se obtienen desde la API del World Bank." },
-        { title: "Datos del mapa", body: "La visualización del mapa mundial usa datos de Natural Earth mediante el paquete world-atlas." },
-        { title: "Sin respaldo oficial", body: "Datlora no está afiliado, patrocinado ni respaldado por los proveedores de datos." },
-      ],
-    },
-    fr: {
-      title: "Sources des données",
-      intro: "Datlora utilise des indicateurs publics de la World Bank et des données cartographiques Natural Earth.",
-      sections: [
-        { title: "World Bank Open Data", body: "Les indicateurs d’énergie, combustibles, alimentation, importations, droits de douane et logistique proviennent de l’API World Bank." },
-        { title: "Données cartographiques", body: "La carte mondiale utilise les données Natural Earth via le package world-atlas." },
-        { title: "Aucune approbation", body: "Datlora n’est pas affilié, sponsorisé ou approuvé par les fournisseurs de données." },
-      ],
-    },
-    de: {
-      title: "Datenquellen",
-      intro: "Datlora verwendet öffentliche World-Bank-Indikatoren und Natural-Earth-Kartendaten.",
-      sections: [
-        { title: "World Bank Open Data", body: "Energie-, Brennstoff-, Lebensmittel-, Import-, Zoll- und Logistikindikatoren werden über die World-Bank-API abgerufen." },
-        { title: "Kartendaten", body: "Die Weltkarte verwendet Natural-Earth-Grenzdaten über das Paket world-atlas." },
-        { title: "Keine offizielle Unterstützung", body: "Datlora ist nicht mit den Datenanbietern verbunden, gesponsert oder offiziell unterstützt." },
-      ],
-    },
-  },
   privacy: {
     ko: {
-      title: "개인정보처리방침",
-      intro: "Datlora는 사이트 기능 제공에 필요한 최소한의 정보만 사용하도록 설계되었습니다.",
+      label: "Privacy Policy",
+      title: "개인정보 처리방침",
+      intro:
+        "Datlora는 회원가입, 결제, 댓글, 개인 프로필 기능을 운영하지 않습니다. 사이트 기능 제공과 기본적인 운영 확인에 필요한 범위에서만 제한적인 정보를 사용합니다.",
       sections: [
-        { title: "접속 국가 표시 및 방문 카운터", body: "호스팅 플랫폼에서 제공하는 대략적인 국가 코드를 사용해 방문 국가를 표시하고 국가별 누적 방문 횟수를 집계합니다. 중복 방문은 포함됩니다. IP 주소 전체는 저장하지 않습니다." },
-        { title: "언어 설정", body: "사용자가 언어를 직접 변경하면 브라우저의 localStorage에 언어 선택이 저장될 수 있습니다." },
-        { title: "이메일 문의", body: "이메일로 문의하는 경우 이메일 주소와 메시지 내용은 문의 응답 목적으로만 사용됩니다." },
+        {
+          title: "수집하거나 사용하는 정보",
+          body:
+            "Datlora는 사용자가 직접 입력하는 계정 정보를 요구하지 않습니다. 다만 사이트 접속 국가 표시, 국가별 방문 집계, 언어 설정, 이메일 문의, 기본적인 접속 통계 확인을 위해 제한적인 정보가 사용될 수 있습니다.",
+        },
+        {
+          title: "방문 국가 표시와 방문 집계",
+          body:
+            "방문 국가 표시는 호스팅 환경에서 제공하는 대략적인 국가 코드에 기반합니다. 국가별 누적 방문 횟수에는 중복 방문이 포함될 수 있으며, 이는 서비스 이용 흐름을 이해하기 위한 참고 정보입니다.",
+        },
+        {
+          title: "언어 설정",
+          body:
+            "사용자가 언어를 직접 변경하면 선택한 언어가 브라우저의 localStorage에 저장될 수 있습니다. 이 정보는 사용자의 브라우저 안에서 다음 방문 시 같은 언어를 보여주기 위한 용도로 사용됩니다.",
+        },
+        {
+          title: "분석 도구",
+          body:
+            "Datlora는 사이트 성능과 사용 흐름을 확인하기 위해 Vercel Analytics와 같은 기본 분석 도구를 사용할 수 있습니다. 이 정보는 페이지 방문 흐름과 서비스 개선 목적에 사용됩니다.",
+        },
+        {
+          title: "이메일 문의",
+          body:
+            "사용자가 이메일로 문의하는 경우 이메일 주소와 메시지 내용은 문의 응답, 오류 확인, 협업 논의 목적으로만 사용됩니다.",
+        },
+        {
+          title: "외부 링크",
+          body:
+            "Datlora는 외부 뉴스 기사, 뉴스 검색 페이지, 공식 데이터 출처로 연결되는 링크를 제공합니다. 외부 사이트에서 처리되는 정보는 해당 사이트의 정책을 따릅니다.",
+        },
       ],
     },
     en: {
+      label: "Privacy Policy",
       title: "Privacy Policy",
-      intro: "Datlora is designed to use only the minimum information needed to provide site features.",
+      intro:
+        "Datlora does not operate user accounts, payments, comments, or personal profile features. It uses limited information only for site functionality and basic operation checks.",
       sections: [
-        { title: "Visitor country display and counter", body: "The site uses an approximate country code from the hosting platform to display visitor countries and count cumulative visits by country. Duplicate visits are included. Full IP addresses are not stored." },
-        { title: "Language preference", body: "If a user changes the language manually, the selected language may be stored in the browser localStorage." },
-        { title: "Email inquiries", body: "If you contact us by email, your email address and message are used only to respond to your inquiry." },
-      ],
-    },
-    ja: {
-      title: "プライバシーポリシー",
-      intro: "Datloraは必要最小限の情報のみを使用するよう設計されています。",
-      sections: [
-        { title: "訪問国カウンター", body: "ホスティング環境の国コードを使って国別の訪問回数を集計します。IPアドレス全体は保存しません。" },
-        { title: "言語設定", body: "言語を変更した場合、ブラウザに設定が保存されることがあります。" },
-        { title: "メール問い合わせ", body: "メール内容は問い合わせ対応の目的で使用されます。" },
-      ],
-    },
-    zh: {
-      title: "隐私政策",
-      intro: "Datlora 仅使用提供功能所需的最低限度信息。",
-      sections: [
-        { title: "访问国家计数器", body: "网站使用托管平台提供的国家代码统计按国家累计访问次数。包含重复访问，不存储完整 IP 地址。" },
-        { title: "语言偏好", body: "用户手动更改语言时，浏览器可能保存该设置。" },
-        { title: "邮件联系", body: "邮件地址和内容仅用于回复咨询。" },
-      ],
-    },
-    es: {
-      title: "Política de privacidad",
-      intro: "Datlora usa solo la información mínima necesaria para sus funciones.",
-      sections: [
-        { title: "Contador por país", body: "El sitio usa un código de país aproximado para contar visitas acumuladas por país. Incluye visitas duplicadas y no almacena la IP completa." },
-        { title: "Preferencia de idioma", body: "La selección de idioma puede guardarse en el navegador." },
-        { title: "Consultas por correo", body: "El correo y el mensaje se usan solo para responder la consulta." },
-      ],
-    },
-    fr: {
-      title: "Politique de confidentialité",
-      intro: "Datlora utilise uniquement les informations minimales nécessaires.",
-      sections: [
-        { title: "Compteur par pays", body: "Le site utilise un code pays approximatif pour compter les visites cumulées par pays. Les visites répétées sont incluses et l’adresse IP complète n’est pas stockée." },
-        { title: "Préférence de langue", body: "La langue choisie peut être enregistrée dans le navigateur." },
-        { title: "Contact par e-mail", body: "L’e-mail et le message servent uniquement à répondre à la demande." },
-      ],
-    },
-    de: {
-      title: "Datenschutzerklärung",
-      intro: "Datlora verwendet nur die minimal notwendigen Informationen.",
-      sections: [
-        { title: "Besucherzähler nach Land", body: "Die Website nutzt einen ungefähren Ländercode, um kumulierte Besuche nach Land zu zählen. Doppelte Besuche sind enthalten; vollständige IP-Adressen werden nicht gespeichert." },
-        { title: "Spracheinstellung", body: "Die gewählte Sprache kann im Browser gespeichert werden." },
-        { title: "E-Mail-Anfragen", body: "E-Mail-Adresse und Nachricht werden nur zur Beantwortung verwendet." },
+        {
+          title: "Information used by the site",
+          body:
+            "Datlora does not require account information from users. Limited information may be used for visitor country display, country-level visit counts, language preference, email inquiries, and basic analytics.",
+        },
+        {
+          title: "Visitor country display and counts",
+          body:
+            "Visitor country display is based on an approximate country code provided by the hosting environment. Country-level cumulative visit counts may include repeat visits and are used as operational reference information.",
+        },
+        {
+          title: "Language preference",
+          body:
+            "If a user manually changes the language, the selected language may be stored in the browser localStorage so that the same language can be shown on later visits.",
+        },
+        {
+          title: "Analytics",
+          body:
+            "Datlora may use basic analytics tools such as Vercel Analytics to understand page visits, site performance, and service usage patterns.",
+        },
+        {
+          title: "Email inquiries",
+          body:
+            "If a user contacts Datlora by email, the email address and message are used only for responding to the inquiry, checking reported issues, or discussing collaboration.",
+        },
+        {
+          title: "External links",
+          body:
+            "Datlora links to external news articles, news search pages, and official data sources. Information handled on external sites is governed by the policies of those sites.",
+        },
       ],
     },
   },
   terms: {
     ko: {
+      label: "Terms of Use",
       title: "이용약관",
-      intro: "Datlora는 공개 통계 정보를 교육, 연구, 참고 목적으로 제공합니다.",
+      intro:
+        "Datlora는 글로벌 뉴스 맥락과 공식 국가 지표를 연결해 보여주는 정보 제공형 데이터 플랫폼입니다. 사이트 이용자는 아래 기준을 이해하고 서비스를 이용해야 합니다.",
       sections: [
-        { title: "서비스 이용", body: "사용자는 사이트를 합법적이고 비방해적인 방식으로 이용해야 합니다." },
-        { title: "데이터 정확성", body: "데이터는 제3자 공개 데이터셋에 기반하므로 지연, 수정, 누락이 있을 수 있습니다." },
-        { title: "금지 행위", body: "사이트를 방해하거나 데이터를 왜곡하여 제공자의 승인처럼 표현해서는 안 됩니다." },
+        {
+          title: "서비스 목적",
+          body:
+            "Datlora는 무역, 에너지, 식량, 관세, 물류, 수입, 공급망 관련 국가 지표와 외부 뉴스 링크를 탐색하기 위한 정보 조사용 서비스입니다.",
+        },
+        {
+          title: "데이터와 뉴스의 구분",
+          body:
+            "국가 지표는 가능한 범위에서 공식 공개 데이터 기준으로 표시됩니다. 뉴스는 외부 기사 또는 뉴스 검색 페이지로 연결되는 참고 맥락이며, Datlora가 기사 원문을 발행하거나 소유하는 것은 아닙니다.",
+        },
+        {
+          title: "사용자의 책임",
+          body:
+            "사용자는 Datlora의 정보를 독립적으로 검토해야 하며, 중요한 결정을 내리기 전에는 원출처, 최신 데이터, 관련 전문가의 검토를 함께 확인해야 합니다.",
+        },
+        {
+          title: "금지된 이용",
+          body:
+            "사용자는 서비스를 방해하거나, 자동화된 과도한 요청을 보내거나, 외부 뉴스 및 공식 데이터 출처의 권리를 침해하는 방식으로 사이트를 이용해서는 안 됩니다.",
+        },
+        {
+          title: "서비스 변경",
+          body:
+            "Datlora는 데이터 출처, 화면 구성, 기능, 링크, 설명 문구를 개선 또는 변경할 수 있습니다.",
+        },
       ],
     },
     en: {
+      label: "Terms of Use",
       title: "Terms of Use",
-      intro: "Datlora provides public statistical information for educational, research, and reference purposes.",
+      intro:
+        "Datlora is an informational data platform that connects global news context with official country indicators. Users should understand the following terms when using the site.",
       sections: [
-        { title: "Use of service", body: "Users should use the site in a lawful and non-disruptive way." },
-        { title: "Data accuracy", body: "The service relies on third-party public datasets, which may be delayed, revised, incomplete, or unavailable." },
-        { title: "No misuse", body: "Users should not disrupt the website or misrepresent data providers as endorsing the site." },
+        {
+          title: "Purpose of the service",
+          body:
+            "Datlora is provided for informational research on country indicators and external news links related to trade, energy, food, tariffs, logistics, imports, and supply-chain context.",
+        },
+        {
+          title: "Separation of data and news",
+          body:
+            "Country indicators are shown from official public data where available. News is provided through external article links or news search pages as context. Datlora does not publish or own the full article text.",
+        },
+        {
+          title: "User responsibility",
+          body:
+            "Users should independently review Datlora information and check original sources, latest data, and relevant professional review before making important decisions.",
+        },
+        {
+          title: "Prohibited use",
+          body:
+            "Users must not disrupt the service, send excessive automated requests, or use the site in a way that infringes the rights of external news or official data providers.",
+        },
+        {
+          title: "Service changes",
+          body:
+            "Datlora may improve or change data sources, page layouts, features, links, and explanatory text.",
+        },
       ],
     },
-    ja: { title: "利用規約", intro: "Datloraは教育・研究・参考目的で公開統計を提供します。", sections: [{ title: "利用", body: "合法的かつ非妨害的に利用してください。" }, { title: "データ精度", body: "第三者データのため遅延、修正、欠落があり得ます。" }, { title: "禁止事項", body: "データ提供者の承認を装ってはいけません。" }] },
-    zh: { title: "使用条款", intro: "Datlora 提供用于教育、研究和参考的公开统计信息。", sections: [{ title: "使用", body: "用户应合法且不干扰地使用本网站。" }, { title: "数据准确性", body: "数据可能延迟、修订、缺失或不可用。" }, { title: "禁止行为", body: "不得误导性地表示数据提供方认可本网站。" }] },
-    es: { title: "Términos de uso", intro: "Datlora ofrece estadísticas públicas para educación, investigación y referencia.", sections: [{ title: "Uso", body: "El sitio debe usarse de forma legal y no disruptiva." }, { title: "Precisión de datos", body: "Los datos pueden estar retrasados, revisados o incompletos." }, { title: "Uso indebido", body: "No se debe tergiversar el respaldo de los proveedores de datos." }] },
-    fr: { title: "Conditions d’utilisation", intro: "Datlora fournit des statistiques publiques à des fins éducatives, de recherche et de référence.", sections: [{ title: "Utilisation", body: "Le site doit être utilisé légalement et sans perturbation." }, { title: "Exactitude des données", body: "Les données peuvent être retardées, révisées ou incomplètes." }, { title: "Usage interdit", body: "Ne présentez pas les fournisseurs comme approuvant le site." }] },
-    de: { title: "Nutzungsbedingungen", intro: "Datlora bietet öffentliche Statistiken für Bildung, Forschung und Referenz.", sections: [{ title: "Nutzung", body: "Die Website muss rechtmäßig und störungsfrei genutzt werden." }, { title: "Datenqualität", body: "Daten können verzögert, geändert oder unvollständig sein." }, { title: "Missbrauch", body: "Datenanbieter dürfen nicht als Unterstützer dargestellt werden." }] },
   },
   disclaimer: {
     ko: {
+      label: "Disclaimer",
       title: "면책 고지",
-      intro: "Datlora는 정보 제공, 교육, 연구 목적의 사이트입니다.",
+      intro:
+        "Datlora의 정보는 조사와 참고 목적입니다. 법률, 투자, 무역, 관세, 물류, 정책, 재무, 사업 의사결정에 대한 전문 조언을 대체하지 않습니다.",
       sections: [
-        { title: "전문 조언 아님", body: "이 사이트는 투자, 법률, 무역, 관세, 물류, 정책, 사업 의사결정에 대한 전문 조언이 아닙니다." },
-        { title: "제3자 데이터", body: "데이터는 공개 제3자 출처에서 가져오며 지연, 수정, 누락 또는 형식 차이가 있을 수 있습니다." },
-        { title: "승인 관계 없음", body: "데이터 제공자는 Datlora를 후원, 승인, 보증하지 않습니다." },
+        {
+          title: "전문 조언 아님",
+          body:
+            "Datlora는 법률, 투자, 관세, 무역, 물류, 정책, 재무, 사업 컨설팅 서비스를 제공하지 않습니다. 중요한 의사결정에는 관련 전문가와 공식 기관의 확인이 필요합니다.",
+        },
+        {
+          title: "데이터 최신성",
+          body:
+            "국가별 공식 지표는 출처, 국가, 지표마다 최신 제공 연도가 다를 수 있습니다. Datlora는 가능한 최신 값을 표시하지만, 모든 국가와 지표가 같은 연도에 업데이트된다는 의미는 아닙니다.",
+        },
+        {
+          title: "외부 뉴스 링크",
+          body:
+            "Datlora는 외부 뉴스 기사와 뉴스 검색 페이지로 연결할 수 있습니다. 외부 뉴스의 제목, 내용, 업데이트, 접근 가능 여부, 검색 결과는 Datlora가 통제하지 않습니다.",
+        },
+        {
+          title: "해석의 한계",
+          body:
+            "Datlora는 뉴스와 공식 통계를 연결해 맥락을 제공하지만, 특정 뉴스가 특정 통계 변화의 직접 원인이라고 단정하지 않습니다.",
+        },
+        {
+          title: "오류 가능성",
+          body:
+            "데이터 처리, 번역, 표시, 외부 API 응답, 링크 연결 과정에서 오류나 지연이 발생할 수 있습니다. 오류를 발견하면 이메일로 알려주세요.",
+        },
       ],
     },
     en: {
+      label: "Disclaimer",
       title: "Disclaimer",
-      intro: "Datlora is for informational, educational, and research purposes only.",
+      intro:
+        "Datlora is for research and informational reference. It does not replace legal, investment, trade, customs, logistics, policy, financial, or business advice.",
       sections: [
-        { title: "Not professional advice", body: "The site is not investment, legal, trade, customs, logistics, policy, or business advice." },
-        { title: "Third-party data", body: "Data comes from public third-party sources and may be delayed, revised, missing, or formatted differently." },
-        { title: "No endorsement", body: "Data providers do not sponsor, endorse, or approve Datlora." },
+        {
+          title: "Not professional advice",
+          body:
+            "Datlora does not provide legal, investment, customs, trade, logistics, policy, financial, or business consulting services. Important decisions should be checked with relevant professionals and official institutions.",
+        },
+        {
+          title: "Data freshness",
+          body:
+            "Official country indicators may have different latest available years depending on the source, country, and indicator. Datlora shows the latest available values where possible, but not all countries and indicators are updated in the same year.",
+        },
+        {
+          title: "External news links",
+          body:
+            "Datlora may link to external news articles and news search pages. Datlora does not control external news headlines, content, updates, availability, or search results.",
+        },
+        {
+          title: "Limits of interpretation",
+          body:
+            "Datlora connects news context with official statistics, but it does not claim that a specific news item directly causes a specific statistical change.",
+        },
+        {
+          title: "Possible errors",
+          body:
+            "Errors or delays may occur in data processing, translation, display, external API responses, or link routing. If you find an issue, contact Datlora by email.",
+        },
       ],
     },
-    ja: { title: "免責事項", intro: "Datloraは情報提供、教育、研究目的のサイトです。", sections: [{ title: "専門的助言ではありません", body: "投資、法律、貿易、物流、政策助言ではありません。" }, { title: "第三者データ", body: "データには遅延、修正、欠落があり得ます。" }, { title: "承認関係なし", body: "データ提供者は本サイトを承認していません。" }] },
-    zh: { title: "免责声明", intro: "Datlora 仅用于信息、教育和研究目的。", sections: [{ title: "非专业建议", body: "本网站不构成投资、法律、贸易、物流或政策建议。" }, { title: "第三方数据", body: "数据可能延迟、修订、缺失或格式不同。" }, { title: "无背书", body: "数据提供方不赞助、认可或批准本网站。" }] },
-    es: { title: "Aviso legal", intro: "Datlora es solo para fines informativos, educativos y de investigación.", sections: [{ title: "No es asesoramiento profesional", body: "No es asesoramiento de inversión, legal, comercial, logístico o político." }, { title: "Datos de terceros", body: "Los datos pueden estar retrasados, revisados o incompletos." }, { title: "Sin respaldo", body: "Los proveedores de datos no patrocinan ni aprueban Datlora." }] },
-    fr: { title: "Avertissement", intro: "Datlora est uniquement destiné à l’information, l’éducation et la recherche.", sections: [{ title: "Pas de conseil professionnel", body: "Ce n’est pas un conseil financier, juridique, commercial, logistique ou politique." }, { title: "Données tierces", body: "Les données peuvent être retardées, révisées ou incomplètes." }, { title: "Aucune approbation", body: "Les fournisseurs ne sponsorisent ni n’approuvent Datlora." }] },
-    de: { title: "Haftungsausschluss", intro: "Datlora dient nur Informations-, Bildungs- und Forschungszwecken.", sections: [{ title: "Keine professionelle Beratung", body: "Es ist keine Anlage-, Rechts-, Handels-, Logistik- oder Politikberatung." }, { title: "Daten Dritter", body: "Daten können verzögert, geändert oder unvollständig sein." }, { title: "Keine Unterstützung", body: "Datenanbieter unterstützen oder genehmigen Datlora nicht." }] },
   },
 };
 
-function getSavedLanguage(): Language {
-  if (typeof window === "undefined") return "ko";
+async function detectInitialLanguage(): Promise<Language> {
+  const manual = localStorage.getItem("datlora-manual-language");
   const saved = localStorage.getItem("dependency-radar-language");
-  if (saved === "ko" || saved === "en" || saved === "ja" || saved === "zh" || saved === "es" || saved === "fr" || saved === "de") return saved;
-  return "ko";
+
+  if (manual === "true" && (saved === "ko" || saved === "en")) {
+    return saved;
+  }
+
+  try {
+    const response = await fetch("/api/geo", { cache: "no-store" });
+    const data = await response.json();
+
+    if (data?.country === "KR") {
+      return "ko";
+    }
+  } catch {
+    return "ko";
+  }
+
+  return saved === "ko" ? "ko" : "en";
 }
 
 export default function LegalInfoPage({ pageType }: { pageType: PageType }) {
   const [language, setLanguage] = useState<Language>("ko");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    async function init() {
+      const next = await detectInitialLanguage();
+      setLanguage(next);
+      setReady(true);
+    }
+
+    init();
   }, []);
 
-  function changeLanguage(nextLanguage: Language) {
-    setLanguage(nextLanguage);
-    localStorage.setItem("dependency-radar-language", nextLanguage);
+  function changeLanguage(next: Language) {
+    setLanguage(next);
+    localStorage.setItem("dependency-radar-language", next);
+    localStorage.setItem("datlora-manual-language", "true");
   }
 
-  const page = pages[pageType][language];
+  const t = pages[pageType][language];
   const c = common[language];
 
   return (
-    <main className="min-h-screen bg-[#070914] px-6 py-16 text-white">
-      <div className="mx-auto max-w-5xl">
-        <div className="flex items-center justify-between gap-4">
-          <a href="/" className="text-sm text-indigo-300 hover:text-white">
-            {c.back}
+    <main className="min-h-screen bg-[#050816] text-white">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#050816]/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-4">
+          <a href="/" className="text-base font-black tracking-tight text-white">
+            Datlora
           </a>
+
+          <UnifiedTopNav language={language} />
 
           <select
             value={language}
             onChange={(event) => changeLanguage(event.target.value as Language)}
             className="rounded-full border border-white/15 bg-[#111524] px-4 py-2 text-sm text-white outline-none"
+            aria-label={c.language}
           >
             {Object.entries(languageLabels).map(([value, label]) => (
               <option key={value} value={value}>
@@ -296,67 +323,83 @@ export default function LegalInfoPage({ pageType }: { pageType: PageType }) {
             ))}
           </select>
         </div>
+      </header>
 
-        <h1 className="mt-8 text-4xl font-bold">{page.title}</h1>
-        <p className="mt-4 max-w-3xl leading-7 text-slate-300">{page.intro}</p>
+      <section className={`mx-auto max-w-5xl px-6 py-14 ${ready ? "" : "opacity-0"}`}>
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-emerald-300">
+          {t.label}
+        </p>
 
-        {pageType === "sources" ? (
-          <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-            <h2 className="text-xl font-bold text-white">World Bank indicator codes</h2>
-            <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
-              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                <thead className="bg-white/[0.06] text-slate-400">
-                  <tr>
-                    <th className="px-5 py-4">Indicator</th>
-                    <th className="px-5 py-4">Code</th>
-                    <th className="px-5 py-4">Meaning</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ["Energy net imports", "EG.IMP.CONS.ZS", "Energy imports, net percentage of energy use"],
-                    ["Fuel import share", "TM.VAL.FUEL.ZS.UN", "Fuel imports as a share of merchandise imports"],
-                    ["Food import share", "TM.VAL.FOOD.ZS.UN", "Food imports as a share of merchandise imports"],
-                    ["Imports/GDP", "NE.IMP.GNFS.ZS", "Imports of goods and services as a share of GDP"],
-                    ["Total imports USD", "NE.IMP.GNFS.CD", "Imports of goods and services in current US dollars"],
-                    ["Tariff rate", "TM.TAX.MRCH.WM.AR.ZS", "Weighted mean tariff rate"],
-                    ["Logistics index", "LP.LPI.OVRL.XQ", "Logistics Performance Index overall score"],
-                  ].map(([name, code, meaning]) => (
-                    <tr key={code} className="border-t border-white/10">
-                      <td className="px-5 py-4 font-semibold text-white">{name}</td>
-                      <td className="px-5 py-4 font-mono text-indigo-200">{code}</td>
-                      <td className="px-5 py-4 text-slate-300">{meaning}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        ) : null}
+        <h1 className="mt-5 text-5xl font-black leading-[0.98] tracking-[-0.075em] md:text-7xl">
+          {t.title}
+        </h1>
 
-        <div className="mt-8 space-y-6">
-          {page.sections.map((section) => (
-            <section
+        <p className="mt-6 text-lg leading-8 text-slate-300">
+          {t.intro}
+        </p>
+
+        <p className="mt-5 w-fit rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold text-slate-400">
+          {c.lastUpdated}: 2026-07-04
+        </p>
+
+        <div className="mt-10 grid gap-5">
+          {t.sections.map((section) => (
+            <article
               key={section.title}
-              className="rounded-3xl border border-white/10 bg-white/[0.04] p-6"
+              className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-2xl shadow-black/20"
             >
-              <h2 className="text-xl font-bold text-white">{section.title}</h2>
-              <p className="mt-3 leading-7 text-slate-300">{section.body}</p>
-            </section>
+              <h2 className="text-2xl font-black tracking-[-0.05em]">
+                {section.title}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-slate-300">
+                {section.body}
+              </p>
+            </article>
           ))}
-
-          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-            <h2 className="text-xl font-bold text-white">{c.contact}</h2>
-            <p className="mt-3 leading-7 text-slate-300">{c.emailText}</p>
-            <a
-              href="mailto:kevinsmp123@gmail.com"
-              className="mt-3 inline-block text-lg font-semibold text-indigo-200 hover:text-white"
-            >
-              kevinsmp123@gmail.com
-            </a>
-          </section>
         </div>
-      </div>
+
+        <section className="mt-10 rounded-[2rem] border border-cyan-300/20 bg-cyan-300/10 p-6">
+          <h2 className="text-2xl font-black tracking-[-0.05em]">
+            {c.related}
+          </h2>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <a
+              href="/sources"
+              className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm font-black text-white transition hover:border-cyan-300/40"
+            >
+              {c.sources} →
+            </a>
+            <a
+              href="/methodology"
+              className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm font-black text-white transition hover:border-emerald-300/40"
+            >
+              {c.methodology} →
+            </a>
+            <a
+              href="/"
+              className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm font-black text-white transition hover:border-blue-300/40"
+            >
+              {c.home} →
+            </a>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-[2rem] border border-violet-300/20 bg-violet-300/10 p-6">
+          <h2 className="text-2xl font-black tracking-[-0.05em]">
+            {c.contact}
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-300">
+            {c.contactText}
+          </p>
+          <a
+            href={`mailto:${c.email}`}
+            className="mt-5 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-emerald-200"
+          >
+            {c.email}
+          </a>
+        </section>
+      </section>
     </main>
   );
 }
