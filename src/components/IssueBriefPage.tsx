@@ -169,6 +169,54 @@ export default async function IssueBriefPage({ slug }: { slug: string }) {
             </section>
 
             <section className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6">
+              <h2 className="text-2xl font-black tracking-[-0.05em]">Country news links</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-300">
+                이 이슈에서 노출도가 높은 국가의 관련 최신 뉴스를 바로 확인합니다.
+              </p>
+
+              <div className="mt-5 grid gap-3">
+                {exposureRows.length > 0 ? (
+                  exposureRows.slice(0, 6).map((country) => (
+                    <div
+                      key={country.iso3}
+                      className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+                    >
+                      <div>
+                        <strong className="block text-white">
+                          {flagEmoji(country.iso2)} {country.name}
+                        </strong>
+                        <span className="mt-1 block text-xs leading-5 text-slate-400">
+                          {country.primaryLabel}: {country.primaryFormatted}
+                          {country.primaryYear ? ` · ${country.primaryYear}` : ""}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <a
+                          href={`/news/country/${country.iso3}`}
+                          className="rounded-full bg-emerald-400 px-3 py-2 text-xs font-black text-slate-950"
+                        >
+                          Country news
+                        </a>
+
+                        <a
+                          href={`/country/${country.iso3}`}
+                          className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-black text-white"
+                        >
+                          Country data
+                        </a>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-4 text-sm text-slate-400">
+                    국가별 뉴스 링크를 표시할 공식 지표가 충분하지 않습니다.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6">
               <h2 className="text-2xl font-black tracking-[-0.05em]">Example country pages</h2>
               <div className="mt-5 grid gap-3">
                 {issue.countryLinks.map((country) => (
