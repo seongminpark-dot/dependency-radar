@@ -15,6 +15,7 @@ import WorldBankExplorerControlsPanel from "@/components/WorldBankExplorerContro
 import HomeActionHub from "@/components/HomeActionHub";
 import HomeDataJumpBar from "@/components/HomeDataJumpBar";
 import HomeIssueWatch from "@/components/HomeIssueWatch";
+import HomeFullDataToggle from "@/components/HomeFullDataToggle";
 
 type Language = "ko" | "en" | "ja" | "zh" | "es" | "fr" | "de";
 
@@ -1245,6 +1246,7 @@ export default function StatsDashboard({
 
       <HomeActionHub rows={rows} language={language} />
 
+      <HomeFullDataToggle language={language}>
       <HomeDataJumpBar language={language} />
       <div id="latest-trade" className="scroll-mt-28" />
       <div id="energy-data" className="scroll-mt-28" />
@@ -1782,6 +1784,9 @@ export default function StatsDashboard({
           </p>
         </div>
       </section>
+
+      </HomeFullDataToggle>
+
       <footer
         id="contact"
         className="mx-auto max-w-7xl border-t border-white/10 px-6 py-10"
