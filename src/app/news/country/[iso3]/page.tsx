@@ -32,7 +32,7 @@ export async function generateMetadata({
       title: `${row.name} Latest News | Datlora`,
       description: `Latest trade, energy, food, tariff, and supply-chain news related to ${row.name}, linked to Datlora country indicators and issue briefs.`,
       alternates: {
-        canonical: `${siteConfig.url}/news/country/${row.iso3}`,
+        canonical: `https://www.datlora.com/news/country/${row.iso3}`,
       },
     };
   } catch {

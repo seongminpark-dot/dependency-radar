@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: issue.title + " | Datlora",
   description: issue.deck,
   alternates: {
-    canonical: "https://datlora.com/issues/oil-shock",
+    canonical: "https://www.datlora.com/issues/oil-shock",
   },
 };
 

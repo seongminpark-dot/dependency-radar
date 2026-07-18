@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora disclaimer explaining that the service is for informational research and does not replace professional advice.",
   alternates: {
-    canonical: "https://datlora.com/disclaimer",
+    canonical: "https://www.datlora.com/disclaimer",
   },
 };
 

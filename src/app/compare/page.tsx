@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Compare official country indicators for trade, energy, food, tariffs, logistics, imports, and supply-chain exposure.",
   alternates: {
-    canonical: "https://datlora.com/compare",
+    canonical: "https://www.datlora.com/compare",
   },
 };
 

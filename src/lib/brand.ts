@@ -1,4 +1,4 @@
-export const SITE_URL = "https://datlora.com";
+export const SITE_URL = "https://www.datlora.com";
 
 export const SITE_NAME = "Datlora";
 

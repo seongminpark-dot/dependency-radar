@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora terms of use for official country indicators, external news links, and informational research use.",
   alternates: {
-    canonical: "https://datlora.com/terms",
+    canonical: "https://www.datlora.com/terms",
   },
 };
 

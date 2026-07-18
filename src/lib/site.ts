@@ -1,6 +1,6 @@
 const productionUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://datlora.com"
+  "https://www.datlora.com"
 ).replace(/\/$/, "");
 
 export const siteConfig = {

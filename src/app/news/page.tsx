@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Live global trade, energy, food, tariff, and supply-chain news linked to Datlora official data issue briefs.",
   alternates: {
-    canonical: "https://datlora.com/news",
+    canonical: "https://www.datlora.com/news",
   },
 };
 

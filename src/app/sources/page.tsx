@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora data sources include World Bank, UN Comtrade, WITS, EIA, GDELT, and external news links used for context.",
   alternates: {
-    canonical: "https://datlora.com/sources",
+    canonical: "https://www.datlora.com/sources",
   },
 };
 

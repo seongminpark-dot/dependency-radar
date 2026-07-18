@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora privacy policy explaining visitor country display, language preference, analytics, email inquiries, and external links.",
   alternates: {
-    canonical: "https://datlora.com/privacy",
+    canonical: "https://www.datlora.com/privacy",
   },
 };
 

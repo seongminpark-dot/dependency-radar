@@ -35,7 +35,7 @@ export async function generateMetadata({
       title,
       description,
       alternates: {
-        canonical: `/country/${row.iso3}`,
+        canonical: `https://www.datlora.com/country/${row.iso3}`,
       },
       openGraph: {
         title: `${title} | Datlora`,

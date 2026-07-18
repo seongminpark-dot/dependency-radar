@@ -1878,7 +1878,7 @@ function html() {
 
     async function shareGame() {
       const distance = state ? Math.floor(state.distance) : loadBest();
-      const url = "https://datlora.com/world-voyage";
+      const url = "https://www.datlora.com/world-voyage";
       const text = "Datlora World Voyage 3D에서 " + distance.toLocaleString("ko-KR") + " km 항해했습니다: " + url;
 
       els.shareStatus.textContent = "공유 준비 중입니다.";

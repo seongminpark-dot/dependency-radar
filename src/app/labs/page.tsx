@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Datlora Labs collects experimental data games, risk tools, and interactive interactive labs connected to global trade and country statistics.",
   alternates: {
-    canonical: "https://datlora.com/labs",
+    canonical: "https://www.datlora.com/labs",
   },
 };
 

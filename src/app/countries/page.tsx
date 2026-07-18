@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Explore official country indicators by country, region, income group, and data coverage. Open country data pages, country news pages, and country comparisons.",
   alternates: {
-    canonical: "https://datlora.com/countries",
+    canonical: "https://www.datlora.com/countries",
   },
 };
 

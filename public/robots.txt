@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://datlora.com/sitemap.xml
+Sitemap: https://www.datlora.com/sitemap.xml

@@ -689,7 +689,7 @@ function html() {
       updateHud();
 
       const bestScore = getShareScore();
-      const publicUrl = "https://datlora.com/risk-lab";
+      const publicUrl = "https://www.datlora.com/risk-lab";
       const scoreText = bestScore.toLocaleString("ko-KR");
       const fullText =
         "Datlora Risk Lab 최고 점수 " +

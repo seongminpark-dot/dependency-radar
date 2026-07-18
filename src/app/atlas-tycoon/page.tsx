@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora Atlas Tycoon is a country collection and world-building tycoon game where players unlock countries, upgrade landmarks, and grow global income.",
   alternates: {
-    canonical: "https://datlora.com/atlas-tycoon",
+    canonical: "https://www.datlora.com/atlas-tycoon",
   },
 };
 

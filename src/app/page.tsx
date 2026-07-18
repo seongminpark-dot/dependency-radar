@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   description:
     "Datlora connects live global news with official country indicators for trade, energy, food, tariff, logistics, and supply-chain exposure.",
   alternates: {
-    canonical: "https://datlora.com",
+    canonical: "https://www.datlora.com",
   },
   openGraph: {
     title: "Datlora | Live Global News and Official Country Data",
     description:
       "Connect global news with official country data and issue briefs for trade, energy, food, tariff, and supply-chain exposure.",
-    url: "https://datlora.com",
+    url: "https://www.datlora.com",
     siteName: "Datlora",
     type: "website",
   },

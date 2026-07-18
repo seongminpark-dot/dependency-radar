@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora methodology explains how live news links, official country indicators, issue briefs, and country exposure pages are separated and interpreted.",
   alternates: {
-    canonical: "https://datlora.com/methodology",
+    canonical: "https://www.datlora.com/methodology",
   },
 };
 

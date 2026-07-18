@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Datlora issue briefs connect official country statistics with global trade, energy, food, tariff, and supply-chain issues.",
   alternates: {
-    canonical: "https://datlora.com/issues",
+    canonical: "https://www.datlora.com/issues",
   },
 };
 
